@@ -1,11 +1,12 @@
 <template>
     <Loading v-if="pending" />
+    <Error v-else-if="!data || !manga" />
     <div class="flex row fill-parent scroll-y" v-else>
         <header class="flex">
-            <div class="image" :style="{ 'background-image': 'url(' + cover + ')' }"></div>
+            <div class="image" :style="{ 'background-image': 'url(' + manga.cover + ')' }"></div>
             <article class="flex row">
-                <a class="title" :href="manga?.url" target="_blank">{{ manga?.title }}</a>
-                <Markdown v-if="manga?.description" :content="manga.description" />
+                <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
+                <Markdown v-if="manga.description" :content="manga.description" />
                 <div class="buttons">
                     <button v-if="isRandom" class="icon-btn" @click="() => $router.go(0)">
                         <Icon>shuffle</Icon>
@@ -30,26 +31,21 @@
     let stats: Ref<ProgressExt | null> = ref(null);
     let reloading = ref(false);
 
-    const route = useRoute();
-    const id = route.params.id.toString();
-    const isRandom = id === 'random';
-    const { data, pending } = isRandom ? await mangaApi.random() : await mangaApi.fetch(id);
-
+    const _id = useRoute().params.id.toString();
+    const isRandom = _id === 'random';
+    const { data, pending } = isRandom ? await mangaApi.random() : await mangaApi.fetch(_id);
     const manga = computed(() => data.value?.manga);
-    const cover = computed(() => manga.value?.cover || '~/assets/broken.png');
-
     const isFavourite = computed(() => stats.value?.stats.favourite || false);
+    const id = computed(() => manga.value?.id || 0);
 
     const toggleFavourite = async () => {
-        if (!manga.value?.id) return;
-
-        await mangaApi.favourite(manga.value.id);
+        if (!id.value) return;
+        await mangaApi.favourite(id.value);
         await fetchExt();
     }
 
     const refresh = async () => {
         if (!manga.value) return;
-
         reloading.value = true;
         const { data: output } = await mangaApi.reload(manga.value);
         data.value = output.value;
@@ -57,9 +53,8 @@
     }
 
     const fetchExt = async () => {
-        if (!manga.value?.id) return;
-
-        const { data } = await mangaApi.extended(manga.value.id);
+        if (!id.value) return;
+        const { data } = await mangaApi.extended(id.value);
         stats.value = data.value;
         console.log('Stats updated', { stats });
     }
@@ -82,23 +77,18 @@
         }
 
         article {
-
+            .title { font-size: 2em; }
             .markdown {
                 flex: 1;
                 overflow: auto;
                 max-height: 310px;
                 padding: 5px 0;
             }
-
-            .title { font-size: 2em; }
         }
 
         .buttons {
             display: flex;
-            
-            button, a {
-                margin: 0 5px;
-            }
+            button, a { margin: 0 5px; }
         }
     }
 </style>
