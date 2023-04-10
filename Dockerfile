@@ -3,9 +3,6 @@ ARG NODE_VERSION=node:18
 FROM $NODE_VERSION AS build
 WORKDIR /app
 
-RUN apk update && apk upgrade
-RUN apk add git
-
 COPY src/package.json .
 COPY src/yarn.lock .
 RUN yarn install
