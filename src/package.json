@@ -9,12 +9,13 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
+    "@types/marked": "^4.0.8",
     "nuxt": "^3.3.3",
     "sass": "^1.61.0",
     "sass-loader": "^13.2.2"
   },
   "dependencies": {
-    "@types/marked": "^4.0.8",
+    "dayjs": "^1.11.7",
     "highlight.js": "^11.7.0",
     "marked": "^4.3.0"
   }

@@ -13,32 +13,32 @@
             <p>Home</p>
         </NuxtLink>
 
-        <NuxtLink to="/filter" active-class="active">
+        <NuxtLink to="/search/all" active-class="active">
             <Icon>search</Icon>
             <p>Search</p>
         </NuxtLink>
 
-        <NuxtLink class="sub" to="/filter/in-progress" active-class="active">
+        <NuxtLink class="sub" to="/search/in-progress" active-class="active">
             <Icon>menu_book</Icon>
             <p>In Progress</p>
         </NuxtLink>
 
-        <NuxtLink class="sub" to="/filter/completed" active-class="active">
+        <NuxtLink class="sub" to="/search/completed" active-class="active">
             <Icon>done_all</Icon>
             <p>Completed</p>
         </NuxtLink>
 
-        <NuxtLink class="sub" to="/filter/bookmarked" active-class="active">
+        <NuxtLink class="sub" to="/search/bookmarked" active-class="active">
             <Icon>bookmarks</Icon>
             <p>Bookmarked</p>
         </NuxtLink>
 
-        <NuxtLink class="sub" to="/filter/favourite" active-class="active">
+        <NuxtLink class="sub" to="/search/favourite" active-class="active">
             <Icon>star</Icon>
             <p>Favourites</p>
         </NuxtLink>
 
-        <NuxtLink to="/filter/updated" active-class="active">
+        <NuxtLink to="/search/updated" active-class="active">
             <Icon>sync</Icon>
             <p>Recently Updated</p>
         </NuxtLink>
@@ -95,7 +95,7 @@
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     nav {
         padding: 10px;
         flex: 1;
