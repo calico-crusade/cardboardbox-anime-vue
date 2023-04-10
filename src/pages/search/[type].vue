@@ -2,18 +2,36 @@
     <div class="search-wrapper" id="search-wrapper" @scroll="() => onScroll()">
         <section class="search" :class="{ open: advanced}">
             <div class="search-input flex">
-                <input type="text" placeholder="Search for your favourite manga!" v-model="filter.search" />
-                <select v-model="filter.state">
-                    <option v-for="state in states" :value="state.index">
-                        {{ state.text }}
-                    </option>
-                </select>
-                <button @click="() => advanced = !advanced">
-                    <Icon size="26px">tune</Icon>
-                </button>
-                <NuxtLink :to="filterRouteUrl()">
-                    <Icon size="26px">search</Icon>
-                </NuxtLink>
+                <div class="cell fill">
+                    <input type="text" placeholder="Search for your favourite manga!" v-model="filter.search" />
+                </div>
+                <div class="cell no-border">
+                    <button class="close-btn" @click="() => filter.search = ''">
+                        <Icon unsize="true" size="12px">close</Icon>
+                    </button>
+                </div>
+                <div class="cell">
+                    <select v-model="filter.state">
+                        <option v-for="state in states" :value="state.index">
+                            {{ state.text }}
+                        </option>
+                    </select>
+                </div>
+                <div class="cell">
+                    <label>
+                        ({{ results.results.length }} / {{ results.count }})
+                    </label>
+                </div>
+                <div class="cell">
+                    <button @click="() => advanced = !advanced">
+                        <Icon unsize="true" size="26px">tune</Icon>
+                    </button>
+                </div>
+                <div class="cell">
+                    <NuxtLink :to="filterRouteUrl()">
+                        <Icon unsize="true" size="26px">search</Icon>
+                    </NuxtLink>
+                </div>
             </div>
             <div class="advanced">
                 <h2>Advanced Search Options: </h2>
@@ -71,7 +89,7 @@
     } = _instance;
 
     _instance.onSetup();
-    
+
     onMounted(async () => await nextTick(() => {
         if (!api.token) return;
         //Force re-check if authed
@@ -93,25 +111,31 @@
             overflow: hidden;
 
             .search-input {
-                input, select {
-                    border-radius: 0;
-                    border-right: 1px solid var(--color-muted);
-                }
+                background-color: var(--bg-color);
 
-                input { flex: 1; }
+                .cell {
+                    border-left: 1px solid var(--color-muted);
+                    display: flex;
 
-                button {
-                    border-right: 1px solid var(--color-muted);
-                    background-color: var(--bg-color);
-                    padding-right: 5px;
-                }
+                    input, select { width: 100%; }
 
-                a {
-                    margin: auto 0;
-                    padding: 5px 5px 0 5px;
-                    background-color: var(--bg-color);
+                    label { margin: auto 5px; }
+
+                    button, a {
+                        margin: auto 5px;
+                        height: 26px;
+
+                        &.close-btn {
+                            height: 15px;
+                        }
+                    }
+
+                    &.no-border, &:first-child {
+                        border: none;
+                    }
                 }
             }
+
             .advanced {
                 background-color: var(--bg-color);
                 max-height: 0px;

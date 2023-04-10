@@ -27,9 +27,34 @@
             <Markdown class="description" :content="mdata.manga.description" />
         </div>
     </div>
-    <NuxtLink class="manga" v-if="sdata" :to="'/import?url=' + sdata.manga.url">
-        
-    </NuxtLink>
+    <div class="manga" v-if="sdata">
+        <NuxtLink :to="'/import?url=' + sdata.manga.url" class="image" :style="{'background-image': 'url(' + proxy(sdata.manga.cover) + ')'}"></NuxtLink>
+        <div class="details masked-overflow">
+            <div class="title">
+                <NuxtLink :to="'/import?url=' + sdata.manga.url">{{ sdata.manga.title }}</NuxtLink>
+            </div>
+            <div class="source">
+                <b>Source: </b>&nbsp;{{ sdata.manga.source }}
+            </div>
+            <div class="source" v-if="sdata.foundVia">
+                <b>Found Via:</b>&nbsp; 
+                {{ sdata.foundVia.text }} (
+                    <span title="Confidence Compute Score">CS: {{ sdata.foundVia.compute.toFixed(2) }}%</span>, 
+                    <span title="Exact Match">EM: {{ sdata.foundVia.exactMatch }}</span>
+                )
+            </div>
+            <div class="source" v-if="sdata.link">
+                <b>Link:</b>&nbsp;
+                <a :href="sdata.link.url" target="_blank">{{ sdata.link.text }}</a>
+            </div>
+            <div class="tags">
+                <div class="header">Tags: </div>
+                <div class="tag nsfw" v-if="sdata.manga.nsfw">NSFW</div>
+                <NuxtLink class="tag" v-for="tag of sdata.manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
+            </div>
+            <Markdown class="description" :content="sdata.manga.description" />
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -168,9 +193,10 @@
 
         .image {
             background-position: center;
-            background-size: cover;
+            background-size: contain;
             background-repeat: no-repeat;
             width: 200px;
+            max-width: (30vw);
             min-height: 300px;
         }
 
@@ -207,9 +233,7 @@
                     border: 1px solid var(--bg-color-offset);
                     border-radius: 3px;
 
-                    &.nsfw {
-                        background-color: var(--color-warning);
-                    }
+                    &.nsfw { background-color: var(--color-warning); }
                 }
             }
         }

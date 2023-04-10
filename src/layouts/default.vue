@@ -1,22 +1,24 @@
 <template>
     <div class="app-fix flex">
-        <aside class="flex">
-            <NavBar />
-        </aside>
+        <NavBar />
         <main class="fill flex">
             <slot />
         </main>
     </div>
 </template>
 
-<style lang="scss">
-    .app-fix {
-        background-image: linear-gradient(to right bottom, #051937, #171228, #190a1a, #12040d, #000000);
+<style lang="scss" scoped>
+    main {
+        margin-right: 2px;
+    }
 
-        aside {
-            overflow: hidden;
-            position: relative;
-            background-color: var(--bg-color-accent);
+    @media only screen and (max-width: 1050px) {
+        .app-fix {
+            flex-flow: column;
+
+            main {
+                overflow: hidden;
+            }
         }
     }
 </style>

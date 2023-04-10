@@ -1,145 +1,163 @@
 <template>
-    <nav class="flex row scroll-y" :class="{ closed }">
-        <div class="title flex">
-            <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
-            <h2>Manga Box</h2>
-            <button @click="() => closed = !closed">
-                <Icon>{{ closed ? 'chevron_right' : 'chevron_left' }}</Icon>
-            </button>
-        </div>
+    <header class="app-header">
+        <button @click="() => closed = !closed">
+            <Icon>menu</Icon>
+        </button>
+        <h2>Manga Box</h2>
+        <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
+    </header>
+    
+    <div class="fade" :class="{ open: !closed }" @click="() => closed = !closed"></div>
+    <aside class="navbar flex" :class="{ closed }">
+        <nav class="flex row scroll-y">
+            <div class="title flex">
+                <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
+                <h2>Manga Box</h2>
+                <button @click="() => closed = !closed">
+                    <Icon>{{ closed ? 'chevron_right' : 'chevron_left' }}</Icon>
+                </button>
+            </div>
 
-        <NuxtLink to="/" active-class="active">
-            <Icon>home</Icon>
-            <p>Home</p>
-        </NuxtLink>
-
-        <NuxtLink to="/search/all" active-class="active">
-            <Icon>search</Icon>
-            <p>Search</p>
-        </NuxtLink>
-
-        <NuxtLink class="sub" to="/search/in-progress" active-class="active">
-            <Icon>menu_book</Icon>
-            <p>In Progress</p>
-        </NuxtLink>
-
-        <NuxtLink class="sub" to="/search/completed" active-class="active">
-            <Icon>done_all</Icon>
-            <p>Completed</p>
-        </NuxtLink>
-
-        <NuxtLink class="sub" to="/search/bookmarked" active-class="active">
-            <Icon>bookmarks</Icon>
-            <p>Bookmarked</p>
-        </NuxtLink>
-
-        <NuxtLink class="sub" to="/search/favourites" active-class="active">
-            <Icon>star</Icon>
-            <p>Favourites</p>
-        </NuxtLink>
-
-        <NuxtLink to="/search/updated" active-class="active">
-            <Icon>sync</Icon>
-            <p>Recently Updated</p>
-        </NuxtLink>
-
-        <NuxtLink to="/manga/random" active-class="active">
-            <Icon>shuffle</Icon>
-            <p>Random</p>
-        </NuxtLink>
-
-        <NuxtLink to="/import" active-class="active">
-            <Icon>add</Icon>
-            <p>Import</p>
-        </NuxtLink>
-        
-        <NuxtLink to="/reverse" active-class="active">
-            <Icon>photo_camera</Icon>
-            <p>Page Lookup</p>
-        </NuxtLink>
-
-        <NuxtLink to="/graph" active-class="active">
-            <Icon>monitoring</Icon>
-            <p>Stats</p>
-        </NuxtLink>
-
-        <div class="fill"></div>
-
-        <a href="https://cba.index-0.com" target="_blank">
-            <Icon>live_tv</Icon>
-            <p>Anime</p>
-            <Icon>open_in_new</Icon>
-        </a>
-
-        <a href="https://discord.gg/RV9MvvYXsp" target="_blank">
-            <img src="~/assets/discord-icon.png" alt="Discord Logo" />
-            <p>Discord Server</p>
-            <Icon>open_in_new</Icon>
-        </a>
-        
-        <a href="https://github.com/calico-crusade/cardboardbox-anime-vue" target="_blank">
-            <svg height="24" width="24" aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" class="octicon octicon-mark-github v-align-middle">
-                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-            </svg>
-            <p>Source Code</p>
-            <Icon>open_in_new</Icon>
-        </a>
-    </nav>
+            <NavBarLinkList />
+        </nav>
+    </aside>
 </template>
 
 <script setup lang="ts">
     const closed = ref(false);
 </script>
 
-<style lang="scss" scoped>
-    nav {
-        width: var(--nav-width);
-        padding: 10px;
-        flex: 1;
-        transition: all 150ms;
+<style lang="scss">
+    .app-header {
+        display: none;
+        padding: 5px;
 
-        .title {
-            margin-bottom: 20px;
-
-            button { margin: auto 0; }
-            img { width: 35px; height: 30px; }
-            h2 { margin: auto 5px; flex: 1; white-space: pre; }
+        button {
+            cursor: pointer;
+            height: 24px;
         }
 
-        a {
-            display: flex;
-            flex-flow: row;
-            border-left: 3px solid transparent;
-            border-right: 3px solid transparent;
-            padding: 5px;
+        img, h2, button {
+            margin: auto 5px;
+        }
 
-            p { margin: auto 5px; flex: 1; white-space: pre; }
+        img { width: 35px; height: 30px; }
+        h2 { 
+            margin: auto 5px;
+            white-space: pre;
+            display: block;
+            flex: 1;
+            text-align: right;
+        }
+    }
 
-            svg { path { color: #fff; fill: currentColor; } }
+    .floating-open {
+        display: none;
+        position: fixed;
+        top: 5px;
+        left: 5px;
+        border-radius: 50%;
+        padding: 5px;
+        background-color: var(--bg-color);
+        z-index: 1;
+        height: 40px;
+        width: 40px;
+        padding-top: 7px;
+    }
 
-            img { width: 24px; }
-            &.sub { margin-left: 20px; }
-            &.active { border-left-color: var(--color-primary); }
-            &:hover { background-color: var(--bg-color-accent); }
+    .fade {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: var(--bg-color-accent-dark);
+        z-index: -1;
+        opacity: 0;
+        transition: all 250ms;
+    }
+
+    .navbar {
+        overflow: hidden;
+        position: relative;
+        background-color: var(--bg-color-accent);
+
+        nav {
+            width: var(--nav-width);
+            padding: 10px;
+            flex: 1;
+            transition: all 150ms;
+
+            .title {
+                margin-bottom: 20px;
+
+                button { margin: auto 0; }
+                img { width: 35px; height: 30px; }
+                h2 { 
+                    margin: auto 5px; 
+                    flex: 1; 
+                    white-space: pre;
+                    display: block;
+                }
+            }
+
         }
 
         &.closed {
-            width: 45px;
-            padding: 5px;
+            nav {
+                width: 45px;
+                padding: 5px;
 
-            .title {
-                flex-flow: column;
-                img { 
-                    width: 35px;
-                    margin: 0 auto;
+                .title {
+                    flex-flow: column;
+                    img { 
+                        width: 35px;
+                        margin: 0 auto;
+                    }
+                    h2 { display: none; }
                 }
-                h2 { display: none; }
+
+                a {
+                    margin: 0 auto;
+                    p { display: none; }
+                    span:last-child { display: none; }
+                } 
+            }
+        }
+    }
+
+    @media only screen and (max-width: 1050px) {
+        .app-header {
+            display: flex;
+        }
+
+        .fade.open {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .navbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 1;
+            background-color: var(--bg-color);
+            transition: margin-left 250ms;
+
+            nav {
+                width: var(--nav-width);
+                padding: 10px;
+
+                .title {
+                    h2 { display: block; }
+                }
+                a {
+                    p { display: block }
+                    span:last-child { display: block }
+                }
             }
 
-            a {
-                margin: 0 auto;
-                p { display: none; }
-                span:last-child { display: none; }
+            &.closed {
+                margin-left: calc(var(--nav-width) * -1 - 50px);
             }
         }
     }

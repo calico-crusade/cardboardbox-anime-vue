@@ -1,6 +1,7 @@
 :root {
-    --bg-color: rgba(0, 0, 0, 0.50);
+    --bg-color: rgba(12, 9, 12, 1);
     --bg-color-accent: rgba(0, 0, 0, 0.25);
+    --bg-color-accent-dark: rgba(0, 0, 0, 0.75);
     --bg-color-offset: #302e42;
 
     --color: #dcddde;
@@ -14,6 +15,7 @@
 
     --nav-width: 250px;
     --font-family: 'Roboto';
+    --mobile-limit: 1050px;
 }
 
 html, body { 
@@ -32,6 +34,7 @@ html, body {
     max-width: max(100vw, 100%);
     max-height: max(100vh, 100%);
     overflow: hidden;
+    background-image: linear-gradient(to right bottom, #051937, #171228, #190a1a, #12040d, #000000);
 }
 
 a, button {

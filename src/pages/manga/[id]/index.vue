@@ -325,7 +325,7 @@
 
                         .chapter-content {
                             position: relative;
-                            z-index: 1;
+                            //z-index: 1;
                         }
 
                         .chapter-root {
@@ -366,6 +366,35 @@
                         .chapter:not(:first-child), .version-chapter:not(:first-child) { display: none; }
                     }
                 }
+            }
+        }
+    }
+
+    @media only screen and (max-width: 1050px) {
+        header {
+            flex-flow: column;
+            article {
+                .title {
+                    margin: 0 auto;
+                    text-align: center;
+                }
+
+                .markdown {
+                    max-height: 100vh;
+                }
+            }
+
+            .buttons {
+                margin: 0 auto;
+            }
+        }
+
+        main {
+            flex-flow: column;
+
+            .drawer {
+                width: unset;
+                margin: 5px 5px;
             }
         }
     }
