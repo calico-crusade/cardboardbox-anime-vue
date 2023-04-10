@@ -83,8 +83,8 @@ class MangaApi {
         return groups;
     }
 
-    search(filter: Filter | Ref<Filter>) {
-        return api.post<Paginated<ProgressExt>>(`manga/search`, filter);
+    search(filter: Filter | Ref<Filter>, lazy: boolean = true) {
+        return api.post<Paginated<ProgressExt>>(`manga/search`, filter, undefined, lazy);
     }
 
     filters() { return api.get<Filters>(`manga/filters`); }

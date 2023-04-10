@@ -54,8 +54,16 @@ class ApiHelper {
         });
     }
 
-    post<T>(url: string, body: any, params?: { [key: string]: any }) {
-        return useLazyFetch<T>(this.wrapUrl(url), {
+    post<T>(url: string, body: any, params?: { [key: string]: any }, lazy: boolean = false) {
+        if (lazy)
+            return useLazyFetch<T>(this.wrapUrl(url), {
+                params,
+                headers: this.headers(),
+                body,
+                method: 'POST'
+            });
+
+        return useFetch<T>(this.wrapUrl(url), <any>{
             params,
             headers: this.headers(),
             body,

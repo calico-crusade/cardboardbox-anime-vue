@@ -1,6 +1,5 @@
 <template>
-    <Loading v-if="pending" />
-    <div class="search-wrapper" v-else>
+    <div class="search-wrapper" id="search-wrapper" @scroll="() => onScroll()">
         <section class="search" :class="{ open: advanced}">
             <div class="search-input flex">
                 <input type="text" placeholder="Search for your favourite manga!" v-model="filter.search" />
@@ -42,137 +41,50 @@
             </div>
         </section>
 
-        <Card v-for="manga of results?.results" :manga="manga" />
+        <Card v-for="manga of results.results" :manga="manga" />
+        <div class="loading-card">
+            <Loading v-if="pending" />
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { Filter } from '~/utils/models';
+    import { MangaSearchService } from '~/utils/page-services/manga-search.service';
 
-    const states = [
-        { text: 'All', routes: '/search/all', index: 0 },
-        { text: 'Completed', routes: '/search/completed', index: 2 },
-        { text: 'In Progress', routes: '/search/in-progress', index: 3, aliases: ['inprogress'] },
-        { text: 'Bookmarked', routes: '/search/bookmarked', index: 4 },
-        { text: 'Favourites', routes: '/search/favourites', index: 1, aliases: [] },
-        { text: 'Not Touched', routes: '/search/not', index: 5, aliases: [] }
-    ];
-
-    const route = useRoute();
-    const state = determineState(route.params.type.toString().toLowerCase()) || 0;
-    const filter = ref(routeFilter());
-    const routerFilter = ref(routeFilter());
-    const { data: results, pending, refresh } = await mangaApi.search(routerFilter);
-    const { data: filters } = await mangaApi.filters();
     const advanced = ref(false);
-    const allTags = computed(() => filters.value?.find(t => t.key === 'tag')?.values || []);
-    const allSorts = computed(() => filters.value?.find(t => t.key === 'sorts')?.values || []);
+    const route = useRoute();
+    const _instance = new MangaSearchService(route);
+
+    const tagState = (tag: string) => _instance.tagState(tag);
+    const tagIcon = (tag: string) => _instance.tagIcon(tag);
+    const tagToggle = (tag: string) => _instance.tagToggle(tag);
+    const filterRouteUrl = () => _instance.filterRouteUrl();
+    const onScroll = () => _instance.onScroll();
+
+    const {
+        results,
+        pending,
+        filter,
+        allTags,
+        allSorts,
+        states
+    } = _instance;
+
+    _instance.onSetup();
     
-    function determineState(type: string) {
-        for(let item of states) {
-            if (item.text.toLocaleLowerCase() === type) return item.index;
-            if (item.routes.toLowerCase().indexOf(type) !== -1) return item.index;
-
-            const aliases = item.aliases || [];
-            if (aliases.indexOf(type) !== -1) return item.index;
-        }
-
-        return 0;
-    }
-
-    function routeFilter() {
-        const query = route.query;
-        let filter : Filter = {
-            page: 1,
-            size: 20,
-            search: '',
-            include: [],
-            exclude: [],
-            asc: false,
-            sort: 2,
-            state,
-            nsfw: 2
-        };
-
-        if (query['search']) filter.search = query['search'].toString();
-        if (query['asc']) filter.asc = true;
-        if (query['include']) filter.include = query['include'].toString().split(',');
-        if (query['exclude']) filter.exclude = query['exclude'].toString().split(',');
-        if (query['sort']) filter.sort = +query['sort'].toString();
-        if (query['state'] && state === undefined) filter.state = +query['state'].toString();
-        if (query['nsfw']) filter.nsfw = +query['nsfw'].toString();
-
-        return filter;
-    }
-
-    function filterRouteUrl() {
-        let pars: { [key: string]: any } = {};
-
-        if (filter.value.search) pars['search'] = filter.value.search;
-        if (filter.value.include.length > 0) pars['include'] = filter.value.include.join(',');
-        if (filter.value.exclude.length > 0) pars['exclude'] = filter.value.exclude.join(',');
-        if (filter.value.asc) pars['asc'] = true;
-        if (filter.value.sort != 2) pars['sort'] = filter.value.sort;
-        if (filter.value.state && state < 0) pars['state'] = filter.value.state;
-        if (filter.value.nsfw) pars['nsfw'] = filter.value.nsfw;
-
-        const query = Object.keys(pars).map(t => `${t}=${pars[t]}`).join('&');
-        const uri = states.find(t => t.index === filter.value.state)?.routes || '/search/all';
-        return `${uri}?${query}`;
-    }
-
-    function tagState(tag: string) {
-        if (filter.value.include.indexOf(tag) !== -1) return 'include';
-        if (filter.value.exclude.indexOf(tag) !== -1) return 'exclude';
-        return 'none';
-    }
-
-    function tagIcon(tag: string) {
-        const state = tagState(tag);
-        switch(state) {
-            case 'include': return 'add';
-            case 'exclude': return 'remove';
-        }
-
-        return '';
-    }
-
-    function tagToggle(tag: string) {
-        const state = tagState(tag);
-
-        const ii = filter.value.include.indexOf(tag);
-        const ei = filter.value.exclude.indexOf(tag);
-
-        switch(state) {
-            case 'include': 
-                if (ii !== -1) filter.value.include.splice(ii, 1);
-                if (ei === -1) filter.value.exclude = [...filter.value.exclude, tag];
-                break;
-            case 'exclude':
-                if (ii !== -1) filter.value.include.splice(ii, 1);
-                if (ei !== -1) filter.value.exclude.splice(ei, 1);
-                break;
-            case 'none':
-                if (ii === -1) filter.value.include = [...filter.value.include, tag];
-                if (ei !== -1) filter.value.exclude.splice(ei, 1);
-                break;
-        }
-    }
-    
-    onMounted(() => nextTick(async () => {
+    onMounted(async () => await nextTick(() => {
         if (!api.token) return;
-
-        //re-render once mounted to fetch authed search cards
-        refresh();
+        //Force re-check if authed
+        _instance.fetch(true);
     }));
-    watch(() => route.query, () => {
-        routerFilter.value = routeFilter();
-    });
+
+    watch(() => route.query, () => _instance.fetch(true));
 </script>
 
 <style lang="scss">
     .search-wrapper {
         overflow-y: auto;
+        padding: 0 10px;
         .search {
             max-width: min(100%, 1000px);
             margin: 10px auto;
@@ -182,7 +94,6 @@
 
             .search-input {
                 input, select {
-                    //background-color: transparent;
                     border-radius: 0;
                     border-right: 1px solid var(--color-muted);
                 }
@@ -239,9 +150,7 @@
                     &:last-child {
                         margin-bottom: 10px;
                     }
-                }
-
-                
+                }                
             }
 
             &.open {
