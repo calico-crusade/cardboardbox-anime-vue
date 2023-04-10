@@ -13,6 +13,7 @@ export default defineNuxtConfig({
                 { children: 'JavaScript is required' }
             ]
         },
+        pageTransition: { name: 'page', mode: 'out-in' }
     },
     css: [
         '@/node_modules/highlight.js/styles/vs2015.css',

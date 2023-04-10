@@ -3,7 +3,7 @@
     <Error v-else-if="!data || !manga" />
     <div class="flex row fill-parent scroll-y" v-else>
         <header class="flex">
-            <div class="image" :style="{ 'background-image': 'url(' + manga.cover + ')' }"></div>
+            <div class="image" :style="{ 'background-image': 'url(' + proxy(manga.cover) + ')' }"></div>
             <article class="flex row">
                 <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
                 <Markdown v-if="manga.description" :content="manga.description" />
@@ -112,7 +112,6 @@
                                                         <span v-if="ver.volume">Vol. {{ ver.volume }}&nbsp;</span>
                                                         Ch. {{ ver.ordinal }}
                                                     </span>
-                                                    
                                                 </div>
                                             </NuxtLink>
                                         </div>
@@ -147,7 +146,7 @@
 
     useHead({ title: manga.value?.title })
     
-    useSeoMeta({
+    useServerSeoMeta({
         title: manga.value?.title,
         ogTitle: manga.value?.title,
         description: manga.value?.description,
@@ -192,8 +191,9 @@
         const { data: output } = await mangaApi.extended(id.value);
         stats.value = output.value || undefined;
         volumes.value = mangaApi.groupVolumes(data.value?.chapters || [], stats.value);
-        console.log('Stats updated', { stats: JSON.stringify(stats.value) });
     }
+
+    const proxy = (url: string) => api.proxyUrl(url, 'manga-cover', manga.value?.referer);
 
     onMounted(async () => await nextTick(() => fetchExt()));
 </script>

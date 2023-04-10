@@ -1,6 +1,6 @@
 const STORAGE_TOKEN = 'AuthToken';
 
-class ApiService {
+class ApiHelper {
 
     get token() { 
         if (this._token) return this._token;
@@ -55,7 +55,7 @@ class ApiService {
     }
 
     post<T>(url: string, body: any, params?: { [key: string]: any }) {
-        return $fetch<T>(this.wrapUrl(url), {
+        return useLazyFetch<T>(this.wrapUrl(url), {
             params,
             headers: this.headers(),
             body,
@@ -79,6 +79,15 @@ class ApiService {
             method: 'DELETE'
         });
     }
+
+    proxyUrl(url: string, group: string = 'manga-page', referer?: string) {
+        const path = encodeURIComponent(url);
+        let uri = `https://cba-proxy.index-0.com/proxy?path=${path}&group=${group}`;
+
+        if (referer) uri += `&referer=${encodeURIComponent(referer)}`;
+
+        return uri;
+    }
 }
 
-export const api = new ApiService();
+export const api = new ApiHelper();

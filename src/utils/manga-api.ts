@@ -1,5 +1,5 @@
 import { AsyncData } from "nuxt/app";
-import { Manga, MangaWithChapters, ProgressExt, Chapter, Progress, Stats } from "./models";
+import { Manga, MangaWithChapters, ProgressExt, Chapter, Progress, Stats, Filter, Paginated, Filters } from "./models";
 
 export type VolumeChapter = {
     read: boolean;
@@ -82,6 +82,12 @@ class MangaApi {
 
         return groups;
     }
+
+    search(filter: Filter | Ref<Filter>) {
+        return api.post<Paginated<ProgressExt>>(`manga/search`, filter);
+    }
+
+    filters() { return api.get<Filters>(`manga/filters`); }
 }
 
 export const mangaApi = new MangaApi();

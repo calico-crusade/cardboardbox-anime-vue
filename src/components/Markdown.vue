@@ -16,6 +16,10 @@
         }
     });
 
-    markdown = marked.parse(content || '');
+    try {
+        markdown = marked.parse(content || '');
+    } catch {
+        markdown = content;
+    }
     
 </script>

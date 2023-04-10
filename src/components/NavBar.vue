@@ -1,10 +1,10 @@
 <template>
-    <nav class="flex row">
+    <nav class="flex row scroll-y" :class="{ closed }">
         <div class="title flex">
             <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
             <h2>Manga Box</h2>
-            <button>
-                <Icon>chevron_left</Icon>
+            <button @click="() => closed = !closed">
+                <Icon>{{ closed ? 'chevron_right' : 'chevron_left' }}</Icon>
             </button>
         </div>
 
@@ -33,7 +33,7 @@
             <p>Bookmarked</p>
         </NuxtLink>
 
-        <NuxtLink class="sub" to="/search/favourite" active-class="active">
+        <NuxtLink class="sub" to="/search/favourites" active-class="active">
             <Icon>star</Icon>
             <p>Favourites</p>
         </NuxtLink>
@@ -88,42 +88,59 @@
 </template>
 
 <script setup lang="ts">
-
-</script>
-
-<script lang="ts">
-
+    const closed = ref(false);
 </script>
 
 <style lang="scss" scoped>
     nav {
+        width: var(--nav-width);
         padding: 10px;
         flex: 1;
+        transition: all 150ms;
 
         .title {
             margin-bottom: 20px;
 
             button { margin: auto 0; }
-            img { height: 40px; }
-            h2 { margin: auto 5px; flex: 1; }
+            img { width: 35px; height: 30px; }
+            h2 { margin: auto 5px; flex: 1; white-space: pre; }
         }
 
         a {
             display: flex;
             flex-flow: row;
             border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
             padding: 5px;
 
-            p { margin: auto 5px; flex: 1; }
+            p { margin: auto 5px; flex: 1; white-space: pre; }
 
-            svg {
-                path { color: #fff; fill: currentColor; }
-            }
+            svg { path { color: #fff; fill: currentColor; } }
 
             img { width: 24px; }
             &.sub { margin-left: 20px; }
             &.active { border-left-color: var(--color-primary); }
             &:hover { background-color: var(--bg-color-accent); }
+        }
+
+        &.closed {
+            width: 45px;
+            padding: 5px;
+
+            .title {
+                flex-flow: column;
+                img { 
+                    width: 35px;
+                    margin: 0 auto;
+                }
+                h2 { display: none; }
+            }
+
+            a {
+                margin: 0 auto;
+                p { display: none; }
+                span:last-child { display: none; }
+            }
         }
     }
 </style>

@@ -16,7 +16,6 @@
         aside {
             overflow: hidden;
             position: relative;
-            width: var(--nav-width);
             background-color: var(--bg-color-accent);
         }
     }

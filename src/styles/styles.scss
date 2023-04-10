@@ -1,9 +1,10 @@
 :root {
-    --bg-color: #272727;
-    --bg-color-accent: rgba(0, 0, 0, 0.45);
+    --bg-color: rgba(0, 0, 0, 0.50);
+    --bg-color-accent: rgba(0, 0, 0, 0.25);
     --bg-color-offset: #302e42;
 
     --color: #dcddde;
+    --color-success: rgb(0, 255, 0);
     --color-primary: #726ae4;
     --color-secondary: rgba(0, 174, 240, 1);
     --color-secondary-tran: rgba(0, 174, 240, 0.25);
@@ -11,7 +12,7 @@
     --color-warning: rgb(255, 61, 61);
     --color-muted: #555;
 
-    --nav-width: 300px;
+    --nav-width: 250px;
     --font-family: 'Roboto';
 }
 
@@ -151,7 +152,7 @@ p, h1, h2, h3, h4, h5, h6 {
 }
 
 .tags {
-    span, a {
+    span, a, button {
         &:first-child {
             font-weight: bold;
             display: inline-block;
@@ -215,6 +216,19 @@ p, h1, h2, h3, h4, h5, h6 {
     }
 }
 
+input, select {
+    background-color: var(--bg-color);
+    color: var(--color);
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    border: none;
+    font-family: var(--font-family);
+
+    option {
+        font-family: var(--font-family);
+    }
+}
 
 @keyframes spin {
     100% {
