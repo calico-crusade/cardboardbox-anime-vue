@@ -1,11 +1,19 @@
 <template>
     <span class="material-symbols-outlined"
-          :class="{ 'unsize': unsize, 'fill': fill, 'spin': spin }" :style="{'font-size': size }">
+          :class="{ 'unsize': unsize, 'fill': fill, 'spin': spin }" :style="{ 'font-size': size, transform: `rotate(${rotate || 0}deg)` }">
         <slot />      
     </span>
 </template>
 
-<script setup lang="ts">defineProps(['unsize', 'fill', 'spin', 'size']);</script>
+<script setup lang="ts">
+    const { rotate } = defineProps<{
+        unsize?: boolean | string,
+        fill?: boolean | string,
+        spin?: boolean | string,
+        size?: string,
+        rotate?: number
+    }>();
+</script>
 
 <style lang="scss">
     .material-symbols-outlined {

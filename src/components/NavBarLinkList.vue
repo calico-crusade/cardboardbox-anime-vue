@@ -51,6 +51,22 @@
 
     <div class="fill"></div>
 
+    <button v-if="!user" @click="() => login()">
+        <Icon>login</Icon>
+        <p>Login</p>
+    </button>
+
+    <template v-else>
+        <NuxtLink to="/account" active-class="active">
+            <img class="avatar" :src="user.avatar" />
+            <p>{{ user.nickname }}</p>
+        </NuxtLink>
+        <button @click="() => logout()">
+            <Icon>logout</Icon>
+            <p>Logout</p>
+        </button>
+    </template>
+
     <a href="https://cba.index-0.com" target="_blank">
         <Icon>live_tv</Icon>
         <p>Anime</p>
@@ -72,13 +88,25 @@
     </a>
 </template>
 
+<script setup lang="ts">
+    const user = authApi.currentUser;
+    const login = () => authApi.login();
+    const logout = () => authApi.logout();
+
+    onMounted(() => nextTick(async () => {
+        await authApi.bump();
+    }))
+</script>
+
 <style lang="scss" scoped>
-    a {
+    a, button {
         display: flex;
         flex-flow: row;
         border-left: 3px solid transparent;
         border-right: 3px solid transparent;
         padding: 5px;
+        text-align: left;
+        font-size: 16px;
 
         p { 
             margin: auto 5px; 
@@ -91,7 +119,10 @@
 
         svg { path { color: #fff; fill: currentColor; } }
 
-        img { width: 24px; }
+        img { 
+            width: 24px;
+            &.avatar { border-radius: 50%; }
+        }
         &.sub { margin-left: 20px; }
         &.active { border-left-color: var(--color-primary); }
         &:hover { background-color: var(--bg-color-accent); }

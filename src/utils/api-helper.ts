@@ -1,4 +1,5 @@
 const STORAGE_TOKEN = 'AuthToken';
+const STORAGE_URL = 'RedirectUrl';
 
 class ApiHelper {
 
@@ -15,14 +16,21 @@ class ApiHelper {
         else localStorage.setItem(STORAGE_TOKEN, token);
     }
 
-    get apiUrl() {
-        if (this._apiUrl) return this._apiUrl;
-        return useRuntimeConfig().public.apiUrl;
+    get redirect() { return localStorage.getItem(STORAGE_URL) || undefined; }
+    set redirect(url: string | undefined) { 
+        if (!url) localStorage.removeItem(STORAGE_URL);
+        else localStorage.setItem(STORAGE_URL, url);
     }
+
+    get apiUrl() { return this._apiUrl || useRuntimeConfig().public.apiUrl; }
+    get authUrl() { return this._authUrl || useRuntimeConfig().public.authUrl; }
+    get appId() { return this._appId || useRuntimeConfig().public.appId; }
 
     constructor(
         private _token?: string,
-        private _apiUrl?: string
+        private _apiUrl?: string,
+        private _authUrl?: string,
+        private _appId?: string
     ) {}
 
     private headers() {

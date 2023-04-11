@@ -195,7 +195,7 @@
 
     const proxy = (url: string) => api.proxyUrl(url, 'manga-cover', manga.value?.referer);
 
-    onMounted(async () => await nextTick(() => fetchExt()));
+    onMounted(async () => await nextTick(() => setTimeout(() => fetchExt(), 100)));
 </script>
 
 <style lang="scss" scoped>

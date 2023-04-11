@@ -10,5 +10,6 @@ export * from './manga/chapter.model';
 export * from './manga/manga.model';
 export * from './manga/progress.model';
 
+export * from './auth.model';
 export * from './db-object.model';
 export * from './image-search.model';

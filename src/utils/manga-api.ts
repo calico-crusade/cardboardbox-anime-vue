@@ -63,7 +63,7 @@ class MangaApi {
                 cur.progress = stats?.pageProgress;
 
             let last = groups[groups.length - 1];
-            if (groups.length === 0 || last.name !== chap.volume) {
+            if (groups.length === 0 || last?.name !== chap.volume) {
                 groups.push({ name: chap.volume, collapse: false, chapters: [ cur ] });
                 continue;
             }

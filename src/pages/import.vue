@@ -1,5 +1,5 @@
 <template>
-    <h1>Hello from import</h1>
+    <h1>Coming Soon &trade;</h1>
 </template>
 
 <script setup lang="ts">

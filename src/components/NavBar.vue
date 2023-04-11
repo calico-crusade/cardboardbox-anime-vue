@@ -14,7 +14,7 @@
                 <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
                 <h2>Manga Box</h2>
                 <button @click="() => closed = !closed">
-                    <Icon>{{ closed ? 'chevron_right' : 'chevron_left' }}</Icon>
+                    <Icon :rotate="closed ? 90 : 0">{{ closed ? 'push_pin' : 'chevron_left' }}</Icon>
                 </button>
             </div>
 
@@ -113,9 +113,15 @@
                         margin: 0 auto;
                     }
                     h2 { display: none; }
+                    button {
+                        margin-top: 10px;
+                        span {
+                            display: inline-block !important;
+                        }
+                    }
                 }
 
-                a {
+                a, button {
                     margin: 0 auto;
                     p { display: none; }
                     span:last-child { display: none; }
