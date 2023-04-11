@@ -79,6 +79,12 @@
     const filterRouteUrl = () => _instance.filterRouteUrl();
     const onScroll = () => _instance.onScroll();
 
+    useHead({ title: 'Find your next binge!' });
+    useServerSeoMeta({
+        title: 'Find your next binge!',
+        ogTitle: 'Find your next binge!'
+    })
+
     const {
         results,
         pending,
@@ -88,12 +94,12 @@
         states
     } = _instance;
 
-    _instance.onSetup();
+    await _instance.onSetup();
 
-    onMounted(async () => await nextTick(() => {
+    onMounted(async () => await nextTick(async () => {
         if (!api.token) return;
         //Force re-check if authed
-        _instance.fetch(true);
+        await _instance.fetch(true);
     }));
 
     watch(() => route.query, () => _instance.fetch(true));

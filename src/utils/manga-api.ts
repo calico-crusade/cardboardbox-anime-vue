@@ -38,7 +38,11 @@ class MangaApi {
     reload(url: string): AsyncData<MangaWithChapters, Error>;
     reload(item: string | Manga) {
         if (typeof item !== 'string') item = item.url;
-        return api.getLazy(`manga/load`, { url: item, force: true });
+        return api.getLazy<MangaWithChapters>(`manga/load`, { url: item, force: true });
+    }
+
+    pages(id: string | number, chapter: number) {
+        return api.get<string[]>(`manga/${id}/${chapter}/pages`);
     }
 
     groupVolumes(chapters: Chapter[]): Volume[];
