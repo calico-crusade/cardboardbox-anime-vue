@@ -19,4 +19,4 @@ ENV NUXT_PORT=3000
 ENV NODE_ENV=production
 
 EXPOSE 3000
-CMD ["node", "/app/.ouput/server/index.mjs"]
+CMD ["node", "/app/.output/server/index.mjs"]
