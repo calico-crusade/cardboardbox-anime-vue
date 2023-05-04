@@ -1,6 +1,6 @@
 <template>
 <Loading v-if="pending" />
-<Error v-else-if="!data || !manga" />
+<Error v-else-if="!data || !manga" :message="error?.message" />
 <div v-else class="manga-details flex fill-parent scroll-y">
     <div class="manga-header flex row">
         <div class="image" :style="{ 'background-image': 'url(' + proxy(manga.cover) + ')' }"></div>
@@ -8,13 +8,19 @@
         <div class="buttons flex center-horz">
             <button v-if="isRandom" class="icon-btn" @click="() => $router.go(0)">
                 <Icon>shuffle</Icon>
-                <p>Next</p>
+                <p>Next Random Manga</p>
             </button>
             <button v-if="stats" class="icon-btn" @click="() => toggleFavourite()">
                 <Icon :fill="isFavourite">star</Icon>
+                <p>Favourite</p>
             </button>
             <button class="icon-btn" :disabled="reloading" @click="() => refresh()">
                 <Icon :spin="reloading">sync</Icon>
+                <p>Reload from source</p>
+            </button>
+            <button class="icon-btn" @click="() => copyUrl()">
+                <Icon>content_copy</Icon>
+                <p>Copy Manga Url</p>
             </button>
         </div>
         <div class="drawers">
@@ -40,13 +46,14 @@
             </Drawer>
         </div>
     </div>
-    <main class="volumes fill">
+    <main class="volumes fill flex row">
         <div class="chapter-header flex">
             <p class="fill">Chapters</p>
             <button @click="() => collapseToggle()">
                 <Icon>{{ allCollapsed ? 'arrow_drop_up' : 'arrow_drop_down' }}</Icon>
             </button>
         </div>
+        <Loading v-if="volumes.length === 0" />
         <article class="volume" v-for="(vol, index) in volumes">
             <div class="name" @click="() => toggleVolume(index)">{{ vol.name ? 'Volume ' + vol.name : 'No Volume' }}</div>
             <button class="collapse-btn" @click="() => toggleVolume(index)">
@@ -66,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ProgressExt, Volume, VolumeChapter } from '~/models';
+import { ProgressExt, Volume } from '~/models';
 
 const { 
     random,
@@ -85,7 +92,7 @@ let volumes: Ref<Volume[]> = ref([]);
 
 const _id = useRoute().params.id.toString();
 const isRandom = _id === 'random';
-const { data, pending } = isRandom ? await random() : await fetch(_id);
+const { data, pending, error } = isRandom ? await random() : await fetch(_id);
 const manga = computed(() => data.value?.manga);
 const isFavourite = computed(() => stats.value?.stats.favourite || false);
 const id = computed(() => manga.value?.id || 0);
@@ -93,7 +100,7 @@ volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
 
 const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
 
-useHead({ title: manga.value?.title })
+useHead({ title: manga.value?.title ?? 'Manga Not Found' })
 
 useServerSeoMeta({
     title: manga.value?.title,
@@ -107,11 +114,6 @@ useServerSeoMeta({
 const toggleVolume = (index: number) => {
     const vol = volumes.value[index];
     vol.collapse = !vol.collapse;
-    volumes.value = volumes.value;
-}
-
-const toggleVersion = (chapter: VolumeChapter) => {
-    chapter.open = !chapter.open;
     volumes.value = volumes.value;
 }
 
@@ -143,12 +145,19 @@ const fetchExt = async () => {
         console.log('Skipping fetch, ID isnt present', { data: JSON.stringify(data.value) });
         return;
     }
+    reloading.value = true;
     const { data: output } = await extended(id.value);
     stats.value = output.value || undefined;
     volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
+    reloading.value = false;
 }
 
 const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer);
+
+const copyUrl = () => {
+    const baseUrl = `${window.location.protocol}//${window.location.host}/manga/${id.value}`;
+    navigator.clipboard.writeText(baseUrl);
+}
 
 onMounted(async () => await nextTick(() => setTimeout(() => fetchExt(), 100)));
 </script>
@@ -156,11 +165,12 @@ onMounted(async () => await nextTick(() => setTimeout(() => fetchExt(), 100)));
 <style lang="scss" scoped>
 $bg-color: var(--bg-color-accent);
 .manga-details {
-    position: relative;
+    position: unset;
     .manga-header {
         position: relative;
         margin: 5px;
         width: 430px;
+        height: auto;
 
         .image {
             max-width: 100%;
@@ -177,47 +187,18 @@ $bg-color: var(--bg-color-accent);
             margin-top: 5px;
         }
 
-        .buttons button { margin: 5px; }
-
-        .drawers {
-            position: sticky;
-            top: 5px;
-            .drawer {
-                border-radius: 5px;
-                margin-bottom: 5px;
-                overflow: hidden;
-
-                .title {
-                    padding: 5px;
-                    cursor: pointer;
-                    border-bottom: 1px solid #{$bg-color};
-                    background-color: $bg-color;
-                    border-top-right-radius: 5px;
-                    border-top-left-radius: 5px;
-                    p { margin: auto 3px; }
-                }
-
-                .opener {
-                    overflow: hidden;
-                    max-height: 0;
-                    padding: 0 5px;
-                    transition: max-height 250ms;
-                    background-color: $bg-color;
-                    border-bottom-right-radius: 5px;
-                    border-bottom-left-radius: 5px;
-
-                    .open-content {
-                        margin-bottom: 5px;
-                        padding: 5px;
-                    }
-                }
-
-                &.open .opener { max-height: 900px; }
+        .buttons {
+            flex-flow: row wrap;
+            align-items: center;
+            button { 
+                margin: 5px; 
+                p { display: none; }
             }
         }
     }
 
     .volumes {
+        position: relative;
         margin: 5px 5px 5px 5px;
 
         .chapter-header {
@@ -283,6 +264,21 @@ $bg-color: var(--bg-color-accent);
         .manga-header {
             width: unset;
             flex: 1;
+        }
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .manga-details .manga-header .buttons {
+        margin: 5px;
+        flex-flow: column;
+
+        button {
+            flex: 1;
+            p { 
+                display: block;
+                margin-left: 10px;
+            }
         }
     }
 }

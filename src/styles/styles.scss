@@ -347,6 +347,12 @@ $ctrl-bg: var(--bg-color-accent);
     }
 }
 
+.rounded { border-radius: var(--margin); }
+.bg { background-color: var(--bg-color); }
+.bg-accent { background-color: var(--bg-color-accent); }
+.pad { padding: var(--margin); }
+.margin { margin: var(--margin); }
+
 @keyframes spin {
     100% {
         transform: rotate(360deg);

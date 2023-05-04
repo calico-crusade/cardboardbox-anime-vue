@@ -18,9 +18,9 @@ export const useMangaApi = () => {
 
     const favourite = (id: number) => get<boolean>(`manga/${id}/favourite`, undefined, true);
 
-    const reload = (manga: Manga | string) => {
+    const reload = (manga: Manga | string, lazy: boolean = true) => {
         if (typeof manga !== 'string') manga = manga.url;
-        return get<MangaWithChapters>(`manga/load`, { url: manga, force: true }, true);
+        return get<MangaWithChapters>(`manga/load`, { url: manga, force: true }, lazy);
     };
 
     const pages = (id: string | number, chapter: number) => get<string[]>(`manga/${id}/${chapter}/pages`);
@@ -48,9 +48,14 @@ export const useMangaApi = () => {
             if (chap.id === progress?.mangaChapterId)
                 cur.progress = stats?.pageProgress;
 
-            let last = groups[groups.length - 1];
-            if (groups.length === 0 || last?.name !== chap.volume) {
+            if (groups.length === 0) {
                 groups.push({ name: chap.volume, collapse: false, chapters: [ cur ] });
+                continue;
+            }
+
+            let last = groups[groups.length - 1];
+            if (last.name !== chap.volume) {
+                groups.push({ name: chap.volume, collapse: false, chapters: [ cur  ]});
                 continue;
             }
 
