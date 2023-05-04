@@ -16,3 +16,16 @@ export interface Chapter extends DbObject {
         value: string;
     }[];
 }
+
+export type VolumeChapter = {
+    read: boolean;
+    versions: Chapter[];
+    open: boolean;
+    progress?: number;
+} & Chapter;
+
+export type Volume = {
+    name?: number;
+    collapse: boolean;
+    chapters: VolumeChapter[];
+};

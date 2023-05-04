@@ -16,6 +16,9 @@
     --nav-width: 250px;
     --font-family: 'Roboto';
     --mobile-limit: 1050px;
+    --margin: 0.75rem;
+    --bg-image-dark: linear-gradient(to right bottom, #051937, #171228, #190a1a, #12040d, #000000);
+    --bg-image: linear-gradient(to right bottom, #1953aa, #693594, #57195c, #1a10a0, #171130);
 }
 
 html, body { 
@@ -34,7 +37,7 @@ html, body {
     max-width: max(100vw, 100%);
     max-height: max(100vh, 100%);
     overflow: hidden;
-    background-image: linear-gradient(to right bottom, #051937, #171228, #190a1a, #12040d, #000000);
+    background-image: var(--bg-image);
 }
 
 a, button {
@@ -69,9 +72,11 @@ p, h1, h2, h3, h4, h5, h6 {
     .fill { flex: 1; }
     .center-vert { margin-top: auto; margin-bottom: auto; }
     .center-horz { margin-left: auto; margin-right: auto; }
-    .center { margin: auto; }
+    .center { margin: auto;  }
     .pad-left { margin-left: auto; }
     .pad-right { margin-right: auto; }
+    .pad-top { margin-top: auto; }
+    .pad-bottom { margin-bottom: auto; }
 
     .content {
         display: flex;
@@ -86,10 +91,17 @@ p, h1, h2, h3, h4, h5, h6 {
         }
     }
 
-    &.scroll { overflow: auto; }
-    &.scroll-y { overflow-y: auto; }
-    &.scroll-x { overflow-x: auto; }
+    &.scroll, .scroll { overflow: auto; }
+    &.scroll-y, .scroll-y { overflow-y: auto !important; }
+    &.scroll-x, .scroll-x { overflow-x: auto; }
     &.overflow { overflow: hidden; }
+    &.center-items { align-items: center; }
+
+    .scroll-header {
+        position: sticky;
+        top: 0;
+        left: 0;
+    }
 }
 
 .text-center { text-align: center; }
@@ -219,17 +231,119 @@ p, h1, h2, h3, h4, h5, h6 {
     }
 }
 
-input, select {
+input, textarea, select {
     background-color: var(--bg-color);
     color: var(--color);
     padding: 10px;
     border-radius: 5px;
     outline: none;
-    border: none;
+    border: 1px solid var(--bg-color);
     font-family: var(--font-family);
+    transition: all 250ms;
 
     option {
         font-family: var(--font-family);
+        background-color: #171130;
+        margin: 5px;
+        padding: 5px;
+    }
+
+    &:focus {
+        border-color: var(--color-primary);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        color: var(--color-muted);
+        border-color: var(--bg-color);
+    }
+}
+
+textarea {
+    resize: none;
+    height: 150px;
+}
+
+input:read-only {
+    cursor: not-allowed;
+    color: var(--color-muted);
+    border-color: var(--bg-color);
+}
+
+$ctrl-bg: var(--bg-color-accent);
+.control {
+    display: flex;
+    flex-flow: column;
+    margin-top: var(--margin);
+
+    label { margin-bottom: var(--margin); }
+
+    &.group, .group {
+        display: flex;
+        flex-flow: row;
+        background-color: $ctrl-bg;
+        border-radius: 5px;
+        border: 1px solid #{$ctrl-bg};
+
+        .fill { flex: 1; }
+
+        label {
+            margin: auto 5px;
+        }
+
+        input, button, select {
+            background-color: transparent;
+            border: none;
+        }
+
+        button, a {
+            display: flex;
+            align-items: center;
+            margin-right: 5px;
+        }
+
+        &:focus-within {
+            border-color: var(--color-primary);
+        }
+
+        .sep {
+            border-left: 1px solid var(--color-muted);
+        }
+    }
+
+    .note {
+        color: var(--color-muted);
+        font-size: 12px;
+    }
+
+    &.checkbox {
+        flex-flow: row;
+        align-items: center;
+
+        label {
+            margin-bottom: 0;
+            margin-right: var(--margin);
+        }
+    }
+
+    &.no-top {
+        margin-top: 0;
+    }
+
+    &.in-line {
+        flex-flow: row;
+
+        label {
+            margin: auto 5px;
+        }
+
+        input, textarea, select {
+            flex: 1;
+        }
+
+        .group {
+            flex: 1;
+        }
     }
 }
 

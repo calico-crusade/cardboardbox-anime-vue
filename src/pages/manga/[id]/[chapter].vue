@@ -6,48 +6,49 @@
 </template>
 
 <script setup lang="ts">
-    import { PageService } from '~/utils/page-services/page.service';
+definePageMeta({ layout: 'nohead' });
 
-    definePageMeta({ layout: 'nohead' });
+const { proxy } = useApiHelper();
+const { token } = useAppSettings();
 
-    const route = useRoute();
-    const _instance = new PageService(route);
+const {
+    pending,
+    external,
+    manga,
+    chapters,
+    chapter,
+    pageUrl,
+    title,
+    nextPageImage,
+    chapterIndex,
+    hasNextChapter,
+    hasNextPage,
+    hasPreviousPage,
+    hasPreviousChapter,
 
-    const {
-        pending,
-        external,
-        manga,
-        chapters,
-        chapter,
-        pageUrl,
-        title,
-        nextPageImage,
-        chapterIndex,
-        hasNextChapter,
-        hasNextPage,
-        hasPreviousPage,
-        hasPreviousChapter
-    } = _instance;
+    doSetup,
+    fetch
+} = usePageService();
 
-    const proxy = (url?: string) => _instance.proxy(url);
+const route = useRoute();
 
-    useHead({ title });
-    useServerSeoMeta({
-        title,
-        ogTitle: title,
-        description: manga.value?.description,
-        ogDescription: manga.value?.description,
-        ogImage: proxy(manga.value?.cover || ''),
-        twitterCard: 'summary_large_image'
-    });
+useHead({ title });
+useServerSeoMeta({
+    title,
+    ogTitle: title,
+    description: manga.value?.description,
+    ogDescription: manga.value?.description,
+    ogImage: proxy(manga.value?.cover || ''),
+    twitterCard: 'summary_large_image'
+});
 
-    await _instance.onSetup();
+await doSetup();
 
-    onMounted(async () => await nextTick(async () => {
-        if (!api.token) return;
-        //Refetch with authentication context
-        await _instance.fetch(true);
-    }));
+onMounted(async () => await nextTick(async () => {
+    if (!token.value) return;
+    //Refetch with authentication context
+    await fetch(true);
+}));
 
-    watch(() => route.query, () => _instance.fetch(true));
+watch(() => route.query, () => fetch(true));
 </script>

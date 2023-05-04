@@ -1,26 +1,26 @@
 <template>
-    <header class="app-header">
-        <button @click="() => closed = !closed">
-            <Icon>menu</Icon>
-        </button>
-        <h2>Manga Box</h2>
-        <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
-    </header>
-    
-    <div class="fade" :class="{ open: !closed }" @click="() => closed = !closed"></div>
-    <aside class="navbar flex" :class="{ closed }">
-        <nav class="flex row scroll-y">
-            <div class="title flex">
-                <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
-                <h2>Manga Box</h2>
-                <button @click="() => closed = !closed">
-                    <Icon :rotate="closed ? 90 : 0">{{ closed ? 'push_pin' : 'chevron_left' }}</Icon>
-                </button>
-            </div>
+<header class="app-header">
+    <button @click="() => closed = !closed">
+        <Icon>menu</Icon>
+    </button>
+    <h2>Manga Box</h2>
+    <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
+</header>
 
-            <NavBarLinkList />
-        </nav>
-    </aside>
+<div class="fade" :class="{ open: !closed }" @click="() => closed = !closed"></div>
+<aside class="navbar flex" :class="{ closed }">
+    <nav class="flex row scroll-y">
+        <div class="title flex">
+            <img src="~/assets/logo.png" alt="Cardboard Box Logo" />
+            <h2>Manga Box</h2>
+            <button @click="() => closed = !closed">
+                <Icon :rotate="closed ? 90 : 0">{{ closed ? 'push_pin' : 'chevron_left' }}</Icon>
+            </button>
+        </div>
+
+        <NavBarLinkList />
+    </nav>
+</aside>
 </template>
 
 <script setup lang="ts">

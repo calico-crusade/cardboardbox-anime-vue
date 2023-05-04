@@ -3,23 +3,23 @@
 </template>
 
 <script setup>
-    import * as marked from 'marked';
-    import * as hljs from 'highlight.js';
+import * as marked from 'marked';
+import * as hljs from 'highlight.js';
 
-    const { content } = defineProps({ content: String });
+const { content } = defineProps({ content: String });
 
-    let markdown = '';
+let markdown = '';
 
-    marked.setOptions({
-        highlight: (code, lang) => {
-            return hljs.default.highlight(lang, code).value;
-        }
-    });
-
-    try {
-        markdown = marked.parse(content || '');
-    } catch {
-        markdown = content;
+marked.setOptions({
+    highlight: (code, lang) => {
+        return hljs.default.highlight(lang, code).value;
     }
+});
+
+try {
+    markdown = marked.parse(content || '');
+} catch {
+    markdown = content;
+}
     
 </script>
