@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     app: {
         head: {
             link: [
+                { rel: 'manifest', href: '/manifest.webmanifest'},
                 { rel: 'preconnect', href: 'https://fonts.gstatic.com' },
                 { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&amp;display=swap' },
                 { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Kolker+Brush&display=swap' },
