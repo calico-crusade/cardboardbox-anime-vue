@@ -46,10 +46,7 @@ export const usePageService = () => {
     const stats = ref<ProgressExt | undefined>();
     const bookmarks = computed(() => data.value?.bookmarks || []);
 
-    const nextPageImage = computed(() => {
-        if (!manga.value || !chapter.value) return DEFAULT_IMAGE;
-        return chapter.value.pages[page.value] || DEFAULT_IMAGE;
-    });
+    const nextPageImage = computed(() => pageUrls.value[page.value] || DEFAULT_IMAGE);
 
     const chapterIndex = computed(() => {
         if (!manga.value || !chapter.value) return -1;
