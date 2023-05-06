@@ -1,5 +1,5 @@
 import { AsyncData } from "#app";
-import { saveAs } from "file-saver";
+import filesaver from 'file-saver';
 import { useAppSettings } from "./settings-helper";
 
 export type Params = { [key: string]: any; };
@@ -100,7 +100,7 @@ export const useApiHelper = () => {
         return fetch(url)
             .then(t => t.blob())
             .then(t => {
-                saveAs(t, name);
+                filesaver.saveAs(t, name);
             });
     }
 
