@@ -48,7 +48,7 @@
                 <Tabs flip>
                     <Tab icon="info" scrollable keep-alive class-name="flex row">
                         <div class="settings-tab flex row">
-                            <img :src="manga.cover" class="rounded" />
+                            <img :src="proxy(manga.cover, 'manga-cover', manga.referer)" class="rounded" />
                             <h3 class="margin-top">
                                 {{ manga.title }}
                             </h3>
