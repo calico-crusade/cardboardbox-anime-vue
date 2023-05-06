@@ -1,8 +1,10 @@
 <template>
+<ClientOnly>
     <span class="material-symbols-outlined"
-          :class="{ 'unsize': unsize, 'fill-icon': fill, 'spin': spin }" :style="{ 'font-size': size, transform: `rotate(${rotate || 0}deg)` }">
+        :class="{ 'unsize': unsize, 'fill-icon': fill, 'spin': spin }" :style="{ 'font-size': size, transform: `rotate(${rotate || 0}deg)` }">
         <slot />      
     </span>
+</ClientOnly>
 </template>
 
 <script setup lang="ts">

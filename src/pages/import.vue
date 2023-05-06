@@ -31,14 +31,14 @@ const loading = ref(false);
 const error = ref<undefined | FetchError<any>>();
 const { reload } = useMangaApi();
 
-const addManga = async () => {
+const addManga = () => {
     loading.value = true;
-    const { data, error: reloadError } = await reload(url.value, false);
+    const { data, error: reloadError } = reload(url.value, false);
     error.value = reloadError.value ?? undefined;
     loading.value = false;
 
     if (data.value?.manga.id) {
-        await navigateTo(`/manga/${data.value.manga.id}`);
+        navigateTo(`/manga/${data.value.manga.id}`);
     }
 };
 

@@ -1,10 +1,10 @@
 <template>
-    <div class="flex fill-parent">
-        <div class="center flex loading-comp">
-            <img src="~/assets/kitsu.gif" alt="Loading Kitsu!" />
-            <p>Loading...</p>
-        </div>
+<div class="flex fill-parent">
+    <div class="center flex loading-comp">
+        <img src="/kitsu.gif" alt="Loading Kitsu!" />
+        <p>Loading...</p>
     </div>
+</div>
 </template>
 
 <style lang="scss">

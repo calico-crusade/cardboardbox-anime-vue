@@ -115,10 +115,7 @@ $bg-color: var(--bg-color-accent);
         }
     }
 
-    .chapter-content {
-        position: relative;
-        //z-index: 1;
-    }
+    .chapter-content { position: relative; }
 
     .chapter-root {
         display: flex;

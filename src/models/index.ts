@@ -13,3 +13,4 @@ export * from './manga/progress.model';
 export * from './auth.model';
 export * from './db-object.model';
 export * from './image-search.model';
+export * from './page-types.model';

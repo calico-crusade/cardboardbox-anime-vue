@@ -1,3 +1,5 @@
+import { AsyncData } from "#app";
+import { saveAs } from "file-saver";
 import { useAppSettings } from "./settings-helper";
 
 export type Params = { [key: string]: any; };
@@ -29,6 +31,8 @@ export const useApiHelper = () => {
 
         return uri;
     }
+
+    const clone = <T>(item: T) => <T>JSON.parse(JSON.stringify(item));
 
     function get<T>(url: string, params?: Params, lazy: boolean = false) {
         if (lazy) 
@@ -92,11 +96,48 @@ export const useApiHelper = () => {
         });
     }
 
+    function download(url: string, name?: string) {
+        return fetch(url)
+            .then(t => t.blob())
+            .then(t => {
+                saveAs(t, name);
+            });
+    }
+
+    function onFinish<T>(request: AsyncData<T, any>, fn: (item?: T) => void, err?: (item: any) => void) {
+        const { pending, data, error } = request;
+
+        const resolve = () => {
+            if (pending.value) return;
+
+            if (error.value && err) {
+                err(error);
+                return;
+            }
+
+            fn(data.value ?? undefined);
+        }
+
+        resolve();
+
+        watch(() => pending.value, () => resolve());
+    }
+
+    function toPromise<T>(request: AsyncData<T, any>): Promise<T | undefined> {
+        return new Promise((resolve, reject) => {
+            onFinish(request, (d) => resolve(d), (err) => reject(err));
+        });
+    }
+
     return {
         get,
         post,
         put,
-        delete: deletefn,
-        proxy
+        del: deletefn,
+        proxy,
+        download,
+        onFinish,
+        toPromise,
+        clone
     }
 }

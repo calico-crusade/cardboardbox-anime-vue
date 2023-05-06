@@ -1,22 +1,30 @@
 <template>
 <Loading v-if="pending" />
-<Error v-else-if="!data || !manga" :message="error?.message" />
+<Error v-else-if="error" :message="error?.message" />
 <div v-else class="manga-details flex fill-parent scroll-y">
-    <div class="manga-header flex row">
+    <div v-if="manga" class="manga-header flex row">
         <div class="image" :style="{ 'background-image': 'url(' + proxy(manga.cover) + ')' }"></div>
         <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
         <div class="buttons flex center-horz">
+            <NuxtLink class="icon-btn" v-if="resumeUrl" :to="resumeUrl">
+                <Icon>play_arrow</Icon>
+                <p>Resume</p>
+            </NuxtLink>
             <button v-if="isRandom" class="icon-btn" @click="() => $router.go(0)">
                 <Icon>shuffle</Icon>
                 <p>Next Random Manga</p>
             </button>
-            <button v-if="stats" class="icon-btn" @click="() => toggleFavourite()">
+            <button v-if="stats" class="icon-btn" @click="toggleFavourite">
                 <Icon :fill="isFavourite">star</Icon>
-                <p>Favourite</p>
+                <p>{{ isFavourite ? 'Unfavourite' : 'Favourite' }}</p>
             </button>
-            <button class="icon-btn" :disabled="reloading" @click="() => refresh()">
+            <button v-if="stats?.progress" :disabled="reloading" class="icon-btn" @click="resetProgress">
+                <Icon :spin="reloading">delete</Icon>
+                <p>Reset Progress</p>
+            </button>
+            <button class="icon-btn" :disabled="reloading" @click="refresh">
                 <Icon :spin="reloading">sync</Icon>
-                <p>Reload from source</p>
+                <p>Reload Source</p>
             </button>
             <button class="icon-btn" @click="() => copyUrl()">
                 <Icon>content_copy</Icon>
@@ -81,10 +89,11 @@ const {
     groupVolumes, 
     favourite, 
     reload,
-    extended
+    extended,
+    resetProgress: reset
 } = useMangaApi();
 
-const { proxy: proxyUrl } = useApiHelper();
+const { proxy: proxyUrl, toPromise } = useApiHelper();
 
 let stats: Ref<ProgressExt | undefined> = ref(undefined);
 let reloading = ref(false);
@@ -92,13 +101,15 @@ let volumes: Ref<Volume[]> = ref([]);
 
 const _id = useRoute().params.id.toString();
 const isRandom = _id === 'random';
-const { data, pending, error } = isRandom ? await random() : await fetch(_id);
+const { data, pending, error } = isRandom ? random() : fetch(_id);
 const manga = computed(() => data.value?.manga);
 const isFavourite = computed(() => stats.value?.stats.favourite || false);
 const id = computed(() => manga.value?.id || 0);
 volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
 
 const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
+const currentChapter = computed(() => data.value?.chapters.find(t => t.id === stats.value?.progress?.mangaChapterId));
+const resumeUrl = computed(() => currentChapter.value ? `/manga/${manga.value?.id}/${currentChapter.value.id}?page=${(stats.value?.progress?.pageIndex ?? 0) + 1}` : undefined);
 
 useHead({ title: manga.value?.title ?? 'Manga Not Found' })
 
@@ -127,15 +138,16 @@ const collapseToggle = () => {
 
 const toggleFavourite = async () => {
     if (!id.value) return;
-    await favourite(id.value);
-    await fetchExt();
+    await toPromise(favourite(id.value));
+    fetchExt();
 }
 
 const refresh = async () => {
     if (!manga.value) return;
     reloading.value = true;
-    const { data: output } = await reload(manga.value);
-    data.value = output.value;
+
+    const output = await toPromise(reload(manga.value));
+    data.value = output ?? null;
     volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
     reloading.value = false;
 }
@@ -146,10 +158,16 @@ const fetchExt = async () => {
         return;
     }
     reloading.value = true;
-    const { data: output } = await extended(id.value);
-    stats.value = output.value || undefined;
+
+    stats.value = await toPromise(extended(id.value));
     volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
     reloading.value = false;
+}
+
+const resetProgress = async () => {
+    reloading.value = true;
+    await toPromise(reset(id.value));
+    fetchExt();
 }
 
 const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer);
@@ -159,7 +177,7 @@ const copyUrl = () => {
     navigator.clipboard.writeText(baseUrl);
 }
 
-onMounted(async () => await nextTick(() => setTimeout(() => fetchExt(), 100)));
+onMounted(() => nextTick(() => setTimeout(() => fetchExt(), 100)));
 </script>
 
 <style lang="scss" scoped>
@@ -190,7 +208,7 @@ $bg-color: var(--bg-color-accent);
         .buttons {
             flex-flow: row wrap;
             align-items: center;
-            button { 
+            button, a { 
                 margin: 5px; 
                 p { display: none; }
             }
@@ -273,7 +291,7 @@ $bg-color: var(--bg-color-accent);
         margin: 5px;
         flex-flow: column;
 
-        button {
+        button, a {
             flex: 1;
             p { 
                 display: block;

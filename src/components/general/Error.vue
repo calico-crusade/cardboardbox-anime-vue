@@ -1,7 +1,7 @@
 <template>
     <div class="flex fill-parent">
         <div class="center flex row center-items error-comp">
-            <img src="~/assets/error.gif" alt="An error gif" />
+            <img src="/error.gif" alt="An error gif" />
             <h2 class="text-center">An error occurred!</h2>
             <p class="text-center">{{ message }}</p>
         </div>

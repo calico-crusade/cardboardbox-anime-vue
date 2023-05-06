@@ -1,3 +1,6 @@
+$primary-color: #726ae4;
+$primary-color-trans: rgba( lighten( $primary-color, 20% ), 0.8 );
+
 :root {
     --bg-color: rgba(12, 9, 12, 1);
     --bg-color-accent: rgba(0, 0, 0, 0.25);
@@ -6,7 +9,8 @@
 
     --color: #dcddde;
     --color-success: rgb(0, 255, 0);
-    --color-primary: #726ae4;
+    --color-primary: #{$primary-color};
+    --color-primary-trans: #{$primary-color-trans};
     --color-secondary: rgba(0, 174, 240, 1);
     --color-secondary-tran: rgba(0, 174, 240, 0.25);
     --color-secondary-dark: rgb(0, 95, 133);
@@ -77,6 +81,10 @@ p, h1, h2, h3, h4, h5, h6 {
     .pad-right { margin-right: auto; }
     .pad-top { margin-top: auto; }
     .pad-bottom { margin-bottom: auto; }
+
+    .margin-top {
+        margin-top: var(--margin);
+    }
 
     .content {
         display: flex;
@@ -231,13 +239,14 @@ p, h1, h2, h3, h4, h5, h6 {
     }
 }
 
+$ctrl-bg: var(--bg-color-accent);
 input, textarea, select {
-    background-color: var(--bg-color);
+    background-color: $ctrl-bg;
     color: var(--color);
     padding: 10px;
     border-radius: 5px;
     outline: none;
-    border: 1px solid var(--bg-color);
+    border: 1px solid #{$ctrl-bg};
     font-family: var(--font-family);
     transition: all 250ms;
 
@@ -257,6 +266,10 @@ input, textarea, select {
         color: var(--color-muted);
         border-color: var(--bg-color);
     }
+
+    &[type="color"] {
+        width: 100%
+    }
 }
 
 textarea {
@@ -264,19 +277,24 @@ textarea {
     height: 150px;
 }
 
-input:read-only {
+input:read-only:not([type='color']):not([type='range']) {
     cursor: not-allowed;
     color: var(--color-muted);
     border-color: var(--bg-color);
 }
 
-$ctrl-bg: var(--bg-color-accent);
 .control {
     display: flex;
     flex-flow: column;
     margin-top: var(--margin);
+    overflow: hidden;
 
-    label { margin-bottom: var(--margin); }
+    label { 
+        margin-bottom: var(--margin); 
+        &.no-bot {
+            margin-bottom: 3px;
+        }
+    }
 
     &.group, .group {
         display: flex;
@@ -284,6 +302,7 @@ $ctrl-bg: var(--bg-color-accent);
         background-color: $ctrl-bg;
         border-radius: 5px;
         border: 1px solid #{$ctrl-bg};
+        overflow: hidden;
 
         .fill { flex: 1; }
 
@@ -299,7 +318,7 @@ $ctrl-bg: var(--bg-color-accent);
         button, a {
             display: flex;
             align-items: center;
-            margin-right: 5px;
+            //margin-right: 5px;
         }
 
         &:focus-within {
@@ -327,7 +346,7 @@ $ctrl-bg: var(--bg-color-accent);
     }
 
     &.no-top {
-        margin-top: 0;
+        margin-top: 3px;
     }
 
     &.in-line {
@@ -343,6 +362,71 @@ $ctrl-bg: var(--bg-color-accent);
 
         .group {
             flex: 1;
+        }
+    }
+}
+
+.btn-group {
+    background-color: $ctrl-bg;
+    display: flex;
+    flex-flow: row;
+    margin-top: 3px;
+    border-radius: 5px;
+    border: 1px solid #{$ctrl-bg};
+    align-items: center;
+
+    button, a {
+        flex: 1;
+        padding-top: 5px;
+        text-align: center;
+        align-items: center;
+
+        &:not(:last-child) {
+            border-right: 1px solid #{$ctrl-bg};
+        }
+
+        &:disabled, &.disabled {
+            background-color: var(--bg-color);
+            color: var(--color-muted);
+            cursor: not-allowed;
+        }
+    }
+}
+
+.btn-group-vert {
+    background-color: $ctrl-bg;
+    display: flex;
+    flex-flow: column;
+    margin-top: 3px;
+    border-radius: 5px;
+    border: 1px solid #{$ctrl-bg};
+
+    button, a {
+        padding-top: 5px;
+        text-decoration: none !important;
+        flex: 1;
+        align-items: center;
+        display: flex;
+        flex-flow: row;
+        padding: 5px 10px;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid #{$ctrl-bg};
+        }
+
+        p {
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        span {
+            margin-left: 5px;
+        }
+
+        &:disabled {
+            background-color: var(--bg-color);
+            color: var(--color-muted);
+            cursor: not-allowed;
         }
     }
 }

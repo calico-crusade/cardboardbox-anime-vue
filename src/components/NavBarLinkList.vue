@@ -74,7 +74,7 @@
 </a>
 
 <a href="https://discord.gg/RV9MvvYXsp" target="_blank">
-    <img src="~/assets/discord-icon.png" alt="Discord Logo" />
+    <img src="/discord-icon.png" alt="Discord Logo" />
     <p>Discord Server</p>
     <Icon>open_in_new</Icon>
 </a>

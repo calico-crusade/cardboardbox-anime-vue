@@ -4,6 +4,11 @@
   </NuxtLayout>
 </template>
 
+<script setup lang="ts">
+const { fixBgImage } = useAppSettings();
+onMounted(() => fixBgImage());
+</script>
+
 <style lang="scss">
 .page-enter-active,
 .page-leave-active {

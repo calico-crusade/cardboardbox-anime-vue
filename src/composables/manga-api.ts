@@ -8,11 +8,11 @@ import {
 import { useApiHelper } from "./api-helpers";
 
 export const useMangaApi = () => {
-    const { get, post } = useApiHelper();
+    const { get, del, post } = useApiHelper();
 
-    const fetch = (id: number | string) => get<MangaWithChapters>(`manga/${id}`, undefined, true);
+    const fetch = (id: number | string) => get<MangaWithChapters>(`manga/${id}`, undefined);
 
-    const random = () => get<MangaWithChapters>(`manga/random`, undefined, true);
+    const random = () => get<MangaWithChapters>(`manga/random`, undefined);
 
     const extended = (id: number | string) => get<ProgressExt>(`manga/${id}/extended`);
 
@@ -74,6 +74,24 @@ export const useMangaApi = () => {
         return groups;
     }
 
+    const progress = (mangaId: number, mangaChapterId: number, page: number) => {
+        return post(`manga`, {
+            mangaId,
+            mangaChapterId,
+            page
+        }, undefined, true);
+    }
+
+    const resetPages = (id: string | number, chapter: number) => {
+        return get<{ worked: boolean }>(`manga/${id}/reset/${chapter}`);
+    };
+
+    const resetProgress = (id: number) => del(`manga/progress/${id}`);
+
+    const bookmark = (id: string | number, chapter: number, pages: number[]) => {
+        return post(`manga/${id}/${chapter}/bookmark`, pages);
+    };
+
     return {
         fetch,
         random,
@@ -83,6 +101,10 @@ export const useMangaApi = () => {
         pages,
         search,
         filters,
-        groupVolumes
+        groupVolumes,
+        progress,
+        resetPages,
+        resetProgress,
+        bookmark
     };
 };

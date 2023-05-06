@@ -15,6 +15,6 @@ onMounted(() => nextTick(async () => {
     const result = await resolve(code);
     if (result) return;
 
-    await navigateTo(redirect.value || '/');
+    navigateTo(redirect.value || '/');
 }));
 </script>

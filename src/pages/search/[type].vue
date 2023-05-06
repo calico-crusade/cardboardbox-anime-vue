@@ -84,12 +84,12 @@ useServerSeoMeta({
 })
 
 
-await onSetup();
+onSetup();
 
-onMounted(async () => await nextTick(async () => {
+onMounted(() => nextTick(() => {
     if (!token.value) return;
     //Force re-check if authed
-    await fetch(true);
+    fetch(true);
 }));
 
 watch(() => route.query, () => fetch(true));
@@ -112,6 +112,10 @@ $br-color: transparent;
             background-color: $bg-color;
             label {
                 margin-left: 15px;
+            }
+
+            .no-top {
+                margin-top: 0;
             }
         }
 
