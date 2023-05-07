@@ -312,6 +312,8 @@ const imageFilter = computed(() => {
         .map(key => `${key}(${filters[key]})`)
         .join(' ');
 });
+const description = computed(() => manga.value?.description ?? title.value);
+const coverUrl = computed(() => proxy(manga.value?.cover || ''));
 
 const clickarea = ref<HTMLElement | undefined>();
 
@@ -319,9 +321,9 @@ useHead({ title });
 useServerSeoMeta({
     title,
     ogTitle: title,
-    description: manga.value?.description,
-    ogDescription: manga.value?.description,
-    ogImage: proxy(manga.value?.cover || ''),
+    description,
+    ogDescription: description,
+    ogImage: coverUrl,
     twitterCard: 'summary_large_image'
 });
 

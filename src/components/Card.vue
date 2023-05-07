@@ -26,10 +26,10 @@
     </div>
 </div>
 <div class="manga" v-if="sdata">
-    <NuxtLink :to="'/import?url=' + sdata.manga.url" class="image" :style="{'background-image': 'url(' + proxy(sdata.manga.cover) + ')'}"></NuxtLink>
+    <NuxtLink :to="'/import?url=' + encodeURIComponent(sdata.manga.url)" class="image" :style="{'background-image': 'url(' + proxy(sdata.manga.cover) + ')'}"></NuxtLink>
     <div class="details masked-overflow">
         <div class="title">
-            <NuxtLink :to="'/import?url=' + sdata.manga.url">{{ sdata.manga.title }}</NuxtLink>
+            <NuxtLink :to="'/import?url=' + encodeURIComponent(sdata.manga.url)">{{ sdata.manga.title }}</NuxtLink>
         </div>
         <div class="source">
             <b>Source: </b>&nbsp;{{ sdata.manga.source }}

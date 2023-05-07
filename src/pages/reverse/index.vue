@@ -29,4 +29,16 @@ const searchFile = async (file: File) => {
     results.value = await toPromise(reverseFile(file), true);
     pending.value = false;
 };
+const title = 'Reverse Image Search', description = 'Reverse Image search Manga pages to find the manga source.', image = 'https://manga.index-0.com/logo.png';
+
+useHead({ title });
+
+useServerSeoMeta({
+    title,
+    ogTitle: title,
+    description,
+    ogDescription: description,
+    ogImage: image,
+    twitterCard: 'summary_large_image'
+});
 </script>

@@ -25,22 +25,31 @@
 
 <script setup lang="ts">
 import { FetchError } from 'ofetch';
+const { toPromise } = useApiHelper();
+const route = useRoute();
 
 const url = ref('');
+const routeUrl = computed(() => decodeURIComponent(route.query.url?.toString() ?? ''));
 const loading = ref(false);
 const error = ref<undefined | FetchError<any>>();
 const { reload } = useMangaApi();
 
-const addManga = () => {
+const addManga = async () => {
     loading.value = true;
-    const { data, error: reloadError } = reload(url.value, false);
-    error.value = reloadError.value ?? undefined;
+    const data = await toPromise(reload(url.value, false), true);
     loading.value = false;
 
-    if (data.value?.manga.id) {
-        navigateTo(`/manga/${data.value.manga.id}`);
+    if (data?.manga.id) {
+        navigateTo(`/manga/${data.manga.id}`);
     }
 };
+
+onMounted(() => nextTick(() => {
+    if (!routeUrl.value) return;
+
+    url.value = routeUrl.value;
+    addManga();
+}));
 
 </script>
 

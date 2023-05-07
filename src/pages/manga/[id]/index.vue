@@ -107,18 +107,23 @@ const isFavourite = computed(() => stats.value?.stats.favourite || false);
 const id = computed(() => manga.value?.id || 0);
 volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
 
+const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer);
+
 const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
 const currentChapter = computed(() => data.value?.chapters.find(t => t.id === stats.value?.progress?.mangaChapterId));
 const resumeUrl = computed(() => currentChapter.value ? `/manga/${manga.value?.id}/${currentChapter.value.id}?page=${(stats.value?.progress?.pageIndex ?? 0) + 1}` : undefined);
+const title = computed(() => manga.value?.title ?? 'Manga Not Found');
+const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
+const cover = computed(() => proxy(manga.value?.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
 
-useHead({ title: manga.value?.title ?? 'Manga Not Found' })
+useHead({ title })
 
 useServerSeoMeta({
-    title: manga.value?.title,
-    ogTitle: manga.value?.title,
-    description: manga.value?.description,
-    ogDescription: manga.value?.description,
-    ogImage: manga.value?.cover,
+    title,
+    ogTitle: title,
+    description,
+    ogDescription: description,
+    ogImage: cover,
     twitterCard: 'summary_large_image'
 });
 
@@ -169,8 +174,6 @@ const resetProgress = async () => {
     await toPromise(reset(id.value));
     fetchExt();
 }
-
-const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer);
 
 const copyUrl = () => {
     const baseUrl = `${window.location.protocol}//${window.location.host}/manga/${id.value}`;
