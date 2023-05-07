@@ -7,11 +7,35 @@ import {
     ImageSearch
 } from "~/models";
 import { useApiHelper } from "./api-helpers";
+import { FetchError } from 'ofetch';
 
 export const useMangaApi = () => {
     const { get, del, post } = useApiHelper();
 
-    const fetch = (id: number | string) => get<MangaWithChapters>(`manga/${id}`, undefined);
+    const fetch = (id: number | string) => {
+        const cache = useState<MangaWithChapters | null>('manga-' + id, () => null);
+        if (cache.value) {
+            const pending = ref(false);
+            const error = ref<FetchError<any> | null>()
+            return {
+                data: cache,
+                pending,
+                error,
+                refresh: async () => {
+                    pending.value = true;
+                    const { data, error: err } = await get<MangaWithChapters>(`manga/${id}`);
+                    error.value = err.value;
+                    cache.value = data.value;
+                    pending.value = false;
+                }
+            };
+        }
+
+        const request = get<MangaWithChapters>(`manga/${id}`);
+        if (!process.client)
+            watch(() => request.data.value, () => cache.value = request.data.value);
+        return request;
+    } 
 
     const random = () => get<MangaWithChapters>(`manga/random`, undefined);
 

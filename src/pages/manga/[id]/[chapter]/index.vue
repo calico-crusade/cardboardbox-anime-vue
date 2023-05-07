@@ -1,217 +1,215 @@
 <template>
-<div class="page-wrapper flex fill-parent" :class="{ 'open': navOpen }">
-    <Loading v-if="pending" />
-    <Error v-else-if="error" :message="error?.message" />
-    <template v-else-if="manga">
-        <main class="fill flex" @click="pageClick" ref="clickarea" :class="pageStyle" v-if="!external">
-            <template v-if="pageStyle === PageStyle.SinglePageFit">
-                <div class="image" :style="{ 'background-image': `url(${pageUrl})`, 'filter': imageFilter }" />
-                <img class="hidden" v-if="nextPageImage" :src="nextPageImage" />
-            </template>
+<Loading v-if="pending" />
+<Error v-else-if="error" :message="error?.message" />
+<div v-else-if="manga" class="page-wrapper flex fill-parent" :class="{ 'open': navOpen }">
+    <main class="fill flex" @click="pageClick" ref="clickarea" :class="pageStyle" v-if="!external">
+        <template v-if="pageStyle === PageStyle.SinglePageFit">
+            <div class="image" :style="{ 'background-image': `url(${pageUrl})`, 'filter': imageFilter }" />
+            <img class="hidden" v-if="nextPageImage" :src="nextPageImage" />
+        </template>
 
-            <template v-else-if="pageStyle === PageStyle.LongStrip">
-                <img v-for="image of pageUrls" :src="image" :style="{ 'filter': imageFilter }" />
-            </template>
+        <template v-else-if="pageStyle === PageStyle.LongStrip">
+            <img v-for="image of pageUrls" :src="image" :style="{ 'filter': imageFilter }" />
+        </template>
 
-            <template v-else-if="pageStyle === PageStyle.DoublePage">
-                <div class="image" :style="{ 'background-image': `url(${pageUrl})`, 'filter': imageFilter}" />
-                <div class="image" v-if="nextPageImage" :style="{ 'background-image': `url(${nextPageImage})`, 'filter': imageFilter}" />
-            </template>
+        <template v-else-if="pageStyle === PageStyle.DoublePage">
+            <div class="image" :style="{ 'background-image': `url(${pageUrl})`, 'filter': imageFilter}" />
+            <div class="image" v-if="nextPageImage" :style="{ 'background-image': `url(${nextPageImage})`, 'filter': imageFilter}" />
+        </template>
 
-            <template v-else>
-                <img :src="pageUrl" :style="{ 'filter': imageFilter }" />
-                <img class="hidden" v-if="nextPageImage" :src="nextPageImage" />
-            </template>
+        <template v-else>
+            <img :src="pageUrl" :style="{ 'filter': imageFilter }" />
+            <img class="hidden" v-if="nextPageImage" :src="nextPageImage" />
+        </template>
 
-            <div class="progress-bar" :class="progressBar">
-                <NuxtLink 
-                    v-for="(_, i) of pageUrls" 
-                    :to="genLink('Page', i + 1)"
-                    :class="{ 'active': i < page }"
-                    class="progress"
-                />
-            </div>
-        </main>
-        <main class="fill flex external" v-else>
-            <div class="center">
-                This is an external manga! Click <a :href="external" target="_blank">here</a> to read it.
-            </div>
-        </main>
-        <aside class="flex row">
-            <header class="flex center-items">
-                <NuxtLink :to="'/manga/' + id" class="flex fill center-items">
-                    <Icon>arrow_back</Icon>
-                    <p class="text-center fill">{{ manga.title }}</p>
-                </NuxtLink>
-            </header>
-            <article class="fill">
-                <Tabs flip>
-                    <Tab icon="info" scrollable keep-alive class-name="flex row">
-                        <div class="settings-tab flex row">
-                            <img :src="proxy(manga.cover, 'manga-cover', manga.referer)" class="rounded" />
-                            <h3 class="margin-top">
-                                {{ manga.title }}
-                            </h3>
-                            <p><b>Manga Progress: </b> {{ (((chapterIndex + 1) / chapters.length) * 100).toFixed(2) }}%</p>
-                            <p v-if="!external"><b>Chapter Progress: </b> {{ (page / (chapter?.pages?.length ?? 1) * 100).toFixed(2) }}%</p>
+        <div class="progress-bar" :class="progressBar">
+            <NuxtLink 
+                v-for="(_, i) of pageUrls" 
+                :to="genLink('Page', i + 1)"
+                :class="{ 'active': i < page }"
+                class="progress"
+            />
+        </div>
+    </main>
+    <main class="fill flex external" v-else>
+        <div class="center">
+            This is an external manga! Click <a :href="external" target="_blank">here</a> to read it.
+        </div>
+    </main>
+    <aside class="flex row">
+        <header class="flex center-items">
+            <NuxtLink :to="'/manga/' + id" class="flex fill center-items">
+                <Icon>arrow_back</Icon>
+                <p class="text-center fill">{{ manga.title }}</p>
+            </NuxtLink>
+        </header>
+        <article class="fill">
+            <Tabs flip>
+                <Tab icon="info" scrollable keep-alive class-name="flex row">
+                    <div class="settings-tab flex row">
+                        <img :src="proxy(manga.cover, 'manga-cover', manga.referer)" class="rounded" />
+                        <h3 class="margin-top">
+                            {{ manga.title }}
+                        </h3>
+                        <p><b>Manga Progress: </b> {{ (((chapterIndex + 1) / chapters.length) * 100).toFixed(2) }}%</p>
+                        <p v-if="!external"><b>Chapter Progress: </b> {{ (page / (chapter?.pages?.length ?? 1) * 100).toFixed(2) }}%</p>
 
-                            <template v-for="attr of chapter?.attributes">
-                                <p v-if="isLink(attr.value)">
-                                    <a :href="attr.value" target="_blank">
-                                        <b>{{ attr.name }}</b>
-                                    </a>
-                                </p>
-                                <p v-else-if="attr.name === 'Scanlation Discord'">
-                                    <a :href="'https://discord.gg/' + attr.value" target="_blank"><b>Scanlation Discord</b></a>
-                                </p>
-                                <p v-else>
-                                    <b>{{ attr.name }}:</b> {{ attr.value }}
-                                </p>
-                            </template>
-
-                            <div class="control no-top">
-                                <select :value="chapterId" @change="(val) => genLinkVal(1, val)">
-                                    <option v-for="chap in chapters" :value="chap.id">
-                                        Ch. {{ chap.ordinal }} - {{ chap.title }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="control no-top" v-if="pageStyle !== PageStyle.LongStrip && !external">
-                                <select :value="page" @change="(val) => genLinkVal(val)">
-                                    <option v-for="(_, index) in chapter?.pages" :value="index + 1">
-                                        Page: #{{ index + 1 }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="btn-group">
-                                <NuxtLink :class="{ 'disabled': !hasPreviousChapter }" :to="genLink('PrevChapter')">
-                                    <Icon>skip_previous</Icon>
-                                </NuxtLink>
-                                <NuxtLink :class="{ 'disabled': !hasPreviousPage }" :to="genLink('PrevPage')" v-if="pageStyle !== PageStyle.LongStrip">
-                                    <Icon>navigate_before</Icon>
-                                </NuxtLink>
-                                <NuxtLink :to="genLink('ChapterStart')">
-                                    <Icon>restart_alt</Icon>
-                                </NuxtLink>
-                                <NuxtLink :class="{ 'disabled': !hasNextPage }" :to="genLink('NextPage')" v-if="pageStyle !== PageStyle.LongStrip">
-                                    <Icon>navigate_next</Icon>
-                                </NuxtLink>
-                                <NuxtLink :class="{ 'disabled': !hasNextChapter }" :to="genLink('NextChapter')">
-                                    <Icon>skip_next</Icon>
-                                </NuxtLink>
-                            </div>
-                            <div class="btn-group-vert">
-                                <button @click="copyUrl(`manga/${id}/${chapterId}?page=${page}`)">
-                                    <Icon>auto_stories</Icon>
-                                    <p>Copy Page Link</p>
-                                </button>
-                                <button @click="copyUrl('manga/' + id)">
-                                    <Icon>share</Icon>
-                                    <p>Copy Manga Link</p>
-                                </button>
-                                <NuxtLink :to="'/manga/' + id">
-                                    <Icon>menu_book</Icon>
-                                    <p>Manga Home page</p>
-                                </NuxtLink>
-                                <a :href="manga.url" target="_blank">
-                                    <Icon>home</Icon>
-                                    <p>Manga Source Page</p>
+                        <template v-for="attr of chapter?.attributes">
+                            <p v-if="isLink(attr.value)">
+                                <a :href="attr.value" target="_blank">
+                                    <b>{{ attr.name }}</b>
                                 </a>
-                                <button :disabled="downloading" @click="downloadData(pageUrl)">
-                                    <Icon :spin="downloading">{{ !downloading ? 'download' : 'sync' }}</Icon>
-                                    <p>Download Page</p>
-                                </button>
-                                <button :disabled="downloading" @click="downloadData(chapterUrl)">
-                                    <Icon :spin="downloading">{{ !downloading ? 'download_for_offline' : 'sync' }}</Icon>
-                                    <p>Download Chapter</p>
-                                </button>
-                                <NuxtLink :to="`/manga/${id}/${chapterId}/strip?page=${page}`">
-                                    <Icon>auto_fix</Icon>
-                                    <p>Create Strip</p>
-                                </NuxtLink>
-                                <NuxtLink :to="genLink('ChapterStart')">
-                                    <Icon>restart_alt</Icon>
-                                    <p>Restart Chapter</p>
-                                </NuxtLink>
-                                <button :disabled="bookmarking" @click="toggleBookmark">
-                                    <Icon :spin="bookmarking">bookmark</Icon>
-                                    <p>Bookmark Page</p>
-                                </button>
-                            </div>
-                        </div>
-                    </Tab>
-                    <Tab icon="settings" scrollable keep-alive class-name="flex row">
-                        <div class="settings-tab flex row">
-                            <h3>Settings</h3>
-                            <div class="control checkbox">
-                                <CheckBox v-model="invertControls">Invert Page Controls</CheckBox>
-                            </div>
-                            <div class="control checkbox">
-                                <CheckBox v-model="forwardOnly">No Directional Buttons</CheckBox>
-                            </div>
-                            <div class="control" v-if="filter === FilterStyle.Custom">
-                                <label class="no-bot">Custom Filter</label>
-                                <input type="text" v-model="customFilter" placeholder="Custom CSS filter" />
-                            </div>
-                            <div class="control">
-                                <label class="no-bot">Progress Bar Style</label>
-                                <select v-model="progressBar">
-                                    <option v-for="style in PROGRESS_BAR_STYLES" :value="style">
-                                        {{ style }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="control">
-                                <label class="no-bot">Scroll amount on key event</label>
-                                <input type="number" min="0" max="1000" step="10" v-model="scrollAmount" />
-                            </div>
-                            <div class="control">
-                                <label class="no-bot">Image Style</label>
-                                <select v-model="pageStyle">
-                                    <option v-for="style in PAGE_STYLES" :value="style">
-                                        {{ style }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="control">
-                                <label class="no-bot">Image Filter</label>
-                                <select v-model="filter">
-                                    <option v-for="style in FILTER_STYLES" :value="style">
-                                        {{ style }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="control">
-                                <label class="no-bot">Image Brightness ({{ brightness }}%)</label>
-                                <input type="range" min="1" max="100" v-model="brightness" />
-                            </div>
-                            <div class="btn-group-vert">
-                                <button @click="fullscreen">
-                                    <Icon>fullscreen</Icon>
-                                    <p>Toggle Fullscreen</p>
-                                </button>
-                                <button @click="resetPages">
-                                    <Icon>sync</Icon>
-                                    <p>Refresh Page Links</p>
-                                </button>
-                            </div>
-                        </div>
-                    </Tab>
-                    <Tab v-if="bookmarks.length > 0" icon="bookmark" scrollable keep-alive class-name="flex row">
-                        <template v-for="bookmark in bookmarks">
-                        <NuxtLink class="bookmark" v-for="p of bookmark.pages" :to="genLink('Page', p, bookmarkChapter(bookmark)?.id)">
-                            <img :src="bookmarkImage(bookmark, p)" :style="{ 'filter': imageFilter }" />
-                            <div class="details">
-                                <p>Ch. {{ bookmarkChapter(bookmark)?.ordinal }} Pg. {{ p }}</p>
-                                <p>Last Updated: <Date :date="bookmark.createdAt" /></p>
-                            </div>
-                        </NuxtLink>
+                            </p>
+                            <p v-else-if="attr.name === 'Scanlation Discord'">
+                                <a :href="'https://discord.gg/' + attr.value" target="_blank"><b>Scanlation Discord</b></a>
+                            </p>
+                            <p v-else>
+                                <b>{{ attr.name }}:</b> {{ attr.value }}
+                            </p>
                         </template>
-                    </Tab>
-                </Tabs>
-            </article>
-        </aside>
-    </template>
+
+                        <div class="control no-top">
+                            <select :value="chapterId" @change="(val) => genLinkVal(1, val)">
+                                <option v-for="chap in chapters" :value="chap.id">
+                                    Ch. {{ chap.ordinal }} - {{ chap.title }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="control no-top" v-if="pageStyle !== PageStyle.LongStrip && !external">
+                            <select :value="page" @change="(val) => genLinkVal(val)">
+                                <option v-for="(_, index) in chapter?.pages" :value="index + 1">
+                                    Page: #{{ index + 1 }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <NuxtLink :class="{ 'disabled': !hasPreviousChapter }" :to="genLink('PrevChapter')">
+                                <Icon>skip_previous</Icon>
+                            </NuxtLink>
+                            <NuxtLink :class="{ 'disabled': !hasPreviousPage }" :to="genLink('PrevPage')" v-if="pageStyle !== PageStyle.LongStrip">
+                                <Icon>navigate_before</Icon>
+                            </NuxtLink>
+                            <NuxtLink :to="genLink('ChapterStart')">
+                                <Icon>restart_alt</Icon>
+                            </NuxtLink>
+                            <NuxtLink :class="{ 'disabled': !hasNextPage }" :to="genLink('NextPage')" v-if="pageStyle !== PageStyle.LongStrip">
+                                <Icon>navigate_next</Icon>
+                            </NuxtLink>
+                            <NuxtLink :class="{ 'disabled': !hasNextChapter }" :to="genLink('NextChapter')">
+                                <Icon>skip_next</Icon>
+                            </NuxtLink>
+                        </div>
+                        <div class="btn-group-vert">
+                            <button @click="copyUrl(`manga/${id}/${chapterId}?page=${page}`)">
+                                <Icon>auto_stories</Icon>
+                                <p>Copy Page Link</p>
+                            </button>
+                            <button @click="copyUrl('manga/' + id)">
+                                <Icon>share</Icon>
+                                <p>Copy Manga Link</p>
+                            </button>
+                            <NuxtLink :to="'/manga/' + id">
+                                <Icon>menu_book</Icon>
+                                <p>Manga Home page</p>
+                            </NuxtLink>
+                            <a :href="manga.url" target="_blank">
+                                <Icon>home</Icon>
+                                <p>Manga Source Page</p>
+                            </a>
+                            <button :disabled="downloading" @click="downloadData(pageUrl)">
+                                <Icon :spin="downloading">{{ !downloading ? 'download' : 'sync' }}</Icon>
+                                <p>Download Page</p>
+                            </button>
+                            <button :disabled="downloading" @click="downloadData(chapterUrl)">
+                                <Icon :spin="downloading">{{ !downloading ? 'download_for_offline' : 'sync' }}</Icon>
+                                <p>Download Chapter</p>
+                            </button>
+                            <NuxtLink :to="`/manga/${id}/${chapterId}/strip?page=${page}`">
+                                <Icon>auto_fix</Icon>
+                                <p>Create Strip</p>
+                            </NuxtLink>
+                            <NuxtLink :to="genLink('ChapterStart')">
+                                <Icon>restart_alt</Icon>
+                                <p>Restart Chapter</p>
+                            </NuxtLink>
+                            <button :disabled="bookmarking" @click="toggleBookmark">
+                                <Icon :spin="bookmarking">bookmark</Icon>
+                                <p>Bookmark Page</p>
+                            </button>
+                        </div>
+                    </div>
+                </Tab>
+                <Tab icon="settings" scrollable keep-alive class-name="flex row">
+                    <div class="settings-tab flex row">
+                        <h3>Settings</h3>
+                        <div class="control checkbox">
+                            <CheckBox v-model="invertControls">Invert Page Controls</CheckBox>
+                        </div>
+                        <div class="control checkbox">
+                            <CheckBox v-model="forwardOnly">No Directional Buttons</CheckBox>
+                        </div>
+                        <div class="control" v-if="filter === FilterStyle.Custom">
+                            <label class="no-bot">Custom Filter</label>
+                            <input type="text" v-model="customFilter" placeholder="Custom CSS filter" />
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Progress Bar Style</label>
+                            <select v-model="progressBar">
+                                <option v-for="style in PROGRESS_BAR_STYLES" :value="style">
+                                    {{ style }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Scroll amount on key event</label>
+                            <input type="number" min="0" max="1000" step="10" v-model="scrollAmount" />
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Image Style</label>
+                            <select v-model="pageStyle">
+                                <option v-for="style in PAGE_STYLES" :value="style">
+                                    {{ style }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Image Filter</label>
+                            <select v-model="filter">
+                                <option v-for="style in FILTER_STYLES" :value="style">
+                                    {{ style }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Image Brightness ({{ brightness }}%)</label>
+                            <input type="range" min="1" max="100" v-model="brightness" />
+                        </div>
+                        <div class="btn-group-vert">
+                            <button @click="fullscreen">
+                                <Icon>fullscreen</Icon>
+                                <p>Toggle Fullscreen</p>
+                            </button>
+                            <button @click="resetPages">
+                                <Icon>sync</Icon>
+                                <p>Refresh Page Links</p>
+                            </button>
+                        </div>
+                    </div>
+                </Tab>
+                <Tab v-if="bookmarks.length > 0" icon="bookmark" scrollable keep-alive class-name="flex row">
+                    <template v-for="bookmark in bookmarks">
+                    <NuxtLink class="bookmark" v-for="p of bookmark.pages" :to="genLink('Page', p, bookmarkChapter(bookmark)?.id)">
+                        <img :src="bookmarkImage(bookmark, p)" :style="{ 'filter': imageFilter }" />
+                        <div class="details">
+                            <p>Ch. {{ bookmarkChapter(bookmark)?.ordinal }} Pg. {{ p }}</p>
+                            <p>Last Updated: <Date :date="bookmark.createdAt" /></p>
+                        </div>
+                    </NuxtLink>
+                    </template>
+                </Tab>
+            </Tabs>
+        </article>
+    </aside>
 </div>
 </template>
 
@@ -220,7 +218,7 @@ import {
     PageStyle, PAGE_STYLES, 
     PROGRESS_BAR_STYLES, 
     FilterStyle, FILTER_STYLES, 
-    Bookmark, MangaWithChapters, ProgressExt 
+    Bookmark
 } from '~/models';
 
 type LinkTypes = 'NextChapter' | 'PrevChapter' | 'NextPage' | 'PrevPage' | 'ChapterStart' | 'Page';
@@ -237,7 +235,7 @@ const DEFAULT_IMAGE = '/broken.png';
 definePageMeta({ layout: 'nohead' });
 
 const { proxy, download } = useApiHelper();
-const { pages, fetch, extended, progress, resetPages: reset, bookmark } = useMangaApi();
+const { pages, fetch, progress, resetPages: reset, bookmark } = useMangaApi();
 const route = useRoute();
 const { 
     token, invertControls, forwardOnly, 
@@ -247,12 +245,10 @@ const {
 } = useAppSettings();
 
 const downloading = ref(false);
-const cacheManga = useState<MangaWithChapters | null | undefined>('cache-page-manga', () => undefined);
-const cacheStats = useState<ProgressExt | null | undefined>('cache-page-stats', () => undefined);
 
 const navOpen = computed({
     get: () => {
-        if (!process.client) return true;
+        if (!process.client) return false;
         return menuOpen.value;
     },
     set: (value: boolean) => menuOpen.value = value
@@ -261,11 +257,9 @@ const navOpen = computed({
 const page = computed(() => +(route.query.page?.toString() || '1'));
 const chapterId = computed(() => +(route.params.chapter?.toString() || '0'));
 const bookmarking = ref(false);
+const pageLoading = ref(false);
 const id = computed(() => route.params.id.toString());
 const { data, pending, error, refresh: refreshManga } = await fetch(id.value);
-const { data: stats, refresh: refreshExt } = await extended(id.value);
-cacheManga.value = data.value;
-cacheStats.value = stats.value;
 
 const manga = computed(() => data.value?.manga);
 const chapters = computed(() => data.value?.chapters || []);
@@ -349,31 +343,21 @@ const mouseInRegion = (event: MouseEvent, target: HTMLElement) => {
 };
 
 const fetchManga = async (force: boolean) => {
-    const manga = cacheManga.value;
-    if (!force && manga && (manga.manga.id.toString() === id.value || manga.manga.hashId === id.value)) {
-        return;
-    }
-
-    if (!id.value) return;
+    if (!id.value || !force) return;
 
     await refreshManga();
-    await refreshExt();
-    cacheManga.value = data.value;
-    cacheStats.value = stats.value;
 }
 
 const doFetch = async (force: boolean) => {
-    if (pending.value) return;
-
     await fetchManga(force);
 
     if (!data.value || !manga.value || !chapter.value || external.value) return;
 
     if (chapter.value.pages.length === 0) {
-        pending.value = true;
+        pageLoading.value = true;
         const { data: outputPages } = await pages(id.value, chapterId.value);
         chapter.value.pages = [...outputPages.value || []];
-        pending.value = false;
+        pageLoading.value = false;
     }
 
     if (chapter.value.pages.length === 0) return;
@@ -393,14 +377,14 @@ const doFetch = async (force: boolean) => {
     }
 }
 
-const resetPages = () => {
-    pending.value = true;
-    reset(id.value, chapterId.value);
-    pending.value = false;
-    doFetch(true);
+const resetPages = async () => {
+    pageLoading.value = true;
+    await reset(id.value, chapterId.value);
+    await doFetch(true);
+    pageLoading.value = false;
 };
 
-const toggleBookmark = () => {
+const toggleBookmark = async () => {
     if (!chapter.value) return;
     bookmarking.value = true;
 
@@ -414,8 +398,8 @@ const toggleBookmark = () => {
         pages.splice(i, 1);
     }
 
-    bookmark(id.value, chapter.value.id, pages);
-    doFetch(true);
+    await bookmark(id.value, chapter.value.id, pages);
+    await doFetch(true);
 
     bookmarking.value = false;
 }
@@ -509,9 +493,7 @@ const copyUrl = (url: string) => {
     navigator.clipboard.writeText(`${window.location.protocol}//${window.location.host}/${url}`);
 }
 
-const bookmarkChapter = (mark: Bookmark) => {
-    return chapters.value.find(t => t.id === mark.mangaChapterId);
-}
+const bookmarkChapter = (mark: Bookmark) => chapters.value.find(t => t.id === mark.mangaChapterId);
 
 const bookmarkImage = (mark: Bookmark, page: number) => {
     const chapter = bookmarkChapter(mark);
