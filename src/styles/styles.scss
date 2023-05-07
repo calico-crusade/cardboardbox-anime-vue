@@ -437,6 +437,13 @@ input:read-only:not([type='color']):not([type='range']) {
 .pad { padding: var(--margin); }
 .margin { margin: var(--margin); }
 
+.reverse-wrapper {
+    overflow-y: auto;
+    padding: var(--margin);
+    flex: 1;
+
+}
+
 @keyframes spin {
     100% {
         transform: rotate(360deg);

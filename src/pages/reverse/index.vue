@@ -1,10 +1,10 @@
 <template>
-<div class="fill-parent flex row pad">
+<div class="reverse-wrapper">
     <ReverseSearch 
         v-model="search"
         @file="searchFile"
     />
-    <Loading v-if="pending" />
+    <Loading v-if="pending" inline />
     <Card v-for="result of combined" :search="result" />
     <div class="alert center flex center-items" v-if="results && combined.length === 0">
         <img src="/twirl.gif" />

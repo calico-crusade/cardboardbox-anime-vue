@@ -50,7 +50,6 @@ const selected = (event: Event) => {
 
 <style lang="scss" scoped>
 .control {
-    margin: 10px;
     .file-input { display: none; }
     a, button {
         padding: 10px;
