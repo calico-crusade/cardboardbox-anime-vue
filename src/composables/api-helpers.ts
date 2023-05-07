@@ -123,9 +123,9 @@ export const useApiHelper = () => {
         watch(() => pending.value, () => resolve());
     }
 
-    function toPromise<T>(request: AsyncData<T, any>): Promise<T | undefined> {
+    function toPromise<T>(request: AsyncData<T, any>, noError: boolean = false): Promise<T | undefined> {
         return new Promise((resolve, reject) => {
-            onFinish(request, (d) => resolve(d), (err) => reject(err));
+            onFinish(request, (d) => resolve(d), (err) => noError ? resolve(undefined) : reject(err));
         });
     }
 

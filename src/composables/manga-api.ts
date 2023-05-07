@@ -3,7 +3,8 @@ import {
     Manga, MangaWithChapters, Stats,
     Paginated, Progress, ProgressExt,
     VolumeChapter,
-    Volume
+    Volume,
+    ImageSearch
 } from "~/models";
 import { useApiHelper } from "./api-helpers";
 
@@ -92,6 +93,13 @@ export const useMangaApi = () => {
         return post(`manga/${id}/${chapter}/bookmark`, pages);
     };
 
+    const reverseUrl = (path: string) => get<ImageSearch>(`manga/image-search`, { path });
+    const reverseFile = (file: File) => {
+        const data = new FormData();
+        data.append('file', file);
+        return post<ImageSearch>(`manga/image-search`, data);
+    }
+
     return {
         fetch,
         random,
@@ -105,6 +113,8 @@ export const useMangaApi = () => {
         progress,
         resetPages,
         resetProgress,
-        bookmark
+        bookmark,
+        reverseUrl,
+        reverseFile
     };
 };

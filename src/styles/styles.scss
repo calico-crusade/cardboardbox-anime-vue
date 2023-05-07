@@ -53,6 +53,12 @@ a, button {
     border: none;
     cursor: pointer;
     text-decoration: none;
+
+    &:disabled, &.disabled {
+        background-color: var(--bg-color);
+        color: var(--color-muted);
+        cursor: not-allowed;
+    }
 }
 
 p, h1, h2, h3, h4, h5, h6 {
@@ -383,12 +389,6 @@ input:read-only:not([type='color']):not([type='range']) {
 
         &:not(:last-child) {
             border-right: 1px solid #{$ctrl-bg};
-        }
-
-        &:disabled, &.disabled {
-            background-color: var(--bg-color);
-            color: var(--color-muted);
-            cursor: not-allowed;
         }
     }
 }

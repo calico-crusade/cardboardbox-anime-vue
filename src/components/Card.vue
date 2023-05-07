@@ -181,7 +181,7 @@ const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', re
 
 <style lang="scss" scoped>
 .manga {
-    flex: 1;
+    margin-top: var(--margin);
     display: flex;
     flex-flow: row;
     padding: var(--margin);
