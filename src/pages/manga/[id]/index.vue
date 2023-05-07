@@ -47,7 +47,7 @@
                 </div>
                 <div class="tags in-line">
                     <span>Details </span>
-                    <span v-for="tag of manga.attributes">
+                    <span v-for="tag in manga.attributes">
                         <b>{{ tag.name }}</b>: {{ tag.value }}
                     </span>
                 </div>
@@ -101,7 +101,7 @@ let volumes: Ref<Volume[]> = ref([]);
 
 const _id = useRoute().params.id.toString();
 const isRandom = _id === 'random';
-const { data, pending, error } = isRandom ? random() : fetch(_id);
+const { data, pending, error } = await (isRandom ? random() : fetch(_id));
 const manga = computed(() => data.value?.manga);
 const isFavourite = computed(() => stats.value?.stats.favourite || false);
 const id = computed(() => manga.value?.id || 0);
@@ -180,7 +180,7 @@ const copyUrl = () => {
     navigator.clipboard.writeText(baseUrl);
 }
 
-onMounted(() => nextTick(() => setTimeout(() => fetchExt(), 100)));
+onMounted(() => nextTick(() => fetchExt()));
 </script>
 
 <style lang="scss" scoped>

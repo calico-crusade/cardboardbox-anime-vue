@@ -4,7 +4,7 @@ import { useAppSettings } from "./settings-helper";
 
 export const useAuthApi = () => {
     const { get } = useApiHelper();
-    const { authUrl, appId, token, redirect } = useAppSettings();
+    const { authUrl, appId, token } = useAppSettings();
     const { currentRoute } = useRouter();
 
     const currentUser = useState<AuthUser | undefined>('login-user', () => undefined);
@@ -14,30 +14,38 @@ export const useAuthApi = () => {
     const resCode = (code: string) => get<AuthResponse>(`auth/${code}`);
 
     const bump = async () => {
-        if (!process.client) return failureReason.value = 'Login is only client side.';
-        if (currentUser.value) return undefined;
+        if (!process.client) {
+            failureReason.value = 'Login is only client side.';
+            return false;
+        }
+        if (currentUser.value) return true;
         if (!token.value) {
             currentUser.value = undefined;
-            return failureReason.value = 'User is not logged in.';
+            failureReason.value = 'User is not logged in.';
+            return false;
         }
 
         const { data: user, error } = await me();
         if (error.value || !user.value) {
             currentUser.value = undefined;
-            return failureReason.value = 'Couldn\'t fetch user profile.';
+            failureReason.value = 'Couldn\'t fetch user profile.';
+            return false;
         }
 
         currentUser.value = {...user.value};
-        return failureReason.value = undefined;
+        failureReason.value = undefined;
+        return true;
     };
 
     const resolve = async (code?: string) => {
         if (!code) {
-            return failureReason.value = 'Invalid login code.';
+            failureReason.value = 'Invalid login code.';
+            return false;
         }
 
         if (!process.client) {
-            return failureReason.value = 'Login is only client side.';
+            failureReason.value = 'Login is only client side.';
+            return false;
         }
 
         failureReason.value = undefined;
@@ -46,16 +54,19 @@ export const useAuthApi = () => {
             token.value = undefined;
             currentUser.value = undefined;
             console.error('Error occurred during login', { error: error.value, results: results.value });
-            return failureReason.value = 'An error occurred during login! ' + results.value?.error;
+            failureReason.value = 'An error occurred during login! ' + results.value?.error;
+            return false;
         }
 
         token.value = results.value.token;
-        return await bump();
+        currentUser.value = results.value.user;
+        return !!currentUser.value;
     };
 
     const login = () => {
-        redirect.value = currentRoute.value.fullPath;
-        const returnUrl = window.location.protocol + '//' + window.location.host + '/auth';
+        currentUser.value = undefined;
+        failureReason.value = undefined;
+        const returnUrl = window.location.protocol + '//' + window.location.host + '/auth?return=' + currentRoute.value.fullPath;
         window.location.href = `${authUrl}/Home/Auth/${appId}?redirect=${encodeURIComponent(returnUrl)}`;
     };
 

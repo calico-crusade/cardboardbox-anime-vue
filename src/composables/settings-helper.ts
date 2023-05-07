@@ -89,8 +89,8 @@ export const useAppSettings = () => {
     }
 
     return { 
-        token: getSet('auth-token'),
-        redirect: getSet('redirect-url'),
+        token: getSet<string>('auth-token'),
+        redirect: getSet<string>('redirect-url'),
         invertControls: getSetBool('invert-controls', false),
         forwardOnly: getSetBool('manga-forward-only', false),
         brightness: getSetNumb('manga-brightness', 70),
@@ -98,7 +98,7 @@ export const useAppSettings = () => {
         pageStyle: getSet<PageStyle>('image-size', PageStyle.SinglePageFit),
         filter: getSet<FilterStyle>('image-filter', FilterStyle.BlueLight),
         progressBar: getSet<ProgressBarStyle>('progress-bar', ProgressBarStyle.Left),
-        customFilter: getSet('custom-filter'),
+        customFilter: getSet<string>('custom-filter'),
         menuOpen: getSetBool('manga-menu-open', false),
 
         bgImageDir,

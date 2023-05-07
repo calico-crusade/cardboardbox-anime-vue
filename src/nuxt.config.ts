@@ -4,6 +4,7 @@ const baseUrl = 'https://manga.index-0.com';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+    ssr: true,
     app: {
         head: {
             link: [

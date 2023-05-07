@@ -219,29 +219,36 @@
 import { 
     PageStyle, PAGE_STYLES, 
     PROGRESS_BAR_STYLES, 
-    FilterStyle, FILTER_STYLES, Bookmark 
+    FilterStyle, FILTER_STYLES, 
+    Bookmark, MangaWithChapters, ProgressExt 
 } from '~/models';
 
 type LinkTypes = 'NextChapter' | 'PrevChapter' | 'NextPage' | 'PrevPage' | 'ChapterStart' | 'Page';
+interface Rect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    name: 'left' | 'right' | 'top' | 'bottom' | 'center';
+}
+    
+const DEFAULT_IMAGE = '/broken.png';
 
 definePageMeta({ layout: 'nohead' });
 
 const { proxy, download } = useApiHelper();
+const { pages, fetch, extended, progress, resetPages: reset, bookmark } = useMangaApi();
+const route = useRoute();
 const { 
-    token,
-    invertControls,
-    forwardOnly,
-    brightness,
-    pageStyle,
-    filter,
-    customFilter,
-    progressBar,
-    apiUrl,
-    menuOpen,
-    scrollAmount
+    token, invertControls, forwardOnly, 
+    brightness, pageStyle, filter, 
+    customFilter, progressBar, apiUrl, 
+    menuOpen, scrollAmount
 } = useAppSettings();
 
 const downloading = ref(false);
+const cacheManga = useState<MangaWithChapters | null | undefined>('cache-page-manga', () => undefined);
+const cacheStats = useState<ProgressExt | null | undefined>('cache-page-stats', () => undefined);
 
 const navOpen = computed({
     get: () => {
@@ -251,43 +258,38 @@ const navOpen = computed({
     set: (value: boolean) => menuOpen.value = value
 });
 
-const {
-    pending,
-    external,
-    manga,
-    chapters,
-    chapter,
-    chapterId,
-    pageUrl,
-    pageUrls,
-    title,
-    error,
-    nextPageImage,
-    chapterIndex,
-    hasNextChapter,
-    hasNextPage,
-    hasPreviousPage,
-    hasPreviousChapter,
-    hasPrevPageAbsolute,
-    hasNextPageAbsolute,
-    bookmarks,
-    bookmarking,
-    id,
-    stats,
-    page,
+const page = computed(() => +(route.query.page?.toString() || '1'));
+const chapterId = computed(() => +(route.params.chapter?.toString() || '0'));
+const bookmarking = ref(false);
+const id = computed(() => route.params.id.toString());
+const { data, pending, error, refresh: refreshManga } = await fetch(id.value);
+const { data: stats, refresh: refreshExt } = await extended(id.value);
+cacheManga.value = data.value;
+cacheStats.value = stats.value;
 
-    DEFAULT_IMAGE,
+const manga = computed(() => data.value?.manga);
+const chapters = computed(() => data.value?.chapters || []);
+const chapter = computed(() => chapters.value.find(t => t.id === chapterId.value));
+const pageUrls = computed(() => !manga.value || !chapter.value ? [] : chapter.value.pages.map(t => proxy(t, 'manga-page', manga.value?.referer)));
+const pageUrl = computed(() => pageUrls.value[page.value - 1] || DEFAULT_IMAGE);
+const title = computed(() => `${manga.value?.title} | Ch. ${chapter.value?.ordinal}`);
+const bookmarks = computed(() => data.value?.bookmarks || []);
+const nextPageImage = computed(() => pageUrls.value[page.value] || DEFAULT_IMAGE);
 
-    resetPages,
-    fetch,
-    mouseInRegion,
-    toggleBookmark
-} = usePageService();
-
-const route = useRoute();
 const chapterUrl = computed(() => `${apiUrl}/manga/${id.value}/${chapterId.value}/download`);
-const imageFilter = computed(() => {
+const description = computed(() => manga.value?.description ?? title.value);
+const coverUrl = computed(() => proxy(manga.value?.cover || ''));
+const external = computed(() => chapter.value?.externalUrl);
 
+const chapterIndex = computed(() => (!manga.value || !chapter.value) ? -1 : chapters.value.findIndex(a => a.id === chapter.value?.id));
+const hasNextChapter = computed(() => manga.value && chapter.value && !!chapters.value[chapterIndex.value + 1]);
+const hasNextPage = computed(() => manga.value && chapter.value && !!chapter.value.pages[page.value] || hasNextChapter.value);
+const hasPreviousChapter = computed(() => manga.value && chapter.value && !!chapters.value[chapterIndex.value - 1]);
+const hasPreviousPage = computed(() => manga.value && chapter.value && !!chapter.value.pages[page.value - 2] || hasPreviousChapter.value);
+const hasNextPageAbsolute = computed(() => manga.value && chapter.value && !!chapter.value.pages[page.value]);
+const hasPrevPageAbsolute = computed(() => manga.value && chapter.value && !!chapter.value.pages[page.value - 2]);
+
+const imageFilter = computed(() => {
     let filters: { [key: string]: string } = {
         'brightness': brightness.value + '%'
     };
@@ -312,8 +314,111 @@ const imageFilter = computed(() => {
         .map(key => `${key}(${filters[key]})`)
         .join(' ');
 });
-const description = computed(() => manga.value?.description ?? title.value);
-const coverUrl = computed(() => proxy(manga.value?.cover || ''));
+
+const regions = (() => {
+    const margin = 30;
+    const w = (100 / 2) - (margin / 2);
+    const regions: Rect[] = [
+        { x: 0, y: 0, width: 100, height: w, name: 'top' },
+        { x: 0, y: 100 - w, width: 100, height: w, name: 'bottom' },
+        { x: 0, y: 0, width: w, height: 100, name: 'left' },
+        { x: 100 - w, y: 0, width: w, height: 100, name: 'right' },
+        { x: w, y: w, width: 100 - (w * 2), height: 100 - (w * 2), name: 'center' }
+    ];
+
+    return regions;
+})();
+
+const inRegion = (rect: DOMRect, mx: number, my: number) => {
+    const output: ('top' | 'left' | 'bottom' | 'right' | 'center')[] = [];
+    const x = (mx - rect.left) / rect.width * 100;
+    const y = (my - rect.top) / rect.height * 100;
+
+    for(let reg of regions) {
+        if (x >= reg.x && x <= reg.x + reg.width &&
+            y >= reg.y && y <= reg.y + reg.height)
+            output.push(reg.name);
+    }
+
+    return output;
+};
+
+const mouseInRegion = (event: MouseEvent, target: HTMLElement) => {
+    const rect = target.getBoundingClientRect();
+    return inRegion(rect, event.clientX, event.clientY);
+};
+
+const fetchManga = async (force: boolean) => {
+    const manga = cacheManga.value;
+    if (!force && manga && (manga.manga.id.toString() === id.value || manga.manga.hashId === id.value)) {
+        return;
+    }
+
+    if (!id.value) return;
+
+    await refreshManga();
+    await refreshExt();
+    cacheManga.value = data.value;
+    cacheStats.value = stats.value;
+}
+
+const doFetch = async (force: boolean) => {
+    if (pending.value) return;
+
+    await fetchManga(force);
+
+    if (!data.value || !manga.value || !chapter.value || external.value) return;
+
+    if (chapter.value.pages.length === 0) {
+        pending.value = true;
+        const { data: outputPages } = await pages(id.value, chapterId.value);
+        chapter.value.pages = [...outputPages.value || []];
+        pending.value = false;
+    }
+
+    if (chapter.value.pages.length === 0) return;
+
+    if (page.value >= chapter.value.pages.length) {
+        navigateTo(`/manga/${id.value}/${chapterId.value}?page=${chapter.value.pages.length}`);
+        return;
+    } 
+
+    if (page.value <= 0) {
+        navigateTo(`/manga/${id.value}/${chapterId.value}?page=1`);
+        return;
+    }
+
+    if (process.client) {
+        progress(manga.value.id, chapterId.value, page.value);
+    }
+}
+
+const resetPages = () => {
+    pending.value = true;
+    reset(id.value, chapterId.value);
+    pending.value = false;
+    doFetch(true);
+};
+
+const toggleBookmark = () => {
+    if (!chapter.value) return;
+    bookmarking.value = true;
+
+    const pages = bookmarks.value
+        .find(t => t.mangaChapterId === chapter.value?.id)?.pages || [];
+
+    const i = pages.indexOf(page.value);
+    if (i === -1) {
+        pages.push(page.value);
+    } else {
+        pages.splice(i, 1);
+    }
+
+    bookmark(id.value, chapter.value.id, pages);
+    doFetch(true);
+
+    bookmarking.value = false;
+}
 
 const clickarea = ref<HTMLElement | undefined>();
 
@@ -326,8 +431,6 @@ useServerSeoMeta({
     ogImage: coverUrl,
     twitterCard: 'summary_large_image'
 });
-
-fetch(true);
 
 const pageClick = (event: MouseEvent) => {
     if (!clickarea.value) return;
@@ -454,15 +557,14 @@ const fullscreen = () => {
     }
 }
 
-onMounted(() => nextTick(() => setTimeout(() => {
+onMounted(() => nextTick(() =>  {
     navOpen.value = menuOpen.value;
     if (!token.value) return;
     //Refetch with authentication context
-    console.log('Refetching');
-    fetch(true);
-}, 100)));
+    doFetch(true);
+}));
 
-watch(() => route.query, () => fetch(false));
+watch(() => route.query, () => doFetch(false));
 </script>
 
 <style lang="scss" scoped>
