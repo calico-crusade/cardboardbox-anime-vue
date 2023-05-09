@@ -1,9 +1,9 @@
 <template>
-<Loading v-if="pending" />
-<Error v-else-if="error" :message="error?.message" />
-<div v-else-if="manga" class="page-wrapper flex fill-parent" :class="{ 'open': navOpen }">
+<Error v-if="error" :message="error?.message" />
+<div v-else class="page-wrapper flex fill-parent" :class="{ 'open': navOpen }">
     <main class="fill flex" @click="pageClick" ref="clickarea" :class="pageStyle" v-if="!external">
-        <template v-if="pageStyle === PageStyle.SinglePageFit">
+        <Loading v-if="pending" />
+        <template v-else-if="pageStyle === PageStyle.SinglePageFit">
             <div class="image" :style="{ 'background-image': `url(${pageUrl})`, 'filter': imageFilter }" />
             <img class="hidden" v-if="nextPageImage" :src="nextPageImage" />
         </template>
@@ -40,15 +40,15 @@
         <header class="flex center-items">
             <NuxtLink :to="'/manga/' + id" class="flex fill center-items">
                 <Icon>arrow_back</Icon>
-                <p class="text-center fill">{{ manga.title }}</p>
+                <p class="text-center fill">{{ manga?.title }}</p>
             </NuxtLink>
         </header>
         <article class="fill">
             <Tabs flip>
                 <Tab icon="info" scrollable keep-alive class-name="flex row">
                     <div class="settings-tab flex row">
-                        <img :src="proxy(manga.cover, 'manga-cover', manga.referer)" class="rounded" />
-                        <h3 class="margin-top">
+                        <img v-if="manga?.cover" :src="proxy(manga.cover, 'manga-cover', manga.referer)" class="rounded" />
+                        <h3 v-if="manga?.title" class="margin-top">
                             {{ manga.title }}
                         </h3>
                         <p><b>Manga Progress: </b> {{ (((chapterIndex + 1) / chapters.length) * 100).toFixed(2) }}%</p>
@@ -112,7 +112,7 @@
                                 <Icon>menu_book</Icon>
                                 <p>Manga Home page</p>
                             </NuxtLink>
-                            <a :href="manga.url" target="_blank">
+                            <a :href="manga?.url" target="_blank">
                                 <Icon>home</Icon>
                                 <p>Manga Source Page</p>
                             </a>
@@ -221,6 +221,12 @@ import {
     Bookmark
 } from '~/models';
 
+definePageMeta({
+  pageTransition: false,
+  layoutTransition: false,
+  layout: 'nohead'
+});
+
 type LinkTypes = 'NextChapter' | 'PrevChapter' | 'NextPage' | 'PrevPage' | 'ChapterStart' | 'Page';
 interface Rect {
     x: number;
@@ -231,8 +237,6 @@ interface Rect {
 }
     
 const DEFAULT_IMAGE = '/broken.png';
-
-definePageMeta({ layout: 'nohead' });
 
 const { proxy, download } = useApiHelper();
 const { pages, fetch, progress, resetPages: reset, bookmark } = useMangaApi();
