@@ -109,7 +109,13 @@ const { search, manga, overridestyle: style } = defineProps<Props>();
 const mdata = computed(() => determineCardData());
 const sdata = computed(() => determineSearchData());
 const actStyle = computed(() => style ?? listStyle.value);
-const isPorn = computed(() => !!mdata.value?.manga.attributes.find(t => t.name === 'Content Rating' && t.value === 'pornographic') && blurPornCovers.value);
+const isPorn = computed(() => 
+    (
+        !!mdata.value
+            ?.manga.attributes
+            .find(t => t.name === 'Content Rating' && t.value === 'pornographic') 
+        || mdata.value?.manga.provider === 'nhentai'
+    ) && blurPornCovers.value);
 
 const domain = (url: string) => new URL(url).hostname;
 

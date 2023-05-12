@@ -436,6 +436,28 @@ input:read-only:not([type='color']):not([type='range']) {
     }
 }
 
+.button-tags {
+    display: flex;
+    flex-flow: row wrap;
+
+    button {
+        background-color: transparent;
+        border: 1px solid var(--color-primary);
+        display: flex;
+        flex-flow: row;
+        margin: 3px;
+        padding: 5px;
+        border-radius: 3px;
+
+        p { margin: auto 0; }
+        &.include { border-color: var(--color-success); }
+        &.exclude { border-color: var(--color-warning); }
+        &.caps { text-transform: capitalize; }
+    }
+
+    &:last-child { margin-bottom: 10px; }
+}
+
 .rounded { border-radius: var(--margin); }
 .bg { background-color: var(--bg-color); }
 .bg-accent { background-color: var(--bg-color-accent); }

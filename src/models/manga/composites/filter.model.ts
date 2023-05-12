@@ -5,9 +5,21 @@ export interface Filter {
     asc: boolean;
     include: string[];
     exclude: string[];
+    sources: string[];
     sort?: number;
     state?: number;
     nsfw?: number;
+    attributes: {
+        type: AttributeType;
+        include: boolean;
+        values: string[];
+    }[];
+}
+
+export enum AttributeType {
+    ContentRating = 1,
+	OriginalLanguage = 2,
+	Status = 3,
 }
 
 export interface FilterDefintion {

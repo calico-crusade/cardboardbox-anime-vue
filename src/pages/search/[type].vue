@@ -5,6 +5,7 @@
     :pending="pending" 
     @onscrolled="onScroll" 
     @headerstuck="(v) => headerStuck = v"
+    capitalize
 >
     <div class="search-drawer" :class="{ open: advanced, stuck: headerStuck }">
         <div class="control fill no-top group center-items">
@@ -29,38 +30,35 @@
         <main>
             <h2>Advanced Search Options: </h2>
             <label>Tags</label>
-            <div class="button-tags">
-                <button v-for="tag of allTags" :class="tagState(tag)" @click="() => tagToggle(tag)">
-                    <Icon unsize="true" size="16px">{{ tagIcon(tag) }}</Icon> 
-                    <p>{{ tag }}</p>
-                </button>
-            </div>
+            <ButtonGroupTags v-model:on="filter.include" v-model:off="filter.exclude" :options="allTags" />
+            <label>Sources</label>
+            <ButtonGroup v-model="filter.sources" :options="sources" capitalize />
+
+            <label>Content Rating</label>
+            <ButtonGroup v-model="filter.attributes[0].values" :options="ratings" capitalize />
+            <ButtonGroupBool v-if="filter.attributes[0].values.length > 0" v-model="filter.attributes[0].include" on="Include" off="Exclude" on-icon="done" off-icon="close" />
+
+            <label>Publication Status</label>
+            <ButtonGroup v-model="filter.attributes[2].values" :options="statuses" capitalize />
+            <ButtonGroupBool v-if="filter.attributes[2].values.length > 0" v-model="filter.attributes[2].include" on="Include" off="Exclude" on-icon="done" off-icon="close" />
+
             <label>Sort Options</label>
-            <div class="button-tags">
-                <button v-for="(sort, index) in allSorts" :class="{ include: filter.sort === index}" @click="() => filter.sort = index">{{ sort }}</button>
-            </div>
-            <div class="button-tags">
-                <button :class="{include: filter.asc}" @click="() => filter.asc = true">
-                    <Icon unsize="true" size="16px">arrow_drop_up</Icon>
-                    <p>Ascending</p>
-                </button>
-                <button :class="{include: !filter.asc}" @click="() => filter.asc = false">
-                    <Icon unsize="true" size="16px">arrow_drop_down</Icon>
-                    <p>Descending</p>
-                </button>
-            </div>
+            <ButtonGroupIndex v-model="filter.sort" :options="allSorts" />
+            <label>Sort By Options</label>
+            <ButtonGroupBool v-model="filter.asc" />
         </main>
     </div>
 </CardList>
 </template>
 
 <script setup lang="ts">
-import { Paginated, ProgressExt, Filter } from "~/models";
+import { Paginated, ProgressExt, Filter, AttributeType } from "~/models";
 
 const advanced = ref(false);
 const headerStuck = ref(false);
 const route = useRoute();
 const { search, filters: getFilters } = useMangaApi();
+const { serialize, deserialize } = useFilterHelpter();
 
 const states = [
     { text: 'All', routes: '/search/all', index: 0 },
@@ -71,16 +69,36 @@ const states = [
     { text: 'Not Touched', routes: '/search/not', index: 5, aliases: [] }
 ];
 
-const DEFAULT_FILTER = <Filter>{
-    page: 1,
-    size: 20,
+const defaultFilters = {
     search: '',
     include: [],
     exclude: [],
+    sources: [],
+    attributes: [
+        {
+            type: AttributeType.ContentRating,
+            include: true,
+            values: []
+        }, {
+            type: AttributeType.OriginalLanguage,
+            include: true,
+            values: []
+        }, {
+            type: AttributeType.Status,
+            include: true,
+            values: []
+        }
+    ],
     asc: false,
     sort: 2,
+    nsfw: 2,
+};
+
+const DEFAULT_FILTER = <Filter>{
+    page: 1,
+    size: 20,
     state: 0,
-    nsfw: 2
+    ...defaultFilters
 };
 
 const filter = ref({...DEFAULT_FILTER});
@@ -91,6 +109,10 @@ const { data: filters } = await getFilters();
    
 const allTags = computed(() => filters.value?.find(t => t.key === 'tag')?.values || []);
 const allSorts = computed(() => filters.value?.find(t => t.key === 'sorts')?.values || []);
+const sources = computed(() => filters.value?.find(t => t.key === 'source')?.values || []);
+const ratings = computed(() => filters.value?.find(t => t.key === 'content rating')?.values || []);
+const languages = computed(() => filters.value?.find(t => t.key === 'original language')?.values || []);
+const statuses = computed(() => filters.value?.find(t => t.key === 'status')?.values || []);
 const type = computed(() => route.params.type.toString());
 const state = computed(() => {
     for(let item of states) {
@@ -114,75 +136,15 @@ useServerSeoMeta({
 });
 
 const routeFilter = () => {
-    const query = route.query || {};
     let outputFilter = {...filter.value};
     outputFilter.state = state.value;
-
-    if (!query) return outputFilter;
-
-    if (query['search']) outputFilter.search = query['search'].toString();
-    if (query['asc']) outputFilter.asc = true;
-    if (query['include']) outputFilter.include = query['include'].toString().split(',');
-    if (query['exclude']) outputFilter.exclude = query['exclude'].toString().split(',');
-    if (query['sort']) outputFilter.sort = +query['sort'].toString();
-    if (query['state'] && !state.value) outputFilter.state = +query['state'].toString();
-    if (query['nsfw']) outputFilter.nsfw = +query['nsfw'].toString();
-
-    return outputFilter;
+    return deserialize(outputFilter, defaultFilters);
 }
 
 const filterRouteUrl = () => {
-    let pars: { [key: string]: any } = {};
-
-    if (filter.value.search) pars['search'] = filter.value.search;
-    if (filter.value.include.length > 0) pars['include'] = filter.value.include.join(',');
-    if (filter.value.exclude.length > 0) pars['exclude'] = filter.value.exclude.join(',');
-    if (filter.value.asc) pars['asc'] = true;
-    if (filter.value.sort != 2) pars['sort'] = filter.value.sort;
-    if (filter.value.state && state.value < 0) pars['state'] = filter.value.state;
-    if (filter.value.nsfw !== 2) pars['nsfw'] = filter.value.nsfw;
-
-    const query = Object.keys(pars).map(t => `${t}=${pars[t]}`).join('&');
+    const query = serialize(filter.value, defaultFilters);
     const uri = states.find(t => t.index === filter.value.state)?.routes || '/search/all';
     return `${uri}?${query}`;
-}
-
-const tagState = (tag: string) => {
-    if (filter.value.include.indexOf(tag) !== -1) return 'include';
-    if (filter.value.exclude.indexOf(tag) !== -1) return 'exclude';
-    return 'none';
-}
-
-const tagIcon = (tag: string) => {
-    const state = tagState(tag);
-    switch(state) {
-        case 'include': return 'add';
-        case 'exclude': return 'remove';
-    }
-
-    return '';
-}
-
-const tagToggle = (tag: string) => {
-    const state = tagState(tag);
-
-    const ii = filter.value.include.indexOf(tag);
-    const ei = filter.value.exclude.indexOf(tag);
-
-    switch(state) {
-        case 'include': 
-            if (ii !== -1) filter.value.include.splice(ii, 1);
-            if (ei === -1) filter.value.exclude = [...filter.value.exclude, tag];
-            break;
-        case 'exclude':
-            if (ii !== -1) filter.value.include.splice(ii, 1);
-            if (ei !== -1) filter.value.exclude.splice(ei, 1);
-            break;
-        case 'none':
-            if (ii === -1) filter.value.include = [...filter.value.include, tag];
-            if (ei !== -1) filter.value.exclude.splice(ei, 1);
-            break;
-    }
 }
 
 const fetch = async (reset: boolean) => {
@@ -251,26 +213,7 @@ $br-color: transparent;
 
         h2 { margin-top: 10px; }
 
-        .button-tags {
-            display: flex;
-            flex-flow: row wrap;
-
-            button {
-                background-color: transparent;
-                border: 1px solid var(--color-primary);
-                display: flex;
-                flex-flow: row;
-                margin: 3px;
-                padding: 5px;
-                border-radius: 3px;
-
-                p { margin: auto 0; }
-                &.include { border-color: var(--color-success); }
-                &.exclude { border-color: var(--color-warning); }
-            }
-
-            &:last-child { margin-bottom: 10px; }
-        }
+        
     }
 
     &.open main {
