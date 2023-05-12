@@ -39,8 +39,6 @@ export const useFilterHelpter = () => {
             
             target.attributes[i].values = val.split(',');
         }
-
-        console.log('Current', target);
     }
 
     const serialize = <T>(params: T, defs: Dic<Options>) => {

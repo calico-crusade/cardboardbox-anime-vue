@@ -163,7 +163,7 @@ const reloadSource = async () => {
 
 const fetchExt = async () => {
     if (!id.value) {
-        console.log('Skipping fetch, ID isnt present', { data: JSON.stringify(data.value) });
+        console.error('Skipping fetch, ID isnt present', { data: JSON.stringify(data.value) });
         return;
     }
     reloading.value = true;
