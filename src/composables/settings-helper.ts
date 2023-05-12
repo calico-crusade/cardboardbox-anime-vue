@@ -105,6 +105,7 @@ export const useAppSettings = () => {
         menuOpen: getSetBool('manga-menu-open', false),
         listStyle: getSet<ListStyle>('list-style', ListStyle.Expanded),
         blurPornCovers: getSetBool('blur-porn-covers', true),
+        showTutorial: getSetBool('show-read-tutorial', true),
 
         bgImageDir,
         bgImageColors,

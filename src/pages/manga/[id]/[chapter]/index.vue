@@ -30,6 +30,37 @@
                 class="progress"
             />
         </div>
+
+        <ClientOnly>
+        <div class="tutorial" v-if="showTutorial">
+            <div 
+                class="region flex"
+                v-for="reg in regions"
+                :class="reg.name"
+                :style="{ 
+                    'top': reg.y + '%', 
+                    'left': reg.x + '%',
+                    'width': reg.width + '%',
+                    'height': reg.height + '%'
+                }"
+            >
+                <div class="center flex row pad margin" v-if="reg.name === 'center'">
+                    <h2 class="pad">Tutorial:</h2>
+                    <p class="pad">Click here (in the center) to open the side bar!</p>
+                    <button class="icon-btn pad-left" @click="() => showTutorial = false">
+                        <Icon>close</Icon>
+                        <p>Close Tutorial</p>
+                    </button>
+                </div>
+                <div class="center pad rounded bg-accent" v-else-if="reg.name === 'left'">
+                    <p class="shadow">Click anywhere here (on the red) to go back a page!</p>
+                </div>
+                <div class="center pad rounded bg-accent" v-else-if="reg.name === 'right'">
+                    <p class="shadow">Click anywhere here (on the green) to go to the next page!</p>
+                </div>
+            </div>
+        </div>
+        </ClientOnly>
     </main>
     <main class="fill flex external" v-else>
         <div class="center">
@@ -245,7 +276,7 @@ const {
     token, invertControls, forwardOnly, 
     brightness, pageStyle, filter, 
     customFilter, progressBar, apiUrl, 
-    menuOpen, scrollAmount
+    menuOpen, scrollAmount, showTutorial
 } = useAppSettings();
 
 const downloading = ref(false);
@@ -677,6 +708,32 @@ $progress-height: 10px;
 
         &.external {
             a { text-decoration: underline; }
+        }
+
+        .tutorial {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            max-width: min(100%, 100vw);
+            max-height: min(100%, 100vh);
+
+            .region {
+                position: absolute;
+
+                &.left {
+                    background-color: #70190a8f;
+                }
+
+                &.right {
+                    background-color: #4f960e8f;
+                }
+
+                &.center {
+                    background-color: var(--bg-color-accent-dark);
+                }
+            }
         }
     }
     aside {
