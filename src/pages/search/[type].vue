@@ -138,7 +138,7 @@ useServerSeoMeta({
 const routeFilter = () => {
     let outputFilter = {...filter.value};
     outputFilter.state = state.value;
-    return deserialize(outputFilter, defaultFilters);
+    return deserialize(<any>route.query, outputFilter, defaultFilters);
 }
 
 const filterRouteUrl = () => {

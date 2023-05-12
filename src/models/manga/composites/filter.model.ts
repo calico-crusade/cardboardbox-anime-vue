@@ -27,4 +27,6 @@ export interface FilterDefintion {
     values: string[];
 }
 
+export type States = 'favourite' | 'completed' | 'inprogress' | 'bookmarked' | 'else' | 'touched' | 'all' | number;
+
 export type Filters = FilterDefintion[];

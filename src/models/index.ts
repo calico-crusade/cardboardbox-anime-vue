@@ -7,6 +7,7 @@ export * from './manga/composites/strip.model';
 
 export * from './manga/bookmark.model';
 export * from './manga/chapter.model';
+export * from './manga/graph.model';
 export * from './manga/manga.model';
 export * from './manga/progress.model';
 

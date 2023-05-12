@@ -4,7 +4,9 @@ import {
     Paginated, Progress, ProgressExt,
     VolumeChapter,
     Volume,
-    ImageSearch
+    ImageSearch,
+    States,
+    MangaGraph
 } from "~/models";
 import { useApiHelper } from "./api-helpers";
 import { FetchError } from 'ofetch';
@@ -126,6 +128,8 @@ export const useMangaApi = () => {
         return post<ImageSearch>(`manga/image-search`, data);
     }
 
+    const graph = (state: States | Ref<States>) => get<MangaGraph[]>(`manga/graph`, { state }, true);
+
     return {
         fetch,
         random,
@@ -142,6 +146,7 @@ export const useMangaApi = () => {
         resetProgress,
         bookmark,
         reverseUrl,
-        reverseFile
+        reverseFile,
+        graph
     };
 };

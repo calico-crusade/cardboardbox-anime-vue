@@ -120,6 +120,12 @@ p, h1, h2, h3, h4, h5, h6 {
 
 .text-center { text-align: center; }
 
+.max-width {
+    max-width: min(1050px, 98vw);
+    width: 100%;
+    margin: 0 auto;
+}
+
 .icon-btn {
     display: flex;
     flex-flow: row;
@@ -468,7 +474,6 @@ input:read-only:not([type='color']):not([type='range']) {
     overflow-y: auto;
     padding: var(--margin);
     flex: 1;
-
 }
 
 @keyframes spin {

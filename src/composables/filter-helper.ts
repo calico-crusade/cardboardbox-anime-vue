@@ -71,8 +71,7 @@ export const useFilterHelpter = () => {
         return Object.keys(output).map(t => `${t}=${output[t]}`).join('&');
     };
 
-    const deserialize = <T>(target: T, defs: Dic<Options>) => {
-        const query = useRoute().query;
+    const deserialize = <T>(query: Dic<string | string[]>, target: T, defs: Dic<Options>) => {
         if (!query) return target;
 
         let at = <any>target;
