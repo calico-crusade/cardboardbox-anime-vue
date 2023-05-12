@@ -179,10 +179,6 @@
                         <div class="control checkbox">
                             <CheckBox v-model="forwardOnly">No Directional Buttons</CheckBox>
                         </div>
-                        <div class="control" v-if="filter === FilterStyle.Custom">
-                            <label class="no-bot">Custom Filter</label>
-                            <input type="text" v-model="customFilter" placeholder="Custom CSS filter" />
-                        </div>
                         <div class="control">
                             <label class="no-bot">Progress Bar Style</label>
                             <select v-model="progressBar">
@@ -210,6 +206,10 @@
                                     {{ style }}
                                 </option>
                             </select>
+                        </div>
+                        <div class="control" v-if="filter === FilterStyle.Custom">
+                            <label class="no-bot">Custom Filter</label>
+                            <input type="text" v-model="customFilter" placeholder="Custom CSS filter" />
                         </div>
                         <div class="control">
                             <label class="no-bot">Image Brightness ({{ brightness }}%)</label>
@@ -801,7 +801,6 @@ $progress-height: 10px;
             }
         }
     }
-
     &.open {
         aside {
             margin-right: 0;

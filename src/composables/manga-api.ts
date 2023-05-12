@@ -2,17 +2,15 @@ import {
     Chapter, Filter, Filters, 
     Manga, MangaWithChapters, Stats,
     Paginated, Progress, ProgressExt,
-    VolumeChapter,
-    Volume,
-    ImageSearch,
-    States,
-    MangaGraph
+    VolumeChapter, Volume, ImageSearch,
+    States, MangaGraph
 } from "~/models";
 import { useApiHelper } from "./api-helpers";
 import { FetchError } from 'ofetch';
 
 export const useMangaApi = () => {
     const { get, del, post } = useApiHelper();
+    const { blurPornCovers } = useAppSettings();
 
     const fetch = (id: number | string) => {
         const cache = useState<MangaWithChapters | null>('manga-' + id, () => null);
@@ -130,6 +128,16 @@ export const useMangaApi = () => {
 
     const graph = (state: States | Ref<States>) => get<MangaGraph[]>(`manga/graph`, { state }, true);
 
+    const shouldBlur = (manga?: Manga) => {
+        return (
+            !!manga?.attributes
+                ?.find(t => 
+                    t.name === 'Content Rating' && 
+                    t.value === 'pornographic') 
+            || manga?.provider === 'nhentai'
+        ) && blurPornCovers.value
+    };
+
     return {
         fetch,
         random,
@@ -147,6 +155,7 @@ export const useMangaApi = () => {
         bookmark,
         reverseUrl,
         reverseFile,
-        graph
+        graph,
+        shouldBlur
     };
 };

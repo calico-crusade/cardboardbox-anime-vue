@@ -477,6 +477,15 @@ input:read-only:not([type='color']):not([type='range']) {
     flex: 1;
 }
 
+.porn {
+    filter: blur(0.5rem);
+    transition: all 250ms;
+
+    &:hover {
+        filter: blur(0);
+    }
+}
+
 @keyframes spin {
     100% {
         transform: rotate(360deg);

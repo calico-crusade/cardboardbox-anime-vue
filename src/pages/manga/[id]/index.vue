@@ -3,7 +3,11 @@
 <Error v-else-if="error" :message="error?.message" />
 <div v-else class="manga-details flex fill-parent scroll-y">
     <div v-if="manga" class="manga-header flex row">
-        <div class="image" :style="{ 'background-image': 'url(' + proxy(manga.cover) + ')' }"></div>
+        <div 
+            class="image" 
+            :style="{'background-image': `url(${proxy(manga.cover)})`}"
+            :class="{'porn': isPorn}"
+        />
         <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
         <div class="buttons flex center-horz">
             <NuxtLink class="icon-btn" v-if="resumeUrl" :to="resumeUrl">
@@ -14,15 +18,30 @@
                 <Icon>shuffle</Icon>
                 <p>Next Random Manga</p>
             </button>
-            <button v-if="stats && currentUser" class="icon-btn" @click="toggleFavourite" :disabled="reloading">
+            <button 
+                v-if="stats && currentUser" 
+                class="icon-btn" 
+                @click="toggleFavourite" 
+                :disabled="reloading"
+            >
                 <Icon :fill="isFavourite" :spin="reloading">star</Icon>
                 <p>{{ isFavourite ? 'Unfavourite' : 'Favourite' }}</p>
             </button>
-            <button v-if="stats?.progress && currentUser" :disabled="reloading" class="icon-btn" @click="resetProgress">
+            <button 
+                v-if="stats?.progress && currentUser" 
+                :disabled="reloading" 
+                class="icon-btn" 
+                @click="resetProgress"
+            >
                 <Icon :spin="reloading">delete</Icon>
                 <p>Reset Progress</p>
             </button>
-            <button class="icon-btn" v-if="currentUser" :disabled="reloading" @click="reloadSource">
+            <button 
+                class="icon-btn" 
+                v-if="currentUser" 
+                :disabled="reloading" 
+                @click="reloadSource"
+            >
                 <Icon :spin="reloading">sync</Icon>
                 <p>Reload Source</p>
             </button>
@@ -43,7 +62,9 @@
                 <div class="tags in-line">
                     <span>Tags </span>
                     <span v-if="manga.nsfw" class="warning">Nsfw</span>
-                    <NuxtLink v-for="tag in manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
+                    <NuxtLink 
+                        v-for="tag in manga.tags" 
+                        :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
                 </div>
                 <div class="tags in-line">
                     <span>Details </span>
@@ -58,22 +79,57 @@
         <div class="chapter-header flex">
             <p class="fill">Chapters</p>
             <button @click="() => collapseToggle()">
-                <Icon>{{ allCollapsed ? 'arrow_drop_up' : 'arrow_drop_down' }}</Icon>
+                <Icon>
+                    {{ allCollapsed 
+                        ? 'arrow_drop_up' 
+                        : 'arrow_drop_down' }}
+                </Icon>
             </button>
         </div>
         <Loading v-if="volumes.length === 0" />
         <article class="volume" v-for="(vol, index) in volumes">
-            <div class="name" @click="() => toggleVolume(index)">{{ vol.name ? 'Volume ' + vol.name : 'No Volume' }}</div>
-            <button class="collapse-btn" @click="() => toggleVolume(index)">
-                <Icon>{{ volumeCollapsed(index) ? 'expand_more' : 'expand_less' }}</Icon>
+            <div 
+                class="name" 
+                @click="() => toggleVolume(index)"
+            >
+                {{ vol.name 
+                    ? 'Volume ' + vol.name 
+                    : 'No Volume' }}
+            </div>
+            <button 
+                class="collapse-btn" 
+                @click="() => toggleVolume(index)"
+            >
+                <Icon>{{ volumeCollapsed(index) 
+                    ? 'expand_more' 
+                    : 'expand_less' }}</Icon>
             </button>
-            <div class="chapters" :class="{'collapse': volumeCollapsed(index)}">
-                <a class="chapter grid by-2" @click="() => toggleVolume(index)">
-                    <span class="cell">{{ vol.name ? 'Volume ' + vol.name : 'No Volume' }}</span>
-                    <span class="cell icon-text"><Icon>expand_more</Icon> Open</span>
-                    <span class="cell icon-text"><Icon>layers</Icon> {{ vol.chapters.length }} Chapters</span>
+            <div 
+                class="chapters" 
+                :class="{'collapse': volumeCollapsed(index)}"
+            >
+                <a 
+                    class="chapter grid by-2" 
+                    @click="() => toggleVolume(index)"
+                >
+                    <span class="cell">
+                        {{ vol.name 
+                            ? 'Volume ' + vol.name 
+                            : 'No Volume' }}
+                    </span>
+                    <span class="cell icon-text">
+                        <Icon>expand_more</Icon> Open
+                    </span>
+                    <span class="cell icon-text">
+                        <Icon>layers</Icon> {{ vol.chapters.length }} Chapters
+                    </span>
                 </a>
-                <VolumeCard v-for="chapter of vol.chapters" :id="id" :chapter="chapter" :stats="stats" />
+                <VolumeCard 
+                    v-for="chapter of vol.chapters" 
+                    :id="id" 
+                    :chapter="chapter" 
+                    :stats="stats" 
+                />
             </div>
         </article>
     </main>
@@ -90,7 +146,8 @@ const {
     favourite, 
     reload,
     extended,
-    resetProgress: reset
+    resetProgress: reset,
+    shouldBlur
 } = useMangaApi();
 
 const { proxy: proxyUrl, toPromise } = useApiHelper();
@@ -110,15 +167,23 @@ volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
 
 const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer);
 
-const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
-const currentChapter = computed(() => data.value?.chapters.find(t => t.id === stats.value?.progress?.mangaChapterId));
+const allCollapsed = computed(() => 
+    !!volumes.value.find(t => !t.collapse));
+const currentChapter = computed(() => data.value
+    ?.chapters.find(t => 
+        t.id === stats.value?.progress?.mangaChapterId));
 const resumeUrl = computed(() => 
-    currentChapter.value ? 
-        `/manga/${manga.value?.id}/${currentChapter.value.id}?page=${(stats.value?.progress?.pageIndex ?? 0) + 1}` :
-        (data.value?.chapters[0]?.id ? `/manga/${manga.value?.id}/${data.value?.chapters[0]?.id}?page=0` : undefined ));
+    currentChapter.value 
+        ? `/manga/${manga.value?.id}/${currentChapter.value.id}?page=${(stats.value?.progress?.pageIndex ?? 0) + 1}` 
+        : (data.value?.chapters[0]?.id 
+            ? `/manga/${manga.value?.id}/${data.value.chapters[0]?.id}?page=0` 
+            : undefined 
+        )
+    );
 const title = computed(() => manga.value?.title ?? 'Manga Not Found');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const cover = computed(() => proxy(manga.value?.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
+const isPorn = computed(() => shouldBlur(manga.value));
 
 useHead({ title })
 
@@ -163,7 +228,9 @@ const reloadSource = async () => {
 
 const fetchExt = async () => {
     if (!id.value) {
-        console.error('Skipping fetch, ID isnt present', { data: JSON.stringify(data.value) });
+        console.error(
+            'Skipping fetch, ID isnt present', 
+            { data: JSON.stringify(data.value) });
         return;
     }
     reloading.value = true;
@@ -283,7 +350,8 @@ $bg-color: var(--bg-color-accent);
 
                 &.collapse {
                     .chapter:first-child { display: grid; }
-                    .chapter:not(:first-child), .version-chapter:not(:first-child) { display: none; }
+                    .chapter:not(:first-child), 
+                    .version-chapter:not(:first-child) { display: none; }
                 }
             }
         }

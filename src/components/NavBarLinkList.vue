@@ -67,6 +67,11 @@
     </button>
 </template>
 
+<NuxtLink to="/settings" active-class="active" @click="clicked">
+    <Icon>settings</Icon>
+    <p>Settings</p>
+</NuxtLink>
+
 <a href="https://cba.index-0.com" target="_blank" @click="clicked">
     <Icon>live_tv</Icon>
     <p>Anime</p>

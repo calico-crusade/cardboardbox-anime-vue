@@ -73,7 +73,8 @@ import {
     VisionResult, ListStyle
 } from '~/models';
 const { proxy: proxyUrl } = useApiHelper();
-const { listStyle, blurPornCovers } = useAppSettings();
+const { listStyle } = useAppSettings();
+const { shouldBlur } = useMangaApi();
 
 interface Props {
     search?: MatchResult | VisionResult | BaseResult | ImageSearchManga;
@@ -109,13 +110,7 @@ const { search, manga, overridestyle: style } = defineProps<Props>();
 const mdata = computed(() => determineCardData());
 const sdata = computed(() => determineSearchData());
 const actStyle = computed(() => style ?? listStyle.value);
-const isPorn = computed(() => 
-    (
-        !!mdata.value
-            ?.manga.attributes
-            .find(t => t.name === 'Content Rating' && t.value === 'pornographic') 
-        || mdata.value?.manga.provider === 'nhentai'
-    ) && blurPornCovers.value);
+const isPorn = computed(() => shouldBlur(mdata.value?.manga));
 
 const domain = (url: string) => new URL(url).hostname;
 
@@ -221,11 +216,6 @@ const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', re
         min-height: 300px;
         border-radius: var(--margin);
         transition: all 250ms;
-
-        &.porn {
-            filter: blur(0.5rem);
-            transition: all 250ms;
-        }
     }
 
     .details {
