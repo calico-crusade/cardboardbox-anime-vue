@@ -1,6 +1,13 @@
 <template>
-<div class="manga" v-if="mdata">
-    <NuxtLink :to="'/manga/' + mdata.manga.id" class="image" :style="{'background-image': 'url(' + proxy(mdata.manga.cover, mdata.manga.referer) + ')'}"></NuxtLink>
+<div class="manga" v-if="mdata" :class="actStyle">
+    <NuxtLink 
+        :to="'/manga/' + mdata.manga.id" 
+        class="image" 
+        :style="{
+            'background-image': 'url(' + proxy(mdata.manga.cover, mdata.manga.referer) + ')'
+        }"
+        :class="{ 'porn': isPorn }"
+    />
     <div class="details masked-overflow">
         <div class="title">
             <NuxtLink :to="'/manga/' + mdata.manga.id">{{ mdata.manga.title }}</NuxtLink>
@@ -22,10 +29,12 @@
             <div class="tag nsfw" v-if="mdata.manga.nsfw">NSFW</div>
             <NuxtLink class="tag" v-for="tag of mdata.manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
         </div>
-        <Markdown class="description" :content="mdata.manga.description" />
+        <div class="description">
+            <Markdown :content="mdata.manga.description" />
+        </div>
     </div>
 </div>
-<div class="manga" v-if="sdata">
+<div class="manga" v-if="sdata" :class="actStyle">
     <NuxtLink :to="'/import?url=' + encodeURIComponent(sdata.manga.url)" class="image" :style="{'background-image': 'url(' + proxy(sdata.manga.cover) + ')'}"></NuxtLink>
     <div class="details masked-overflow">
         <div class="title">
@@ -50,7 +59,9 @@
             <div class="tag nsfw" v-if="sdata.manga.nsfw">NSFW</div>
             <NuxtLink class="tag" v-for="tag of sdata.manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
         </div>
-        <Markdown class="description" :content="sdata.manga.description" />
+        <div class="description">
+            <Markdown :content="sdata.manga.description" />
+        </div>
     </div>
 </div>
 </template>
@@ -59,13 +70,15 @@
 import { 
     BaseResult, Chapter, ImageSearchManga, Manga, 
     Stats, MatchResult, Progress, ProgressExt, 
-    VisionResult 
+    VisionResult, ListStyle
 } from '~/models';
 const { proxy: proxyUrl } = useApiHelper();
+const { listStyle, blurPornCovers } = useAppSettings();
 
 interface Props {
     search?: MatchResult | VisionResult | BaseResult | ImageSearchManga;
-    manga?: Manga | ProgressExt
+    manga?: Manga | ProgressExt;
+    overridestyle?: ListStyle;
 }
 
 interface MangaData {
@@ -92,9 +105,11 @@ interface SearchData {
     }
 }
 
-const { search, manga } = defineProps<Props>();
+const { search, manga, overridestyle: style } = defineProps<Props>();
 const mdata = computed(() => determineCardData());
 const sdata = computed(() => determineSearchData());
+const actStyle = computed(() => style ?? listStyle.value);
+const isPorn = computed(() => !!mdata.value?.manga.attributes.find(t => t.name === 'Content Rating' && t.value === 'pornographic') && blurPornCovers.value);
 
 const domain = (url: string) => new URL(url).hostname;
 
@@ -199,6 +214,12 @@ const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', re
         max-width: 30vw;
         min-height: 300px;
         border-radius: var(--margin);
+        transition: all 250ms;
+
+        &.porn {
+            filter: blur(0.5rem);
+            transition: all 250ms;
+        }
     }
 
     .details {
@@ -208,6 +229,7 @@ const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', re
         margin-left: var(--margin);
         max-height: 300px;
         overflow: hidden;
+        transition: all 250ms;
 
         .title {
             display: flex;
@@ -215,6 +237,7 @@ const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', re
             font-size: 1.5em;
             font-weight: 700;
             align-items: center;
+            transition: all 250ms;
 
             a {
                 flex: 1;
@@ -238,6 +261,88 @@ const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', re
                 &.nsfw { background-color: var(--color-warning); }
             }
         }
+    }
+
+    &.compact {
+        .image {
+            max-height: 100px;
+            min-height: 100px;
+            max-width: 60px;
+            min-width: unset;
+        }
+
+        .details {
+            max-height: 100px;
+            .title {
+                font-size: 1rem;
+                a { font-weight: bold; }
+            }
+
+            .tags, .source {
+                display: none;
+            }
+        }
+    }
+
+    &.album {
+        position: relative;
+        display: flex;
+        min-width: min(250px, 90vw);
+        max-width: min(250px, 90vw);
+        min-height: 400px;
+        max-height: 400px;
+
+        .image {
+            flex: 1;
+            transition: all 250ms;
+            max-width: 100%;
+        }
+
+        .details {
+            display: flex;
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            mask-image: none !important;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+
+            .title {
+                flex: 1;
+                font-size: 1rem;
+                color: #fff;
+                margin: var(--margin);
+                padding: var(--margin);
+                //
+                border-radius: var(--margin);
+                overflow: hidden;
+                text-shadow: 0px 0px 4px #000;
+
+                a { 
+                    font-weight: bold;
+                    color: #fff;
+                }
+            }
+
+            .tags, .source, .description {
+                display: none;
+            }
+        }
+
+        &:hover {
+            .image {
+                filter: brightness(0.8) grayscale(0.8);
+            }
+
+            .details .title {
+                text-shadow: 0px 0px 6px #000;
+            }
+        }
+    }
+
+    &:hover .image.porn {
+        filter: blur(0);
     }
 }
 

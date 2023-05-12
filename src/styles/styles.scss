@@ -123,7 +123,7 @@ p, h1, h2, h3, h4, h5, h6 {
 .icon-btn {
     display: flex;
     flex-flow: row;
-    background-color: var(--bg-color-offset);
+    background-color: var(--bg-color-accent);
     border-radius: 5px;
     padding: 10px 15px;
     font-size: 1.15em;
@@ -227,7 +227,7 @@ p, h1, h2, h3, h4, h5, h6 {
             justify-content: end; 
         }
     }
-    &.by-3 { 
+    &.by-3, &.responsive { 
         grid-template-columns: repeat(3, minmax(0, 1fr));
         .cell {
             &:nth-child(3n+3) {
@@ -380,6 +380,7 @@ input:read-only:not([type='color']):not([type='range']) {
     border-radius: 5px;
     border: 1px solid #{$ctrl-bg};
     align-items: center;
+    overflow: hidden;
 
     button, a {
         flex: 1;
@@ -389,6 +390,10 @@ input:read-only:not([type='color']):not([type='range']) {
 
         &:not(:last-child) {
             border-right: 1px solid #{$ctrl-bg};
+        }
+
+        &.active {
+            background-color: var(--color-primary);
         }
     }
 }
@@ -447,5 +452,17 @@ input:read-only:not([type='color']):not([type='range']) {
 @keyframes spin {
     100% {
         transform: rotate(360deg);
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .grid.responsive {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .grid.responsive {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
     }
 }

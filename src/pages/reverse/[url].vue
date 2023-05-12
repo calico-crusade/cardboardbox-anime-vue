@@ -1,16 +1,15 @@
 <template>
-<div class="reverse-wrapper">
-    <ReverseSearch
+<CardList 
+    title="Reverse Image Lookup"
+    :search="combined"
+    :pending="pending"
+    :noresults="!!results"
+>
+    <ReverseSearch 
         v-model="search"
         @file="searchFile"
     />
-    <Loading v-if="pending" inline />
-    <Card v-for="result of combined" :search="result" />
-    <div class="alert center flex center-items" v-if="results && combined.length === 0">
-        <img src="/twirl.gif" />
-        <p>No results!</p>
-    </div>
-</div>
+</CardList>
 </template>
 
 <script setup lang="ts">

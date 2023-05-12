@@ -1,28 +1,32 @@
 <template>
-<div class="search-wrapper" id="search-wrapper" @scroll="() => onScroll()">
-    <section class="search" :class="{ open: advanced}">
-        <div class="search-input flex">
-            <div class="control fill no-top group center-items">
-                <input class="fill" type="text" placeholder="Search for your favourite manga!" v-model="filter.search" />
-                <button @click="() => filter.search = ''">
-                    <Icon unsize="true" size="12px">close</Icon>
-                </button>
-                <div class="sep" />
-                <select v-model="filter.state">
-                    <option v-for="state in states" :value="state.index">
-                        {{ state.text }}
-                    </option>
-                </select>
-                <label>({{ results.results.length }} / {{ results.count }})</label>
-                <button @click="() => advanced = !advanced">
-                    <Icon unsize="true" size="26px">tune</Icon>
-                </button>
-                <NuxtLink :to="filterRouteUrl()">
-                    <Icon unsize="true" size="26px">search</Icon>
-                </NuxtLink>
-            </div>
+<CardList 
+    :title="type" 
+    :manga="results.results" 
+    :pending="pending" 
+    @onscrolled="onScroll" 
+    @headerstuck="(v) => headerStuck = v"
+>
+    <div class="search-drawer" :class="{ open: advanced, stuck: headerStuck }">
+        <div class="control fill no-top group center-items">
+            <input class="fill" type="text" placeholder="Search for your favourite manga!" v-model="filter.search" />
+            <button @click="() => filter.search = ''">
+                <Icon unsize="true" size="12px">close</Icon>
+            </button>
+            <div class="sep" />
+            <select v-model="filter.state">
+                <option v-for="state in states" :value="state.index">
+                    {{ state.text }}
+                </option>
+            </select>
+            <label>({{ results.results.length }} / {{ results.count }})</label>
+            <button @click="() => advanced = !advanced">
+                <Icon unsize="true" size="26px">tune</Icon>
+            </button>
+            <NuxtLink :to="filterRouteUrl()">
+                <Icon unsize="true" size="26px">search</Icon>
+            </NuxtLink>
         </div>
-        <div class="advanced">
+        <main>
             <h2>Advanced Search Options: </h2>
             <label>Tags</label>
             <div class="button-tags">
@@ -45,23 +49,18 @@
                     <p>Descending</p>
                 </button>
             </div>
-        </div>
-    </section>
-
-    <Card v-for="manga of results.results" :manga="manga" />
-    <div class="loading-card">
-        <Loading v-if="pending" />
+        </main>
     </div>
-</div>
+</CardList>
 </template>
 
 <script setup lang="ts">
-import { Paginated, ProgressExt, Filter, Filters } from "~/models";
+import { Paginated, ProgressExt, Filter } from "~/models";
 
 const advanced = ref(false);
+const headerStuck = ref(false);
 const route = useRoute();
 const { search, filters: getFilters } = useMangaApi();
-const { token } = useAppSettings();
 
 const states = [
     { text: 'All', routes: '/search/all', index: 0 },
@@ -208,14 +207,8 @@ const fetch = async (reset: boolean) => {
 }
 
 const onScroll = async () => {
-    const element = document.getElementById('search-wrapper');
-    if (!element) return;
-    
     const curRes = results.value;
     if (!curRes || curRes.pages <= filter.value.page || pending.value) return;
-
-    const bottom = element.scrollTop + element.clientHeight >= element.scrollHeight;
-    if (!bottom) return;
     
     filter.value.page++;
     await fetch(false);
@@ -229,88 +222,71 @@ onMounted(() => nextTick(() => {
 watch(() => route.query, () => fetch(true));
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $bg-color: var(--bg-color-accent);
 $br-color: transparent;
-.search-wrapper {
-    overflow-y: auto;
-    padding: 0;
-    .search {
-        max-width: min(100%, 1000px);
-        margin: 10px auto;
-        border: 1px solid #{$br-color};
-        border-radius: 5px;
+
+.search-drawer {
+    margin: 5px auto;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: background-color 250ms;
+
+    .control {
+        background-color: $bg-color;
+
+        &.no-top { margin-top: 0; }
+        a, button { padding: 0 5px; }
+    }
+
+    main {
+        background-color: $bg-color;
         overflow: hidden;
+        max-height: 0;
+        transition: all 250ms;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        border-top: 1px solid transparent;
+        padding: 0 10px;
 
-        .search-input {
-            background-color: $bg-color;
-            label {
-                margin-left: 15px;
-            }
+        h2 { margin-top: 10px; }
 
-            .no-top {
-                margin-top: 0;
-            }
-        }
+        .button-tags {
+            display: flex;
+            flex-flow: row wrap;
 
-        .advanced {
-            background-color: $bg-color;
-            max-height: 0px;
-            overflow: hidden;
-            transition: all 250ms;
-            border-bottom-left-radius: 5px;
-            border-bottom-right-radius: 5px;
-            border-top: 1px solid transparent;
-            padding: 0 10px;
-
-            h2 {
-                margin-top: 10px;
-            }
-
-            .button-tags {
+            button {
+                background-color: transparent;
+                border: 1px solid var(--color-primary);
                 display: flex;
-                flex-flow: row wrap;
+                flex-flow: row;
+                margin: 3px;
+                padding: 5px;
+                border-radius: 3px;
 
-                button {
-                    background-color: transparent;
-                    border: 1px solid var(--color-primary);
-                    display: flex;
-                    flex-flow: row;
-                    margin: 3px;
-                    padding: 5px;
-                    border-radius: 3px;
-
-                    p {
-                        margin: auto 0;
-                    }
-
-                    &.include { border-color: var(--color-success); }
-                    &.exclude { border-color: var(--color-warning); }
-                }
-
-                &:last-child {
-                    margin-bottom: 10px;
-                }
-            }                
-        }
-
-        &.open {
-            .advanced {
-                max-height: 900px;
-                border-top-color: $br-color;
+                p { margin: auto 0; }
+                &.include { border-color: var(--color-success); }
+                &.exclude { border-color: var(--color-warning); }
             }
+
+            &:last-child { margin-bottom: 10px; }
         }
     }
 
-    .manga {
-        max-width: min(100%, 1000px);
-        margin: 10px auto;
+    &.open main {
+        max-height: 80vh;
+        border-top-color: $br-color;
+        overflow-y: auto;
     }
+
+    &.stuck { background-color: var(--bg-color-accent-dark); }
 }
 
 @media only screen and (max-width: 550px) {
-    .search-input .control label {
-        display: none;
+    .control {
+        label, select {
+            display: none;
+        }
     }
 }
 </style>

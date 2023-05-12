@@ -8,17 +8,13 @@
 </template>
 
 <style lang="scss" scoped>
-    main {
-        margin-right: 2px;
-    }
+@media only screen and (max-width: 1050px) {
+    .app-fix {
+        flex-flow: column;
 
-    @media only screen and (max-width: 1050px) {
-        .app-fix {
-            flex-flow: column;
-
-            main {
-                overflow: hidden;
-            }
+        main {
+            overflow: hidden;
         }
     }
+}
 </style>

@@ -1,24 +1,24 @@
-import { FilterStyle, PageStyle, ProgressBarStyle } from "~/models";
-import { Theme } from "~/models/theme.model";
+import { FilterStyle, ListStyle, PageStyle, ProgressBarStyle, Theme } from "~/models";
 
 export const useAppSettings = () => {
     const config = useRuntimeConfig();
 
     const themes: Theme[] = [
         {
-            name: 'Light Pink',
-            direction: 'to right bottom',
-            colors: ['#0260ed', '#9645d9', '#ce14db', '#9f0f9a', '#ff0040']
-        }, {
             name: 'Dark',
             direction: 'to right bottom',
             colors: ['#1953aa', '#693594', '#57195c', '#1a10a0', '#171130']
-        }
+        },
+        {
+            name: 'Light Pink',
+            direction: 'to right bottom',
+            colors: ['#0260ed', '#9645d9', '#ce14db', '#9f0f9a', '#ff0040']
+        },
     ]
 
     function getStore<T>(key: string, def?: T) {
         if (!process.client) return def;
-        return localStorage.getItem(key) ?? def;
+        return <T><any>localStorage.getItem(key) ?? def;
     }
 
     function setStore<T>(key: string, value?: T) {
@@ -28,47 +28,50 @@ export const useAppSettings = () => {
     }
 
     function getSet<T>(key: string, def?: T) {
-        const item = ref(getStore<string>(key));
+        const state = useState<T | undefined>(key, () => getStore<T>(key, def));
 
         return computed({
-            get: () => item.value ?? (<any>def)?.toString(),
-            set: (val: string | undefined) => {
-                item.value = val;
+            get: () => state.value,
+            set: (val: T | undefined) => {
+                state.value = val;
                 setStore(key, val);
             }
         });
     }
     
     const getSetBool = (key: string, def: boolean) => {
-        const item = ref(!!(getStore(key) ?? def));
+        const state = useState<boolean>(key, () => !!(getStore(key) ?? def));
         return computed({
-            get: () => item.value,
+            get: () => state.value,
             set: (value: boolean) => {
-                item.value = value;
+                state.value = value;
                 setStore(key, value ? '1' : undefined);
             }
         });
     };
     
     const getSetNumb = (key: string, def: number) => {
-        const item = ref(+(getStore<string>(key)?.toString() ?? def.toString()));
+        const state = useState<number>(key, () => +(getStore<string>(key)?.toString() ?? def.toString()));
         return computed({
-            get: () => item.value,
+            get: () => state.value,
             set: (value: number) => {
-                item.value = value;
+                state.value = value;
                 setStore(key, value.toString());
             }
         })
     };
 
     const getSetArray = (key: string, def: string[]) => {
-        const item = ref(
-            getStore<string>(key)?.toString()?.split(',')?.map(t => t.trim()
-        ) ?? def);
+        const state = useState<string[]>(key, 
+            () => getStore<string>(key)
+                ?.toString()
+                ?.split(',')
+                ?.map(t => t.trim()) ?? def);
+
         return computed({
-            get: () => item.value,
+            get: () => state.value,
             set: (value: string[]) => {
-                item.value = value;
+                state.value = value;
                 setStore(key, value.join(', ').toString());
             }
         })
@@ -100,6 +103,8 @@ export const useAppSettings = () => {
         progressBar: getSet<ProgressBarStyle>('progress-bar', ProgressBarStyle.Left),
         customFilter: getSet<string>('custom-filter'),
         menuOpen: getSetBool('manga-menu-open', false),
+        listStyle: getSet<ListStyle>('list-style', ListStyle.Expanded),
+        blurPornCovers: getSetBool('blur-porn-covers', true),
 
         bgImageDir,
         bgImageColors,

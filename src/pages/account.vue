@@ -23,6 +23,9 @@
                     </option>
                 </select>
             </div>
+            <div class="control checkbox">
+                <CheckBox v-model="blurPornCovers">Blur Pornographic Cover Art</CheckBox>
+            </div>
             <h2>Custom Theme</h2>
             <div class="control">
                 <label>Background Gradient Direction</label>
@@ -76,7 +79,8 @@ const {
     bgImageColors,
     resetBgImage,
     fixBgImage,
-    themes
+    themes,
+    blurPornCovers
 } = useAppSettings();
 
 useHead({ title: 'Your account! Checking yourself out?' });

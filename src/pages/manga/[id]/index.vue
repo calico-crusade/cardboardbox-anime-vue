@@ -10,19 +10,19 @@
                 <Icon>play_arrow</Icon>
                 <p>Resume</p>
             </NuxtLink>
-            <button v-if="isRandom" class="icon-btn" @click="() => $router.go(0)">
+            <button v-if="isRandom" class="icon-btn" @click="nextRandom">
                 <Icon>shuffle</Icon>
                 <p>Next Random Manga</p>
             </button>
-            <button v-if="stats" class="icon-btn" @click="toggleFavourite">
-                <Icon :fill="isFavourite">star</Icon>
+            <button v-if="stats && currentUser" class="icon-btn" @click="toggleFavourite" :disabled="reloading">
+                <Icon :fill="isFavourite" :spin="reloading">star</Icon>
                 <p>{{ isFavourite ? 'Unfavourite' : 'Favourite' }}</p>
             </button>
-            <button v-if="stats?.progress" :disabled="reloading" class="icon-btn" @click="resetProgress">
+            <button v-if="stats?.progress && currentUser" :disabled="reloading" class="icon-btn" @click="resetProgress">
                 <Icon :spin="reloading">delete</Icon>
                 <p>Reset Progress</p>
             </button>
-            <button class="icon-btn" :disabled="reloading" @click="refresh">
+            <button class="icon-btn" v-if="currentUser" :disabled="reloading" @click="reloadSource">
                 <Icon :spin="reloading">sync</Icon>
                 <p>Reload Source</p>
             </button>
@@ -94,6 +94,7 @@ const {
 } = useMangaApi();
 
 const { proxy: proxyUrl, toPromise } = useApiHelper();
+const { currentUser } = useAuthApi();
 
 let stats: Ref<ProgressExt | undefined> = ref(undefined);
 let reloading = ref(false);
@@ -101,7 +102,7 @@ let volumes: Ref<Volume[]> = ref([]);
 
 const _id = useRoute().params.id.toString();
 const isRandom = _id === 'random';
-const { data, pending, error } = await (isRandom ? random() : fetch(_id));
+const { data, pending, error, refresh } = await (isRandom ? random() : fetch(_id));
 const manga = computed(() => data.value?.manga);
 const isFavourite = computed(() => stats.value?.stats.favourite || false);
 const id = computed(() => manga.value?.id || 0);
@@ -111,7 +112,10 @@ const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer
 
 const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
 const currentChapter = computed(() => data.value?.chapters.find(t => t.id === stats.value?.progress?.mangaChapterId));
-const resumeUrl = computed(() => currentChapter.value ? `/manga/${manga.value?.id}/${currentChapter.value.id}?page=${(stats.value?.progress?.pageIndex ?? 0) + 1}` : undefined);
+const resumeUrl = computed(() => 
+    currentChapter.value ? 
+        `/manga/${manga.value?.id}/${currentChapter.value.id}?page=${(stats.value?.progress?.pageIndex ?? 0) + 1}` :
+        (data.value?.chapters[0]?.id ? `/manga/${manga.value?.id}/${data.value?.chapters[0]?.id}?page=0` : undefined ));
 const title = computed(() => manga.value?.title ?? 'Manga Not Found');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const cover = computed(() => proxy(manga.value?.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
@@ -147,7 +151,7 @@ const toggleFavourite = async () => {
     fetchExt();
 }
 
-const refresh = async () => {
+const reloadSource = async () => {
     if (!manga.value) return;
     reloading.value = true;
 
@@ -178,6 +182,14 @@ const resetProgress = async () => {
 const copyUrl = () => {
     const baseUrl = `${window.location.protocol}//${window.location.host}/manga/${id.value}`;
     navigator.clipboard.writeText(baseUrl);
+}
+
+const nextRandom = async () => {
+    if (!isRandom) return;
+
+    await refresh();
+    volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
+    await fetchExt();
 }
 
 onMounted(() => nextTick(() => fetchExt()));

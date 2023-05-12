@@ -45,3 +45,15 @@ export const FILTER_STYLES = [
     FilterStyle.BluePrint,
     FilterStyle.Custom
 ]
+
+export enum ListStyle {
+    Expanded = 'expanded',
+    Compact = 'compact',
+    Album = 'album'
+}
+
+export const LIST_STYLES = [
+    ListStyle.Expanded,
+    ListStyle.Compact,
+    ListStyle.Album
+];
