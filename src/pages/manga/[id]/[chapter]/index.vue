@@ -434,7 +434,6 @@ const {
 
 const downloading = ref(false);
 
-
 const navOpen = computed({
     get: () => {
         if (!process.client) return false;
@@ -738,7 +737,55 @@ const fullscreen = () => {
     }
 }
 
+const nextPage = () => {
+    const link = genLink('NextPage');
+    if (link) navTo(link);
+}
+
+const prevPage = () => {
+    const link = genLink('PrevPage');
+    if (link) navTo(link);
+}
+
+const arrowKey = (ev: KeyboardEvent) => {
+    const scrollabled = [
+        PageStyle.LongStrip, 
+        PageStyle.SinglePageFitToWidth, 
+        PageStyle.SinglePageNaturalSize
+    ].indexOf(pageStyle.value) !== -1;
+    
+    const pos = clickarea.value?.scrollTop ?? 0;
+    const offset = scrollAmount.value;
+
+    const forward = () => (invertControls.value ? prevPage() : nextPage());
+    const backward = () => (invertControls.value ? nextPage() : prevPage());
+
+    switch(ev.key) {
+        case 'ArrowLeft': backward(); return;
+        case 'ArrowRight': forward();  return;
+        case 'ArrowUp':
+            if (!scrollabled) { 
+                backward(); 
+                return;
+            }
+
+            if (clickarea.value) clickarea.value.scroll({ top: pos - offset, behavior: 'smooth' });
+            return;
+
+        case 'ArrowDown':
+            if (!scrollabled) { 
+                forward(); 
+                return;
+            }
+
+            if (clickarea.value) clickarea.value.scroll({ top: pos + offset, behavior: 'smooth' });
+            return;
+    }
+}
+
 onMounted(() => nextTick(() =>  {
+    window.addEventListener('keyup', arrowKey);
+
     navOpen.value = menuOpen.value;
     if (!token.value) return;
 
@@ -746,6 +793,10 @@ onMounted(() => nextTick(() =>  {
     doFetch(wasUnauthed);
     wasUnauthed = false;
 }));
+
+onUnmounted(() => {
+    window.removeEventListener('keyup', arrowKey);
+})
 
 watch(() => route.query, () => doFetch(false));
 </script>
