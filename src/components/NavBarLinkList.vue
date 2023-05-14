@@ -97,17 +97,12 @@
 const {
     currentUser: user,
     login,
-    logout: doLogout,
-    bump
+    logout: doLogout
 } = useAuthApi();
 
 const emits = defineEmits<{ (e: 'naved'): void }>();
 const clicked = () => emits('naved');
 const logout = () => { doLogout(); clicked(); }
-
-onMounted(() => nextTick(async () => {
-    await bump();
-}))
 </script>
 
 <style lang="scss" scoped>

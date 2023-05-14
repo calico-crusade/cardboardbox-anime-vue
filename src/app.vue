@@ -5,8 +5,13 @@
 </template>
 
 <script setup lang="ts">
-const { fixBgImage } = useAppSettings();
-onMounted(() => fixBgImage());
+const { fixBgImage, injectSettings } = useAppSettings();
+const { bump } = useAuthApi();
+onMounted(() => nextTick(async () => {
+    fixBgImage();
+
+    if (await bump()) injectSettings();
+}));
 </script>
 
 <style lang="scss">

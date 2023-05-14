@@ -1,7 +1,18 @@
 <template>
 <div class="control no-top group center-items">
-    <input type="file" class="file-input" accept="image/*" @change="selected" ref="fileinput" />
-    <input type="text" class="fill" v-model="value" placeholder="Image URL or Manga Title" />
+    <input 
+        type="file" 
+        class="file-input" 
+        accept="image/*"
+        @change="selected" 
+        ref="fileinput" 
+    />
+    <input 
+        type="text" 
+        class="fill" 
+        v-model="value" 
+        placeholder="Image URL or Manga Title" 
+    />
     <button @click="() => value = ''">
         <Icon unsize="true" size="12px">close</Icon>
     </button>
@@ -34,7 +45,11 @@ const value = computed({
     set: (value: string) => emits('update:modelValue', value)
 });
 
-const wrapedUrl = computed(() => value.value ? `/reverse/${encodeURIComponent(value.value)}` : undefined);
+const wrapedUrl = computed(() => 
+    value.value 
+        ? `/reverse/${encodeURIComponent(value.value)}` 
+        : undefined
+    );
 
 const selected = (event: Event) => {
     if (!event?.target) return;

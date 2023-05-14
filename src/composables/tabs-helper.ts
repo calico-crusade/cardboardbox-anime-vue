@@ -1,4 +1,8 @@
-import { reactive, ref, readonly, InjectionKey, provide, inject, Ref, onUnmounted, computed } from 'vue'
+import { 
+    reactive, ref, readonly, 
+    InjectionKey, provide, inject, 
+    Ref, onUnmounted, computed 
+} from 'vue'
 
 interface TabData {
   title?: string;

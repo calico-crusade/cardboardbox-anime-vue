@@ -20,7 +20,13 @@ const { toPromise } = useApiHelper();
 const search = ref('');
 const pending = ref(false);
 const results = ref<ImageSearch | undefined>();
-const combined = computed(() => results.value ? [...results.value.match, ...results.value.vision, ...results.value.textual] : []);
+const combined = computed(() => 
+    results.value 
+        ? [
+            ...results.value.match, 
+            ...results.value.vision, 
+            ...results.value.textual
+        ] : []);
 
 const searchFile = async (file: File) => {
     results.value = undefined;
@@ -28,7 +34,9 @@ const searchFile = async (file: File) => {
     results.value = await toPromise(reverseFile(file), true);
     pending.value = false;
 };
-const title = 'Reverse Image Search', description = 'Reverse Image search Manga pages to find the manga source.', image = 'https://manga.index-0.com/logo.png';
+const title = 'Reverse Image Search', 
+    description = 'Reverse Image search Manga pages to find the manga source.', 
+    image = 'https://manga.index-0.com/logo.png';
 
 useHead({ title });
 

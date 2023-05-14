@@ -9,8 +9,6 @@
 <script setup lang="ts">
 
 const { randomNum } = useMangaApi();
-const { count } = useMatchApi();
-const { currentUser } = useAuthApi();
 
 const messages = [
     'Here to find your next binge?',
@@ -38,12 +36,12 @@ useServerSeoMeta({
 });
 
 const { data: randomManga, pending: randomPending } = await randomNum(6);
-//const { data: imageCount, pending: countPending } = await count();
 const rndNum = (max: number, min: number = 0) => min + Math.floor(Math.random() * max);
 const rnd = <T>(array: T[]) => array[rndNum(array.length)];
 const timeout = () => rndNum(10, 75);
 
-const sleep = (timeout: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), timeout));
+const sleep = (timeout: number) => 
+    new Promise<void>((resolve) => setTimeout(() => resolve(), timeout));
 
 const unprint = async () => {
     while(title.value.length !== 0) {

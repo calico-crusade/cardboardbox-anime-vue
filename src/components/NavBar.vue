@@ -7,14 +7,20 @@
     <img src="/logo.png" alt="Cardboard Box Logo" />
 </header>
 
-<div class="fade" :class="{ open: !closed }" @click="() => closed = !closed"></div>
+<div 
+    class="fade" 
+    :class="{ open: !closed }" 
+    @click="() => closed = !closed" 
+/>
 <aside class="navbar flex" :class="{ closed }">
     <nav class="flex row scroll-y">
         <div class="title flex">
             <img src="/logo.png" alt="Cardboard Box Logo" />
             <h2>Manga Box</h2>
             <button @click="() => closed = !closed">
-                <Icon :rotate="closed ? 90 : 0">{{ closed ? 'push_pin' : 'chevron_left' }}</Icon>
+                <Icon :rotate="closed ? 90 : 0">
+                    {{ closed ? 'push_pin' : 'chevron_left' }}
+                </Icon>
             </button>
         </div>
 

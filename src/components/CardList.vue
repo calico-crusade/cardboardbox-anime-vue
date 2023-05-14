@@ -42,7 +42,12 @@
 </template>
 
 <script setup lang="ts">
-import { ProgressExt, Manga, MatchResult, VisionResult, BaseResult, ImageSearchManga, ListStyle } from '~/models';
+import { 
+    ProgressExt, Manga, 
+    MatchResult, VisionResult, 
+    BaseResult, ImageSearchManga, 
+    ListStyle 
+} from '~/models';
 type MangaType = Manga | ProgressExt;
 type SearchType = MatchResult | VisionResult | BaseResult | ImageSearchManga;
 
@@ -64,14 +69,16 @@ const props = defineProps<{
 
 const items = computed(() => {
     return [
-        ...((props.manga ?? []).map(t => { return { manga: t, search: undefined }})),
-        ...((props.search ?? []).map(t => { return { manga: undefined, search: t }}))
+        ...((props.manga ?? [])
+            .map(t => { return { manga: t, search: undefined }})),
+        ...((props.search ?? [])
+            .map(t => { return { manga: undefined, search: t }}))
     ]
 });
 
-const style = computed<ListStyle | undefined>({
+const style = computed<ListStyle>({
     get: () => listStyle.value,
-    set: (value: ListStyle | undefined) => listStyle.value = value
+    set: (value: ListStyle) => listStyle.value = value
 });
 
 const styles = [
@@ -84,7 +91,9 @@ const onScroll = () => {
     const element = scroller.value;
     if (!element) return;
     
-    const bottom = element.scrollTop + element.clientHeight >= element.scrollHeight;
+    const bottom = 
+        element.scrollTop + element.clientHeight 
+        >= element.scrollHeight;
     if (!bottom) return;
 
     emits('onscrolled');

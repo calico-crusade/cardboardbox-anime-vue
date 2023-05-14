@@ -20,12 +20,22 @@ const { toPromise, proxy } = useApiHelper();
 const url = computed(() => decodeURIComponent(route.params.url?.toString() ?? ''));
 const search = ref(url.value);
 const { pending, data: results } = await reverseUrl(url.value);
-const combined = computed(() => results.value ? [...results.value.match, ...results.value.vision, ...results.value.textual] : []);
+const combined = computed(() => 
+    results.value 
+        ? [...results.value.match, ...results.value.vision, ...results.value.textual] 
+        : []);
 const first = computed(() => combined.value[0]);
 
-const title = computed(() => first.value?.manga?.title ?? 'Reverse Image Search');
-const description = computed(() => first.value?.manga.description ?? 'Reverse Image search Manga pages to find the manga source.');
-const cover = computed(() => first.value?.manga.cover ? proxy(first.value.manga.cover, 'manga-cover') : 'https://manga.index-0.com/logo.png');
+const title = computed(() => 
+    first.value?.manga?.title 
+    ?? 'Reverse Image Search');
+const description = computed(() => 
+    first.value?.manga.description 
+    ?? 'Reverse Image search Manga pages to find the manga source.');
+const cover = computed(() => 
+    first.value?.manga.cover 
+        ? proxy(first.value.manga.cover, 'manga-cover') 
+        : 'https://manga.index-0.com/logo.png');
 
 const searchFile = async (file: File) => {
     results.value = null;

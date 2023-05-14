@@ -10,15 +10,26 @@
     />
     <div class="details masked-overflow">
         <div class="title">
-            <NuxtLink :to="'/manga/' + mdata.manga.id">{{ mdata.manga.title }}</NuxtLink>
-            <Icon :fill="!!mdata.icon.fill" v-if="mdata.icon">{{ mdata.icon.text }}</Icon>
+            <NuxtLink :to="'/manga/' + mdata.manga.id">
+                {{ mdata.manga.title }}
+            </NuxtLink>
+            <Icon :fill="!!mdata.icon.fill" v-if="mdata.icon">
+                {{ mdata.icon.text }}
+            </Icon>
         </div>
         <template v-if="mdata.stats">
             <div class="source" v-if="mdata.progress">
-                <span><b>Progress: </b>&nbsp; {{ mdata.stats.chapterProgress }}% - <Date :date="mdata.progress.updatedAt.toString()" /></span>
+                <span>
+                    <b>Progress: </b>&nbsp; 
+                    {{ mdata.stats.chapterProgress }}%&nbsp;
+                    - <Date :date="mdata.progress.updatedAt.toString()" />
+                </span>
             </div>
             <div class="source">
-                <span><b>Latest Chapter: </b>&nbsp; <Date :date="mdata.stats.latestChapter?.toString()" /></span>
+                <span>
+                    <b>Latest Chapter: </b>&nbsp; 
+                    <Date :date="mdata.stats.latestChapter?.toString()" />
+                </span>
             </div>
         </template>
         <div class="source">
@@ -27,7 +38,13 @@
         <div class="tags">
             <div class="header">Tags: </div>
             <div class="tag nsfw" v-if="mdata.manga.nsfw">NSFW</div>
-            <NuxtLink class="tag" v-for="tag of mdata.manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
+            <NuxtLink 
+                class="tag" 
+                v-for="tag of mdata.manga.tags" 
+                :to="'/search/all?include=' + tag"
+            >
+                {{ tag }}
+            </NuxtLink>
         </div>
         <div class="description">
             <Markdown :content="mdata.manga.description" />
@@ -35,10 +52,18 @@
     </div>
 </div>
 <div class="manga" v-if="sdata" :class="actStyle">
-    <NuxtLink :to="'/import?url=' + encodeURIComponent(sdata.manga.url)" class="image" :style="{'background-image': 'url(' + proxy(sdata.manga.cover) + ')'}"></NuxtLink>
+    <NuxtLink 
+        :to="'/import?url=' + encodeURIComponent(sdata.manga.url)" 
+        class="image" 
+        :style="{'background-image': `url(${proxy(sdata.manga.cover)})`}"
+    />
     <div class="details masked-overflow">
         <div class="title">
-            <NuxtLink :to="'/import?url=' + encodeURIComponent(sdata.manga.url)">{{ sdata.manga.title }}</NuxtLink>
+            <NuxtLink 
+                :to="'/import?url=' + encodeURIComponent(sdata.manga.url)"
+            >
+                {{ sdata.manga.title }}
+            </NuxtLink>
         </div>
         <div class="source">
             <b>Source: </b>&nbsp;{{ sdata.manga.source }}
@@ -46,8 +71,12 @@
         <div class="source" v-if="sdata.foundVia">
             <b>Found Via:</b>&nbsp; 
             {{ sdata.foundVia.text }} (
-                <span title="Confidence Compute Score">CS: {{ sdata.foundVia.compute.toFixed(2) }}%</span>, 
-                <span title="Exact Match">EM: {{ sdata.foundVia.exactMatch }}</span>
+                <span title="Confidence Compute Score">
+                    CS: {{ sdata.foundVia.compute.toFixed(2) }}%
+                </span>, 
+                <span title="Exact Match">
+                    EM: {{ sdata.foundVia.exactMatch }}
+                </span>
             )
         </div>
         <div class="source" v-if="sdata.link">
@@ -57,7 +86,13 @@
         <div class="tags">
             <div class="header">Tags: </div>
             <div class="tag nsfw" v-if="sdata.manga.nsfw">NSFW</div>
-            <NuxtLink class="tag" v-for="tag of sdata.manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
+            <NuxtLink 
+                class="tag" 
+                v-for="tag of sdata.manga.tags" 
+                :to="'/search/all?include=' + tag"
+            >
+                {{ tag }}
+            </NuxtLink>
         </div>
         <div class="description">
             <Markdown :content="sdata.manga.description" />

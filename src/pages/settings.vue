@@ -5,25 +5,45 @@
         <Tab title="Settings" icon="settings" scrollable keep-alive>
             <div class="flex row">
                 <div class="control checkbox">
-                    <CheckBox v-model="blurPornCovers">Blur Pornographic Cover Art</CheckBox>
+                    <CheckBox v-model="blurPornCovers">
+                        Blur Pornographic Cover Art
+                    </CheckBox>
                 </div>
                 <div class="control checkbox">
-                    <CheckBox v-model="invertControls">Invert Page Direction Controls</CheckBox>
+                    <CheckBox v-model="invertControls">
+                        Invert Page Direction Controls
+                    </CheckBox>
                 </div>
                 <div class="control checkbox">
-                    <CheckBox v-model="forwardOnly">No Directional Buttons</CheckBox>
+                    <CheckBox v-model="forwardOnly">
+                        No Directional Buttons
+                    </CheckBox>
+                </div>
+                <div class="control checkbox">
+                    <CheckBox v-model="showTutorial">
+                        Show Page Tutorial
+                    </CheckBox>
                 </div>
                 <div class="control">
                     <label class="no-bot">Progress Bar Style</label>
                     <select v-model="progressBar">
-                        <option v-for="style in PROGRESS_BAR_STYLES" :value="style">
+                        <option 
+                            v-for="style in PROGRESS_BAR_STYLES" 
+                            :value="style"
+                        >
                             {{ style }}
                         </option>
                     </select>
                 </div>
                 <div class="control">
                     <label class="no-bot">Scroll amount on key event</label>
-                    <input type="number" min="0" max="1000" step="10" v-model="scrollAmount" />
+                    <input 
+                        type="number" 
+                        min="0" 
+                        max="1000" 
+                        step="10" 
+                        v-model="scrollAmount" 
+                    />
                 </div>
                 <div class="control">
                     <label class="no-bot">Image Style</label>
@@ -43,11 +63,25 @@
                 </div>
                 <div class="control" v-if="filter === FilterStyle.Custom">
                     <label class="no-bot">Custom Filter</label>
-                    <input type="text" v-model="customFilter" placeholder="Custom CSS filter" />
+                    <input 
+                        type="text" 
+                        v-model="customFilter" 
+                        placeholder="Custom CSS filter" 
+                    />
                 </div>
                 <div class="control">
-                    <label class="no-bot">Image Brightness ({{ brightness }}%)</label>
+                    <label class="no-bot">
+                        Image Brightness ({{ brightness }}%)
+                    </label>
                     <input type="range" min="1" max="100" v-model="brightness" />
+                </div>
+                <div class="control">
+                    <label class="no-bot">Reader Style</label>
+                    <select v-model="listStyle">
+                        <option v-for="style in LIST_STYLES" :value="style">
+                            {{ style }}
+                        </option>
+                    </select>
                 </div>
             </div>
         </Tab>
@@ -73,7 +107,11 @@
                 </div>
                 <div class="control" v-if="direction === 'deg'">
                     <label>Background Gradient Radius</label>
-                    <input type="number" v-model="degrees" max="360" min="-360" step="10" />
+                    <input 
+                        type="number" 
+                        v-model="degrees" 
+                        max="360" min="-360" step="10" 
+                    />
                 </div>
                 <div class="flex center-items header">
                     <h2 class="fill">Gradient Colors</h2>
@@ -81,7 +119,10 @@
                         <Icon>add</Icon>
                     </button>
                 </div>
-                <div class="control rounded pad bg-accent" v-for="(color, index) in colors">
+                <div 
+                    class="control rounded pad bg-accent" 
+                    v-for="(color, index) in colors"
+                >
                     <label>Gradient Color #{{ index + 1 }}</label>
                     <div class="group">
                         <input 
@@ -111,14 +152,19 @@
 
 <script setup lang="ts">
 import { 
-    PROGRESS_BAR_STYLES, PAGE_STYLES, FILTER_STYLES,
-    FilterStyle 
+    PROGRESS_BAR_STYLES, 
+    PAGE_STYLES, 
+    FILTER_STYLES,
+    FilterStyle,
+    LIST_STYLES
 } from '~/models';
 
 const { currentUser } = useAuthApi();
 const { 
     resetBgImage,
     fixBgImage,
+    commit,
+    pauseUpdates,
 
     bgImageDir, 
     bgImageColors,
@@ -130,10 +176,10 @@ const {
     brightness,
     scrollAmount,
     pageStyle,
-    progressBar,
+    progressBarStyle: progressBar,
     listStyle,
     showTutorial,
-    filter,
+    filterStyle: filter,
     customFilter
 } = useAppSettings();
 
@@ -141,7 +187,7 @@ useHead({ title: 'Configure the reader your way.' });
 
 const themeIndex = ref(0);
 
-const direction = ref<string | undefined>();
+const direction = ref<string>(bgImageDir.value);
 const degrees = ref(90);
 const colors = ref<{ color: string }[]>([]);
 const theme = computed({
@@ -167,9 +213,12 @@ const newColor = () => {
 }
 
 const save = () => {
+    pauseUpdates.value = true;
     bgImageColors.value = colors.value.map(t => t.color);
     bgImageDir.value = direction.value === 'deg' ? `${degrees.value}deg` : direction.value;
     fixBgImage()
+    pauseUpdates.value = false;
+    commit();
 }
 
 const reset = () => {

@@ -1,10 +1,10 @@
 import { AuthResponse, AuthUser } from "~/models";
 import { useApiHelper } from "./api-helpers";
-import { useAppSettings } from "./settings-helper";
+import { useSettingsHelper } from "./settings-helper";
 
 export const useAuthApi = () => {
     const { get } = useApiHelper();
-    const { authUrl, appId, token } = useAppSettings();
+    const { authUrl, appId, token } = useSettingsHelper();
     const { currentRoute } = useRouter();
 
     const currentUser = useState<AuthUser | undefined>('login-user', () => undefined);

@@ -7,15 +7,26 @@
     @headerstuck="(v) => headerStuck = v"
     capitalize
 >
-    <div class="search-drawer" :class="{ open: advanced, stuck: headerStuck }">
+    <div 
+        class="search-drawer" 
+        :class="{ open: advanced, stuck: headerStuck }"
+    >
         <div class="control fill no-top group center-items">
-            <input class="fill" type="text" placeholder="Search for your favourite manga!" v-model="filter.search" />
+            <input 
+                class="fill" 
+                type="text" 
+                placeholder="Search for your favourite manga!" 
+                v-model="filter.search" 
+            />
             <button @click="() => filter.search = ''">
                 <Icon unsize="true" size="12px">close</Icon>
             </button>
             <div class="sep" />
             <select v-model="filter.state">
-                <option v-for="state in states" :value="state.index">
+                <option 
+                    v-for="state in states" 
+                    :value="state.index"
+                >
                     {{ state.text }}
                 </option>
             </select>
@@ -30,20 +41,53 @@
         <main>
             <h2>Advanced Search Options: </h2>
             <label>Tags</label>
-            <ButtonGroupTags v-model:on="filter.include" v-model:off="filter.exclude" :options="allTags" />
+            <ButtonGroupTags 
+                v-model:on="filter.include" 
+                v-model:off="filter.exclude" 
+                :options="allTags" 
+            />
             <label>Sources</label>
-            <ButtonGroup v-model="filter.sources" :options="sources" capitalize />
+            <ButtonGroup 
+                v-model="filter.sources" 
+                :options="sources" 
+                capitalize 
+            />
 
             <label>Content Rating</label>
-            <ButtonGroup v-model="filter.attributes[0].values" :options="ratings" capitalize />
-            <ButtonGroupBool v-if="filter.attributes[0].values.length > 0" v-model="filter.attributes[0].include" on="Include" off="Exclude" on-icon="done" off-icon="close" />
+            <ButtonGroup 
+                v-model="filter.attributes[0].values" 
+                :options="ratings" 
+                capitalize 
+            />
+            <ButtonGroupBool 
+                v-if="filter.attributes[0].values.length > 0" 
+                v-model="filter.attributes[0].include" 
+                on="Include" 
+                off="Exclude" 
+                on-icon="done" 
+                off-icon="close" 
+            />
 
             <label>Publication Status</label>
-            <ButtonGroup v-model="filter.attributes[2].values" :options="statuses" capitalize />
-            <ButtonGroupBool v-if="filter.attributes[2].values.length > 0" v-model="filter.attributes[2].include" on="Include" off="Exclude" on-icon="done" off-icon="close" />
+            <ButtonGroup 
+                v-model="filter.attributes[2].values" 
+                :options="statuses" 
+                capitalize 
+            />
+            <ButtonGroupBool 
+                v-if="filter.attributes[2].values.length > 0" 
+                v-model="filter.attributes[2].include" 
+                on="Include" 
+                off="Exclude" 
+                on-icon="done" 
+                off-icon="close" 
+            />
 
             <label>Sort Options</label>
-            <ButtonGroupIndex v-model="filter.sort" :options="allSorts" />
+            <ButtonGroupIndex 
+                v-model="filter.sort" 
+                :options="allSorts" 
+            />
             <label>Sort By Options</label>
             <ButtonGroupBool v-model="filter.asc" />
         </main>

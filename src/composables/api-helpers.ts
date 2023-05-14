@@ -1,11 +1,11 @@
 import { AsyncData } from "#app";
 import filesaver from 'file-saver';
-import { useAppSettings } from "./settings-helper";
+import { useSettingsHelper } from "./settings-helper";
 
 export type Params = { [key: string]: any; };
 
 export const useApiHelper = () => {
-    const { apiUrl, token } = useAppSettings();
+    const { apiUrl, token } = useSettingsHelper();
 
     const wrapUrl = (url: string) => {
         if (url.toLowerCase().indexOf('https://') !== -1 || 
@@ -129,6 +129,29 @@ export const useApiHelper = () => {
         });
     }
 
+    function debounce<T>(fun: (arg: T) => void, wait: number)  {
+        let timer: NodeJS.Timer;
+        return (arg: T) => {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(() => {
+                fun(arg);
+            }, wait);
+        }
+    }
+
+    function throttle(fun: Function, wait: number) {
+        let throttled = false;
+        return function(...args: any) {
+            if (throttled) return;
+    
+            fun(...args);
+            throttled = true;
+            setTimeout(() => {
+                throttled = false;
+            }, wait);
+        }
+    }
+
     return {
         get,
         post,
@@ -138,6 +161,8 @@ export const useApiHelper = () => {
         download,
         onFinish,
         toPromise,
-        clone
+        clone,
+        debounce,
+        throttle
     }
 }
