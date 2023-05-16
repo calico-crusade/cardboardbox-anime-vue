@@ -128,6 +128,8 @@ export const useMangaApi = () => {
 
     const graph = (state: States | Ref<States>) => get<MangaGraph[]>(`manga/graph`, { state }, true);
 
+    const providers = () => get<{ name: string, url: string }[]>(`manga/providers`);
+
     const shouldBlur = (manga?: Manga) => {
         return (
             !!manga?.attributes
@@ -156,6 +158,7 @@ export const useMangaApi = () => {
         reverseUrl,
         reverseFile,
         graph,
-        shouldBlur
+        shouldBlur,
+        providers
     };
 };

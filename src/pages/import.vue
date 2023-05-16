@@ -9,11 +9,10 @@
     </div>
     <p>We support Manga from the following sites:</p>
     <ul>
-        <li><a href="https://mangadex.org" target="_blank">mangadex.org</a></li>
-        <li><a href="https://mangaclash.com" target="_blank">mangaclash.com</a></li>
-        <li><a href="https://mangakakalot.com" target="_blank">mangakakalot.com</a></li>
-        <li><a href="https://ww4.mangakakalot.tv" target="_blank">ww4.mangakakalot.tv</a></li>
-        <li><a href="https://nhentai.to" target="_blank">nhentai.to</a> (Yes, really...)</li>
+        <li v-for="prov in providers">
+            <a :href="prov.url" target="_blank">{{ prov.name }}</a>
+            {{ prov.name === 'nhentai' ? '(Yes, really...)' : '' }}
+        </li>
     </ul>
     <footer class="flex">
         <button class="icon-btn pad-left" @click="addManga">
@@ -32,9 +31,13 @@ const url = ref('');
 const routeUrl = computed(() => decodeURIComponent(route.query.url?.toString() ?? ''));
 const loading = ref(false);
 const error = ref<undefined | FetchError<any>>();
-const { reload } = useMangaApi();
+const { reload, providers: getProviders } = useMangaApi();
+
+const { data: providers } = await getProviders();
 
 const addManga = async () => {
+    if (!url.value) return;
+
     loading.value = true;
     const data = await toPromise(reload(url.value, false), true);
     loading.value = false;
