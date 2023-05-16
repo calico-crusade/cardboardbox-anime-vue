@@ -119,23 +119,13 @@
                         <Icon>add</Icon>
                     </button>
                 </div>
-                <div 
-                    class="control rounded pad bg-accent" 
+                <ColorPicker 
                     v-for="(color, index) in colors"
-                >
-                    <label>Gradient Color #{{ index + 1 }}</label>
-                    <div class="group">
-                        <input 
-                            class="fill" 
-                            type="color" 
-                            v-model="color.color" 
-                            :style="{ 'background-color': color.color }"
-                        />
-                        <button @click="() => deleteColor(index)">
-                            <Icon>delete</Icon>
-                        </button>
-                    </div>
-                </div>
+                    v-model="color.color"
+                    :label="'Gradient Color #' + (index + 1)"
+                    @delete="() => deleteColor(index)"
+                    @move="(inc) => move(index, inc)"
+                />
                 <footer class="flex">
                     <button class="pad-left icon-btn" @click="save">
                         <Icon>save</Icon>
@@ -237,6 +227,15 @@ const rebind = () => {
         return { color: t }
     });
 };
+
+const move = (index: number, increment: number) => {
+    let next = index + increment;
+    if (next < 0) next = colors.value.length - 1;
+    if (next >= colors.value.length) next = 0;
+    if (next === index) return;
+
+    [colors.value[index], colors.value[next]] = [colors.value[next], colors.value[index]];
+}
 
 onMounted(() => {
     rebind();
