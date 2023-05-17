@@ -1,6 +1,5 @@
 <template>
-<Loading v-if="!currentUser" />
-<div v-else class="max-width">
+<div class="max-width">
     <Tabs>
         <Tab title="Settings" icon="settings" scrollable keep-alive>
             <div class="flex row">
@@ -26,14 +25,23 @@
                 </div>
                 <div class="control">
                     <label class="no-bot">Progress Bar Style</label>
-                    <select v-model="progressBar">
+                    <SelectBox v-model="progressBar">
                         <option 
                             v-for="style in PROGRESS_BAR_STYLES" 
                             :value="style"
                         >
                             {{ style }}
                         </option>
-                    </select>
+                    </SelectBox>
+
+                    <!-- <select v-model="progressBar">
+                        <option 
+                            v-for="style in PROGRESS_BAR_STYLES" 
+                            :value="style"
+                        >
+                            {{ style }}
+                        </option>
+                    </select> -->
                 </div>
                 <div class="control">
                     <label class="no-bot">Scroll amount on key event</label>
@@ -47,19 +55,19 @@
                 </div>
                 <div class="control">
                     <label class="no-bot">Image Style</label>
-                    <select v-model="pageStyle">
+                    <SelectBox v-model="pageStyle">
                         <option v-for="style in PAGE_STYLES" :value="style">
                             {{ style }}
                         </option>
-                    </select>
+                    </SelectBox>
                 </div>
                 <div class="control">
                     <label class="no-bot">Image Filter</label>
-                    <select v-model="filter">
+                    <SelectBox v-model="filter">
                         <option v-for="style in FILTER_STYLES" :value="style">
                             {{ style }}
                         </option>
-                    </select>
+                    </SelectBox>
                 </div>
                 <div class="control" v-if="filter === FilterStyle.Custom">
                     <label class="no-bot">Custom Filter</label>
@@ -77,11 +85,11 @@
                 </div>
                 <div class="control">
                     <label class="no-bot">Reader Style</label>
-                    <select v-model="listStyle">
+                    <SelectBox v-model="listStyle">
                         <option v-for="style in LIST_STYLES" :value="style">
                             {{ style }}
                         </option>
-                    </select>
+                    </SelectBox>
                 </div>
             </div>
         </Tab>
@@ -90,20 +98,20 @@
                 <h2>System Themes</h2>
                 <div class="control">
                     <label>Theme</label>
-                    <select v-model="theme">
+                    <SelectBox v-model="theme">
                         <option v-for="(theme, index) in themes" :value="index">
                             {{ theme.name }}
                         </option>
-                    </select>
+                    </SelectBox>
                 </div>
                 <h2>Custom Theme</h2>
                 <div class="control">
                     <label>Background Gradient Direction</label>
-                    <select v-model="direction">
+                    <SelectBox v-model="direction">
                         <option v-for="dir in directions" :value="dir">
                             {{ dir }}
                         </option>
-                    </select>
+                    </SelectBox>
                 </div>
                 <div class="control" v-if="direction === 'deg'">
                     <label>Background Gradient Radius</label>
