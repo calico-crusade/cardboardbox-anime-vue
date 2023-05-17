@@ -38,8 +38,8 @@ html, body {
     left: 0;
     width: max(100vw, 100%);
     height: max(100vh, 100%);
-    max-width: max(100vw, 100%);
-    max-height: max(100vh, 100%);
+    max-width: min(100vw, 100%);
+    max-height: min(100vh, 100%);
     overflow: hidden;
     background-image: var(--bg-image);
 }

@@ -8,13 +8,13 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-    modelValue: any;
+    modelValue: unknown;
     disabled?: boolean;
     transparent?: boolean;
 }>();
 
 const emits = defineEmits<{
-    (e: 'update:modelValue', v: any): void;
+    (e: 'update:modelValue', v: unknown): void;
 }>();
 
 const value = computed({

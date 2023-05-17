@@ -2,7 +2,7 @@
 <Error v-if="error" :message="error?.message" />
 <div v-else 
     class="page-wrapper flex fill-parent" 
-    :class="{ 'open': navOpen }"
+    :class="{ 'open': navOpen, 'over': pageMenuOver }"
 >
     <main 
         class="fill flex" 
@@ -121,11 +121,14 @@
             to read it.
         </div>
     </main>
+    <div class="fade" @click="() => menuOpen = !menuOpen" />
     <aside class="flex row">
         <header class="flex center-items">
-            <NuxtLink :to="'/manga/' + id" class="flex fill center-items">
-                <Icon>arrow_back</Icon>
-                <p class="text-center fill">{{ manga?.title }}</p>
+            <button @click="() => menuOpen = !menuOpen">
+                <Icon>close</Icon>
+            </button>
+            <NuxtLink :to="'/manga/' + id" class="flex fill center-items text-center">
+                {{ manga?.title }}
             </NuxtLink>
         </header>
         <article class="fill">
@@ -169,33 +172,27 @@
                         </template>
 
                         <div class="control no-top">
-                            <select 
-                                :value="chapterId" 
-                                @change="(val) => genLinkVal(1, val)"
-                            >
+                            <SelectBox v-model="chapterId">
                                 <option 
                                     v-for="chap in chapters" 
                                     :value="chap.id"
                                 >
                                     Ch. {{ chap.ordinal }} - {{ chap.title }}
                                 </option>
-                            </select>
+                            </SelectBox>
                         </div>
                         <div 
                             class="control no-top" 
                             v-if="pageStyle !== PageStyle.LongStrip && !external"
                         >
-                            <select 
-                                :value="page" 
-                                @change="(val) => genLinkVal(val)"
-                            >
+                            <SelectBox v-model="page">
                                 <option 
                                     v-for="(_, index) in chapter?.pages" 
                                     :value="index + 1"
                                 >
                                     Page: #{{ index + 1 }}
                                 </option>
-                            </select>
+                            </SelectBox>
                         </div>
                         <div class="btn-group">
                             <NuxtLink 
@@ -298,16 +295,21 @@
                                 No Directional Buttons
                             </CheckBox>
                         </div>
+                        <div class="control checkbox">
+                            <CheckBox v-model="pageMenuOver">
+                                Page Menu Over Content
+                            </CheckBox>
+                        </div>
                         <div class="control">
                             <label class="no-bot">Progress Bar Style</label>
-                            <select v-model="progressBar">
+                            <SelectBox v-model="progressBar">
                                 <option 
                                     v-for="style in PROGRESS_BAR_STYLES" 
                                     :value="style"
                                 >
                                     {{ style }}
                                 </option>
-                            </select>
+                            </SelectBox>
                         </div>
                         <div class="control">
                             <label class="no-bot">Scroll amount on key event</label>
@@ -321,19 +323,19 @@
                         </div>
                         <div class="control">
                             <label class="no-bot">Image Style</label>
-                            <select v-model="pageStyle">
+                            <SelectBox v-model="pageStyle">
                                 <option v-for="style in PAGE_STYLES" :value="style">
                                     {{ style }}
                                 </option>
-                            </select>
+                            </SelectBox>
                         </div>
                         <div class="control">
                             <label class="no-bot">Image Filter</label>
-                            <select v-model="filter">
+                            <SelectBox v-model="filter">
                                 <option v-for="style in FILTER_STYLES" :value="style">
                                     {{ style }}
                                 </option>
-                            </select>
+                            </SelectBox>
                         </div>
                         <div class="control" v-if="filter === FilterStyle.Custom">
                             <label class="no-bot">Custom Filter</label>
@@ -423,7 +425,8 @@ const {
      invertControls, forwardOnly, 
     brightness, pageStyle, filterStyle: filter, 
     customFilter, progressBarStyle: progressBar,
-    scrollAmount, showTutorial
+    scrollAmount, showTutorial,
+    pageMenuOver
 } = useAppSettings();
 
 const {
@@ -442,8 +445,16 @@ const navOpen = computed({
     set: (value: boolean) => menuOpen.value = value
 });
 
-const page = computed(() => +(route.query.page?.toString() || '1'));
-const chapterId = computed(() => +(route.params.chapter?.toString() || '0'));
+const page = computed({
+    get: () => +(route.query.page?.toString() || '1'),
+    set: (value: number) => genLinkVal(value)
+});
+
+const chapterId = computed({
+    get: () => +(route.params.chapter?.toString() || '0'),
+    set: (value: number) => genLinkVal(1, value)
+});
+
 const bookmarking = ref(false);
 const pageLoading = ref(false);
 const id = computed(() => route.params.id.toString());
@@ -804,7 +815,45 @@ watch(() => route.query, () => doFetch(false));
 <style lang="scss" scoped>
 $navwidth: 400px;
 $progress-height: 10px;
+
+@mixin page-menu-over {
+    aside {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        z-index: 2;
+        background-image: var(--bg-image);
+    }
+
+    main {
+        max-width: 100% !important;
+    }
+
+    .fade {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-color-accent-dark);
+        z-index: -1;
+        opacity: 0;
+        transition: all 250ms;
+    }
+
+    &.open {
+
+        .fade {
+            z-index: 1;
+            opacity: 1;
+        }
+    }
+}
+
 .page-wrapper {
+    position: relative;
+
     main {
         position: relative;
         overflow: auto;
@@ -961,17 +1010,19 @@ $progress-height: 10px;
         background-color: var(--bg-color-accent);
 
         header {
-            margin: 0 10px;
+            margin: 10px;
+            margin-bottom: 0;
             overflow: hidden;
+
+            button {
+                height: 24px;
+            }
 
             a { 
                 overflow: hidden;
-                margin-top: 5px;
-                p {
-                    overflow: hidden;
-                    white-space: pre;
-                    text-overflow: ellipsis;
-                }
+                overflow: hidden;
+                white-space: pre;
+                text-overflow: ellipsis;
             }
         }
 
@@ -1026,6 +1077,15 @@ $progress-height: 10px;
         main {
             max-width: calc(100vw - #{$navwidth});
         }
+    }
+    &.over {
+        @include page-menu-over();
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .page-wrapper {
+        @include page-menu-over();
     }
 }
 </style>

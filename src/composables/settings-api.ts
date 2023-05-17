@@ -16,6 +16,7 @@ interface MangaSettings {
     showPorn: boolean;
     bgImageDir: string;
     bgImageColors: string[];
+    pageMenuOver: boolean;
 }
 
 interface Settings {
@@ -37,6 +38,7 @@ type MangaSettingsKey = {
     showPorn: WritableComputedRef<boolean>;
     bgImageDir: WritableComputedRef<string>;
     bgImageColors: WritableComputedRef<string[]>;
+    pageMenuOver: WritableComputedRef<boolean>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -53,11 +55,11 @@ const DEFAULTS: MangaSettings = {
     showTutorial: true,
     showPorn: true,
     bgImageDir: 'to right bottom',
-    bgImageColors: ['#1953aa', '#693594', '#57195c', '#1a10a0', '#171130']
+    bgImageColors: ['#1953aa', '#693594', '#57195c', '#1a10a0', '#171130'],
+    pageMenuOver: false
 }
 
 export const useAppSettings = () => {
-    const config = useRuntimeConfig();
     const { currentUser } = useAuthApi();
     const { post, debounce, clone } = useApiHelper();
     const { getSetBool, getSetNumb, getSet, getSetArray } = useSettingsHelper();
@@ -91,7 +93,8 @@ export const useAppSettings = () => {
             showTutorial: getSetBool('show-read-tutorial', DEFAULTS.showTutorial, () => commit()),
             showPorn: getSetBool('show-porn', DEFAULTS.showPorn, () => commit()),
             bgImageDir: getSet<string>('bg-image-dir', DEFAULTS.bgImageDir, () => { commit(); fixBgImage(); }),
-            bgImageColors: getSetArray('bg-image-colors', DEFAULTS.bgImageColors, () => { commit(); fixBgImage(); })
+            bgImageColors: getSetArray('bg-image-colors', DEFAULTS.bgImageColors, () => { commit(); fixBgImage(); }),
+            pageMenuOver: getSetBool('page-menu-over', DEFAULTS.pageMenuOver, () => commit()),
         }
     })();
 

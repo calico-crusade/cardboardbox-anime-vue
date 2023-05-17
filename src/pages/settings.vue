@@ -157,7 +157,6 @@ import {
     LIST_STYLES
 } from '~/models';
 
-const { currentUser } = useAuthApi();
 const { 
     resetBgImage,
     fixBgImage,
