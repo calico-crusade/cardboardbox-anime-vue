@@ -5,7 +5,9 @@
     :pending="pending" 
     @onscrolled="onScroll" 
     @headerstuck="(v) => headerStuck = v"
+    @reload="() => fetch(true)"
     capitalize
+    allow-reload
 >
     <div 
         class="search-drawer" 

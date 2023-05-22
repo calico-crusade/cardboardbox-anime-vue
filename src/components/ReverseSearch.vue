@@ -47,7 +47,7 @@ const value = computed({
 
 const wrapedUrl = computed(() => 
     value.value 
-        ? `/reverse/${encodeURIComponent(value.value)}` 
+        ? `/reverse?url=${encodeURIComponent(value.value)}` 
         : undefined
     );
 

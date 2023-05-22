@@ -1,5 +1,5 @@
 <template>
-<div class="select-styled" :class="{ 'transparent': transparent }">
+<div class="select-styled" :class="{ 'transparent': transparent, 'fill': fill }">
     <select v-model="value" :disabled="disabled" :aria-disabled="disabled">
         <slot />
     </select>
@@ -11,6 +11,7 @@ const props = defineProps<{
     modelValue: unknown;
     disabled?: boolean;
     transparent?: boolean;
+    fill?: boolean
 }>();
 
 const emits = defineEmits<{
@@ -21,6 +22,7 @@ const value = computed({
     get: () => props.modelValue,
     set: (val: any) => emits('update:modelValue', val)
 });
+
 </script>
 
 <style lang="scss">

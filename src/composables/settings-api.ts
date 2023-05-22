@@ -17,6 +17,7 @@ interface MangaSettings {
     bgImageDir: string;
     bgImageColors: string[];
     pageMenuOver: boolean;
+    regionMargin: number;
 }
 
 interface Settings {
@@ -39,6 +40,7 @@ type MangaSettingsKey = {
     bgImageDir: WritableComputedRef<string>;
     bgImageColors: WritableComputedRef<string[]>;
     pageMenuOver: WritableComputedRef<boolean>;
+    regionMargin: WritableComputedRef<number>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -56,7 +58,8 @@ const DEFAULTS: MangaSettings = {
     showPorn: true,
     bgImageDir: 'to right bottom',
     bgImageColors: ['#1953aa', '#693594', '#57195c', '#1a10a0', '#171130'],
-    pageMenuOver: false
+    pageMenuOver: false,
+    regionMargin: 30
 }
 
 export const useAppSettings = () => {
@@ -95,6 +98,7 @@ export const useAppSettings = () => {
             bgImageDir: getSet<string>('bg-image-dir', DEFAULTS.bgImageDir, () => { commit(); fixBgImage(); }),
             bgImageColors: getSetArray('bg-image-colors', DEFAULTS.bgImageColors, () => { commit(); fixBgImage(); }),
             pageMenuOver: getSetBool('page-menu-over', DEFAULTS.pageMenuOver, () => commit()),
+            regionMargin: getSetNumb('region-margin', DEFAULTS.regionMargin, () => commit())
         }
     })();
 

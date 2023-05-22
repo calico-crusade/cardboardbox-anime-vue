@@ -33,15 +33,6 @@
                             {{ style }}
                         </option>
                     </SelectBox>
-
-                    <!-- <select v-model="progressBar">
-                        <option 
-                            v-for="style in PROGRESS_BAR_STYLES" 
-                            :value="style"
-                        >
-                            {{ style }}
-                        </option>
-                    </select> -->
                 </div>
                 <div class="control">
                     <label class="no-bot">Scroll amount on key event</label>

@@ -47,6 +47,7 @@
 import { States } from '~/models';
 
 const { graph } = useMangaApi();
+useHead({ title: 'Interested in your favourite tags?' });
 
 const states: States[] = [
     'favourite', 'completed', 

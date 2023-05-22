@@ -147,7 +147,8 @@ const {
     reload,
     extended,
     resetProgress: reset,
-    shouldBlur
+    shouldBlur,
+    volumed
 } = useMangaApi();
 
 const { proxy: proxyUrl, toPromise } = useApiHelper();

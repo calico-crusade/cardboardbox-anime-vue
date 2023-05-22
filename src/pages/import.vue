@@ -27,6 +27,8 @@ import { FetchError } from 'ofetch';
 const { toPromise } = useApiHelper();
 const route = useRoute();
 
+useHead({ title: 'Import your favourite binge!' });
+
 const url = ref('');
 const routeUrl = computed(() => decodeURIComponent(route.query.url?.toString() ?? ''));
 const loading = ref(false);

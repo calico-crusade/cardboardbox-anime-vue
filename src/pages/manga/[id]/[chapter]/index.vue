@@ -5,8 +5,11 @@
     :class="{ 'open': navOpen, 'over': pageMenuOver }"
 >
     <main 
-        class="fill flex" 
-        @click="pageClick" 
+        class="fill flex"
+        v-swipe
+        @tap="pageClick"
+        @swipe-left="forward"
+        @swipe-right="backward"
         ref="clickarea" 
         :class="pageStyle" 
         v-if="!external"
@@ -300,6 +303,11 @@
                                 Page Menu Over Content
                             </CheckBox>
                         </div>
+                        <div class="control checkbox">
+                            <CheckBox v-model="showTutorial">
+                                Show Page Tutorial
+                            </CheckBox>
+                        </div>
                         <div class="control">
                             <label class="no-bot">Progress Bar Style</label>
                             <SelectBox v-model="progressBar">
@@ -319,6 +327,16 @@
                                 max="1000" 
                                 step="10" 
                                 v-model="scrollAmount" 
+                            />
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Click Region Margin</label>
+                            <input 
+                                type="number" 
+                                min="5" 
+                                max="90" 
+                                step="5" 
+                                v-model="regionMargin" 
                             />
                         </div>
                         <div class="control">
@@ -426,7 +444,7 @@ const {
     brightness, pageStyle, filterStyle: filter, 
     customFilter, progressBarStyle: progressBar,
     scrollAmount, showTutorial,
-    pageMenuOver
+    pageMenuOver, regionMargin
 } = useAppSettings();
 
 const {
@@ -513,8 +531,8 @@ const imageFilter = computed(() => {
         .join(' ');
 });
 
-const regions = (() => {
-    const margin = 30;
+const regions = computed(() => {
+    const margin = regionMargin.value;
     const w = (100 / 2) - (margin / 2);
     const regions: Rect[] = [
         { x: 0, y: 0, width: 100, height: w, name: 'top' },
@@ -525,14 +543,14 @@ const regions = (() => {
     ];
 
     return regions;
-})();
+});
 
 const inRegion = (rect: DOMRect, mx: number, my: number) => {
     const output: ('top' | 'left' | 'bottom' | 'right' | 'center')[] = [];
     const x = (mx - rect.left) / rect.width * 100;
     const y = (my - rect.top) / rect.height * 100;
 
-    for(let reg of regions) {
+    for(let reg of regions.value) {
         if (x >= reg.x && x <= reg.x + reg.width &&
             y >= reg.y && y <= reg.y + reg.height)
             output.push(reg.name);
@@ -541,9 +559,9 @@ const inRegion = (rect: DOMRect, mx: number, my: number) => {
     return output;
 };
 
-const mouseInRegion = (event: MouseEvent, target: HTMLElement) => {
+const mouseInRegion = (x: number, y: number, target: HTMLElement) => {
     const rect = target.getBoundingClientRect();
-    return inRegion(rect, event.clientX, event.clientY);
+    return inRegion(rect, x, y);
 };
 
 const fetchManga = async (force: boolean) => {
@@ -620,10 +638,20 @@ useServerSeoMeta({
     twitterCard: 'summary_large_image'
 });
 
+const forward = () => {
+    const link = genLink(invertControls.value ? 'PrevPage': 'NextPage');
+    if (link) navTo(link);
+}
+
+const backward = () => {
+    const link = genLink(invertControls.value ? 'NextPage': 'PrevPage');
+    if (link) navTo(link);
+}
+
 const pageClick = (event: MouseEvent) => {
     if (!clickarea.value) return;
 
-    const output = mouseInRegion(event, clickarea.value);
+    const output = mouseInRegion(event.clientX, event.clientY, clickarea.value);
 
     if(output.includes('center')) {
         menuOpen.value = !menuOpen.value;
@@ -639,21 +667,13 @@ const pageClick = (event: MouseEvent) => {
     let isBack = output.includes('left') || (output.includes('top') && !output.includes('right'));
     let isForward = output.includes('right') || (output.includes('bottom') && !output.includes('left'));
 
-    if (invertControls.value) {
-        const isfor = isForward;
-        isForward = isBack;
-        isBack = isfor;
-    }
-
     if (isBack) {
-        const link = genLink('PrevPage');
-        if (link) navTo(link);
+        backward();
         return;
     }
 
     if (isForward) {
-        const link = genLink('NextPage');
-        if (link) navTo(link);
+        forward();
         return;
     }
 };

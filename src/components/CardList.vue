@@ -5,6 +5,9 @@
             <Icon>arrow_back</Icon>
         </button>
         <h2 class="fill" :class="{ 'caps': capitalize }">{{ title }} ({{ items.length }})</h2>
+        <button v-if="allowReload" class="btn-reload" @click="() => $emit('reload')">
+            <Icon>sync</Icon>
+        </button>
         <div class="btn-group">
             <button 
                 v-for="sty in styles"
@@ -55,6 +58,7 @@ const { listStyle } = useAppSettings();
 const stickyheader = ref<HTMLElement>();
 const emits = defineEmits<{ 
     (e: 'onscrolled'): void;
+    (e: 'reload'): void;
     (e: 'headerstuck', value: boolean): void;
 }>();
 const scroller = ref<HTMLElement>();
@@ -65,6 +69,7 @@ const props = defineProps<{
     noresults?: boolean;
     capitalize?: boolean;
     title: string;
+    allowReload?: boolean;
 }>();
 
 const items = computed(() => {
@@ -127,6 +132,11 @@ onMounted(() => {
         width: 100%;
         margin: 0 auto;
         margin-top: var(--margin);
+
+        .btn-reload {
+            height: 24px;
+            margin: auto 10px;
+        }
     }
 
     .title {

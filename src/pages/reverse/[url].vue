@@ -19,7 +19,7 @@ const { toPromise, proxy } = useApiHelper();
 
 const url = computed(() => decodeURIComponent(route.params.url?.toString() ?? ''));
 const search = ref(url.value);
-const { pending, data: results } = await reverseUrl(url.value);
+const { pending, data: results } = await reverseUrl(url.value, process.client);
 const combined = computed(() => 
     results.value 
         ? [...results.value.match, ...results.value.vision, ...results.value.textual] 

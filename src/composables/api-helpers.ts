@@ -96,8 +96,9 @@ export const useApiHelper = () => {
         });
     }
 
-    function download(url: string, name?: string) {
-        return fetch(url)
+    function download(url: string, name?: string, req?: RequestInit) {
+        const uri = wrapUrl(url);
+        return fetch(uri, req)
             .then(t => t.blob())
             .then(t => {
                 filesaver.saveAs(t, name);

@@ -3,13 +3,13 @@ import {
     Manga, MangaWithChapters, Stats,
     Paginated, Progress, ProgressExt,
     VolumeChapter, Volume, ImageSearch,
-    States, MangaGraph
+    States, MangaGraph, MangaData
 } from "~/models";
 import { useApiHelper } from "./api-helpers";
 import { FetchError } from 'ofetch';
 
 export const useMangaApi = () => {
-    const { get, del, post } = useApiHelper();
+    const { get, del, post, download } = useApiHelper();
     const { blurPornCovers } = useAppSettings();
 
     const fetch = (id: number | string) => {
@@ -42,6 +42,8 @@ export const useMangaApi = () => {
     const randomNum = (count: number) => get<Manga[]>(`manga/random/${count}`);
 
     const extended = (id: number | string) => get<ProgressExt>(`manga/${id}/extended`);
+
+    const volumed = (id: number | string) => get<MangaData>(`manga/${id}/volumed`);
 
     const favourite = (id: number) => get<boolean>(`manga/${id}/favourite`, undefined, true);
 
@@ -119,7 +121,7 @@ export const useMangaApi = () => {
         return post(`manga/${id}/${chapter}/bookmark`, pages);
     };
 
-    const reverseUrl = (path: string) => get<ImageSearch>(`manga/image-search`, { path });
+    const reverseUrl = (path: string, lazy: boolean = false) => get<ImageSearch>(`manga/image-search`, { path }, lazy);
     const reverseFile = (file: File) => {
         const data = new FormData();
         data.append('file', file);
@@ -140,6 +142,18 @@ export const useMangaApi = () => {
         ) && blurPornCovers.value
     };
 
+    const strip = (id: number, pages: { chapterId: number, page: number}[]) => {
+        const body = JSON.stringify({
+            mangaId: id,
+            pages
+        });
+        return download(`manga/strip`, 'strip.png', {
+            method: 'POST',
+            body,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
     return {
         fetch,
         random,
@@ -159,6 +173,8 @@ export const useMangaApi = () => {
         reverseFile,
         graph,
         shouldBlur,
-        providers
+        providers,
+        volumed,
+        strip
     };
 };
