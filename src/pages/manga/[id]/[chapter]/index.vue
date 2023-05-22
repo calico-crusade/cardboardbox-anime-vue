@@ -595,7 +595,7 @@ const doFetch = async (force: boolean) => {
     }
 
     if (process.client) {
-        progress(manga.value.id, chapterId.value, page.value);
+        progress(manga.value.id, chapterId.value, page.value - 1);
     }
 }
 
