@@ -33,7 +33,7 @@
         </div>
         <div class="tags">
             <div class="header">Tags: </div>
-            <div class="tag nsfw" v-if="mdata.manga.nsfw">NSFW</div>
+            <div class="tag nsfw" v-if="mdata.manga.nsfw">{{ mdata.rating ?? 'NSFW' }}</div>
             <NuxtLink 
                 class="tag" 
                 v-for="tag of mdata.manga.tags" 
@@ -119,7 +119,8 @@ interface MangaData {
     icon?: {
         text: string;
         fill?: boolean;
-    }
+    };
+    rating?: string;
 }
 
 interface SearchData {
@@ -216,7 +217,8 @@ function determineCardData(): MangaData | undefined {
         progress: progress,
         stats: stats,
         chapter: chapter,
-        icon: getIcon()
+        icon: getIcon(),
+        rating: manga.manga.attributes.find(t => t.name === 'Content Rating')?.value
     }
 }
 </script>
@@ -280,7 +282,10 @@ function determineCardData(): MangaData | undefined {
                 border: 1px solid var(--bg-color-offset);
                 border-radius: 3px;
 
-                &.nsfw { background-color: var(--color-warning); }
+                &.nsfw { 
+                    background-color: var(--color-warning);
+                    text-transform: capitalize;
+                }
             }
         }
     }
