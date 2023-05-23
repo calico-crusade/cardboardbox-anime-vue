@@ -594,7 +594,7 @@ const doFetch = async (force: boolean) => {
         return;
     }
 
-    if (process.client) {
+    if (process.client && token.value) {
         progress(manga.value.id, chapterId.value, page.value - 1);
     }
 
@@ -818,7 +818,7 @@ onMounted(() => nextTick(() =>  {
     window.addEventListener('keydown', arrowKeyDown);
 
     navOpen.value = menuOpen.value;
-    if (!token.value) return;
+    if (!token.value && !!chapter.value?.pages.length) return;
 
     //Refetch with authentication context
     doFetch(wasUnauthed);
