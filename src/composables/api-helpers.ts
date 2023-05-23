@@ -130,7 +130,7 @@ export const useApiHelper = () => {
         });
     }
 
-    function debounce<T>(fun: (arg: T) => void, wait: number)  {
+    const debounce = <T>(fun: (arg: T) => void, wait: number) => {
         let timer: NodeJS.Timer;
         return (arg: T) => {
             if (timer) clearTimeout(timer);
@@ -140,12 +140,12 @@ export const useApiHelper = () => {
         }
     }
 
-    function throttle(fun: Function, wait: number) {
+    const throttle = <T>(fun: (arg: T) => void, wait: number) => {
         let throttled = false;
-        return function(...args: any) {
+        return (arg: T) => {
             if (throttled) return;
     
-            fun(...args);
+            fun(arg);
             throttled = true;
             setTimeout(() => {
                 throttled = false;

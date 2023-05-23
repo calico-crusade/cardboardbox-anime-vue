@@ -436,7 +436,7 @@ interface Rect {
     
 const DEFAULT_IMAGE = '/broken.png';
 
-const { proxy, download } = useApiHelper();
+const { proxy, download, throttle } = useApiHelper();
 const { pages, fetch, progress, resetPages: reset, bookmark } = useMangaApi();
 const route = useRoute();
 const { 
@@ -770,26 +770,34 @@ const fullscreen = () => {
     }
 }
 
-const arrowKey = (ev: KeyboardEvent) => {
+const scroll = (up: boolean) => {
+    clickarea.value?.scrollBy({
+        top: (up ? -scrollAmount.value : scrollAmount.value),
+        behavior: 'smooth'
+    });
+}
+
+const scrollThrottle = computed(() => scrollAmount.value);
+const scrollDown = computed(() => throttle<void>(() => scroll(false), scrollThrottle.value));
+const scrollUp = computed(() => throttle<void>(() => scroll(true), scrollThrottle.value));
+
+const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
     const scrollabled = [
         PageStyle.LongStrip, 
         PageStyle.SinglePageFitToWidth, 
         PageStyle.SinglePageNaturalSize
     ].indexOf(pageStyle.value) !== -1;
     
-    const pos = clickarea.value?.scrollTop ?? 0;
-    const offset = scrollAmount.value;
-
     switch(ev.key) {
-        case 'ArrowLeft': backward(); return;
-        case 'ArrowRight': forward();  return;
+        case 'ArrowLeft': if(!down) backward(); return;
+        case 'ArrowRight': if(!down) forward();  return;
         case 'ArrowUp':
             if (!scrollabled) { 
                 backward(); 
                 return;
             }
 
-            clickarea.value?.scroll({ top: pos - offset, behavior: 'smooth' });
+            scrollUp.value();
             return;
 
         case 'ArrowDown':
@@ -798,13 +806,16 @@ const arrowKey = (ev: KeyboardEvent) => {
                 return;
             }
 
-            clickarea.value?.scroll({ top: pos + offset, behavior: 'smooth' });
+            scrollDown.value();
             return;
     }
-}
+};
+const arrowKeyDown = (ev: KeyboardEvent) => arrowKeyHandler(ev, true);
+const arrowKeyUp = (ev: KeyboardEvent) => arrowKeyHandler(ev, false);
 
 onMounted(() => nextTick(() =>  {
-    window.addEventListener('keyup', arrowKey);
+    window.addEventListener('keyup', arrowKeyUp);
+    window.addEventListener('keydown', arrowKeyDown);
 
     navOpen.value = menuOpen.value;
     if (!token.value) return;
@@ -815,7 +826,8 @@ onMounted(() => nextTick(() =>  {
 }));
 
 onUnmounted(() => {
-    window.removeEventListener('keyup', arrowKey);
+    window.removeEventListener('keyup', arrowKeyUp);
+    window.removeEventListener('keydown', arrowKeyDown);
 })
 
 watch(() => route.query, () => doFetch(false));
