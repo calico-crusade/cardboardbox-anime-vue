@@ -1,12 +1,8 @@
 <template>
 <div class="manga" v-if="mdata" :class="actStyle">
-    <NuxtLink 
-        :to="'/manga/' + mdata.manga.id" 
-        class="image" 
-        :style="{
-            'background-image': 'url(' + proxy(mdata.manga.cover, mdata.manga.referer) + ')'
-        }"
-        :class="{ 'porn': isPorn }"
+    <Cover 
+        type="link" 
+        :manga="mdata.manga" 
     />
     <div class="details masked-overflow">
         <div class="title">
@@ -52,10 +48,10 @@
     </div>
 </div>
 <div class="manga" v-if="sdata" :class="actStyle">
-    <NuxtLink 
-        :to="'/import?url=' + encodeURIComponent(sdata.manga.url)" 
-        class="image" 
-        :style="{'background-image': `url(${proxy(sdata.manga.cover)})`}"
+    <Cover 
+        type="link" 
+        :url="sdata.manga.cover"
+        :link="'/import?url=' + encodeURIComponent(sdata.manga.url)"
     />
     <div class="details masked-overflow">
         <div class="title">
@@ -107,9 +103,7 @@ import {
     Stats, MatchResult, Progress, ProgressExt, 
     VisionResult, ListStyle
 } from '~/models';
-const { proxy: proxyUrl } = useApiHelper();
 const { listStyle } = useAppSettings();
-const { shouldBlur } = useMangaApi();
 
 interface Props {
     search?: MatchResult | VisionResult | BaseResult | ImageSearchManga;
@@ -145,7 +139,6 @@ const { search, manga, overridestyle: style } = defineProps<Props>();
 const mdata = computed(() => determineCardData());
 const sdata = computed(() => determineSearchData());
 const actStyle = computed(() => style ?? listStyle.value);
-const isPorn = computed(() => shouldBlur(mdata.value?.manga));
 
 const domain = (url: string) => new URL(url).hostname;
 
@@ -226,8 +219,6 @@ function determineCardData(): MangaData | undefined {
         icon: getIcon()
     }
 }
-
-const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', referer);
 </script>
 
 <style lang="scss" scoped>
@@ -364,6 +355,10 @@ const proxy = (url: string, referer?: string) => proxyUrl(url, 'manga-cover', re
         &:hover {
             .image {
                 filter: brightness(0.8) grayscale(0.8);
+
+                &.porn {
+                    filter: brightness(0.8) grayscale(0.8) blur(0);
+                }
             }
 
             .details .title {

@@ -3,11 +3,7 @@
 <Error v-else-if="error" :message="error?.message" />
 <div v-else class="manga-details flex fill-parent scroll-y">
     <div v-if="manga" class="manga-header flex row">
-        <div 
-            class="image" 
-            :style="{'background-image': `url(${proxy(manga.cover)})`}"
-            :class="{'porn': isPorn}"
-        />
+        <Cover :manga="manga" type="background" width="100%" height="400px" />
         <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
         <div class="buttons flex center-horz">
             <NuxtLink class="icon-btn" v-if="resumeUrl" :to="resumeUrl">
@@ -51,6 +47,32 @@
             </button>
         </div>
         <div class="drawers">
+            <Drawer title="Progress" v-if="stats && stats.progress">
+                <p>
+                    <b>Chapter: </b>
+                    <span v-if="stats.chapter.volume">Vol. {{ stats.chapter.volume }}&nbsp;</span> Ch. {{ stats.chapter.ordinal }} - {{ stats.chapter.title }}
+                </p>
+                <p>
+                    <b>Progress: </b>
+                    {{ stats.stats.chapterProgress }}%
+                </p>
+                <p>
+                    <b>Page Progress: </b>
+                    {{ stats.stats.pageProgress }}%
+                </p>
+                <p>
+                    <b>Last Read On: </b>
+                    <Date :date="stats.progress.updatedAt.toString()" />
+                </p>
+                <p>
+                    <b>Favourite: </b>
+                    {{ stats.stats.favourite ? 'Yes' : 'No' }}
+                </p>
+                <p>
+                    <b>Completed: </b>
+                    {{ stats.stats.completed ? 'Yes' : 'No' }}
+                </p>
+            </Drawer>
             <Drawer title="Description" v-if="manga.description">
                 <Markdown :content="manga.description" />
             </Drawer>
@@ -146,9 +168,7 @@ const {
     favourite, 
     reload,
     extended,
-    resetProgress: reset,
-    shouldBlur,
-    volumed
+    resetProgress: reset
 } = useMangaApi();
 
 const { proxy: proxyUrl, toPromise } = useApiHelper();
@@ -184,7 +204,6 @@ const resumeUrl = computed(() =>
 const title = computed(() => manga.value?.title ?? 'Manga Not Found');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const cover = computed(() => proxy(manga.value?.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
-const isPorn = computed(() => shouldBlur(manga.value));
 
 useHead({ title })
 
@@ -272,15 +291,6 @@ $bg-color: var(--bg-color-accent);
         margin: 5px;
         width: 430px;
         height: auto;
-
-        .image {
-            max-width: 100%;
-            min-height: 400px;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            margin: 0 5px;
-        }
 
         a.title {
             font-size: 2em;

@@ -597,6 +597,8 @@ const doFetch = async (force: boolean) => {
     if (process.client) {
         progress(manga.value.id, chapterId.value, page.value - 1);
     }
+
+    clickarea.value?.scroll({ top: 0, behavior: 'smooth' });
 }
 
 const resetPages = async () => {
@@ -768,16 +770,6 @@ const fullscreen = () => {
     }
 }
 
-const nextPage = () => {
-    const link = genLink('NextPage');
-    if (link) navTo(link);
-}
-
-const prevPage = () => {
-    const link = genLink('PrevPage');
-    if (link) navTo(link);
-}
-
 const arrowKey = (ev: KeyboardEvent) => {
     const scrollabled = [
         PageStyle.LongStrip, 
@@ -788,9 +780,6 @@ const arrowKey = (ev: KeyboardEvent) => {
     const pos = clickarea.value?.scrollTop ?? 0;
     const offset = scrollAmount.value;
 
-    const forward = () => (invertControls.value ? prevPage() : nextPage());
-    const backward = () => (invertControls.value ? nextPage() : prevPage());
-
     switch(ev.key) {
         case 'ArrowLeft': backward(); return;
         case 'ArrowRight': forward();  return;
@@ -800,7 +789,7 @@ const arrowKey = (ev: KeyboardEvent) => {
                 return;
             }
 
-            if (clickarea.value) clickarea.value.scroll({ top: pos - offset, behavior: 'smooth' });
+            clickarea.value?.scroll({ top: pos - offset, behavior: 'smooth' });
             return;
 
         case 'ArrowDown':
@@ -809,7 +798,7 @@ const arrowKey = (ev: KeyboardEvent) => {
                 return;
             }
 
-            if (clickarea.value) clickarea.value.scroll({ top: pos + offset, behavior: 'smooth' });
+            clickarea.value?.scroll({ top: pos + offset, behavior: 'smooth' });
             return;
     }
 }
@@ -936,7 +925,7 @@ $progress-height: 10px;
         }
 
         .progress-bar {
-            position: absolute;
+            position: fixed;
             display: flex;
             flex-flow: row;
 
@@ -967,7 +956,6 @@ $progress-height: 10px;
             }
 
             &.left, &.right {
-                position: absolute;
                 top: 0;
                 height: 100%;
                 flex-flow: column;

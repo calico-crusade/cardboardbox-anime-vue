@@ -19,6 +19,7 @@ const open = ref(true);
 
 <style lang="scss" scoped>
 $bg-color: var(--bg-color-accent);
+$max-height: 80vh;
 .drawer {
     border-radius: 5px;
     margin-bottom: 5px;
@@ -44,6 +45,9 @@ $bg-color: var(--bg-color-accent);
         .open-content {
             margin-bottom: 5px;
             padding: 5px;
+            max-height: #{$max-height - 1vh};
+            overflow-y: auto;
+            overflow-x: hidden;
         }
     }
 
@@ -53,7 +57,7 @@ $bg-color: var(--bg-color-accent);
         }
 
         .opener { 
-            max-height: 900px;
+            max-height: $max-height;
         }
     }
 }
