@@ -126,11 +126,12 @@ const doSearch = (trigger?: boolean) => {
         transition: all 250ms;
         padding: 0;
         border: 1px solid transparent;
+        position: relative;
 
         .drawer-content {
             overflow-x: hidden;
             overflow-y: auto;
-            max-height: 100%;
+            max-height: calc(80vh - 20px);
             padding: 10px;
         }
     }
