@@ -18,3 +18,4 @@ export * from './image-search.model';
 export * from './styles.model';
 export * from './match.model';
 export * from './theme.model';
+export * from './polyfill';

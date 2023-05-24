@@ -35,6 +35,8 @@ export default defineNuxtConfig({
     },
     components: [
         '~/components/general',
+        '~/components/general/tabs',
+        '~/components/buttons',
         '~/components'
     ],
     modules: [

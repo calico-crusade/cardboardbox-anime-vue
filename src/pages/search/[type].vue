@@ -9,21 +9,13 @@
     capitalize
     allow-reload
 >
-    <div 
-        class="search-drawer" 
-        :class="{ open: advanced, stuck: headerStuck }"
+    <InputGroup
+        v-model="filter.search"
+        placeholder="Search for your favourite manga!" 
+        :stuck="headerStuck"
+        :link="filterRouteUrl()"
     >
-        <div class="control fill no-top group center-items">
-            <input 
-                class="fill" 
-                type="text" 
-                placeholder="Search for your favourite manga!" 
-                v-model="filter.search" 
-            />
-            <button @click="() => filter.search = ''">
-                <Icon unsize="true" size="12px">close</Icon>
-            </button>
-            <div class="sep" />
+        <template #input>
             <select v-model="filter.state">
                 <option 
                     v-for="state in states" 
@@ -33,67 +25,76 @@
                 </option>
             </select>
             <label>({{ results.results.length }} / {{ results.count }})</label>
-            <button @click="() => advanced = !advanced">
-                <Icon unsize="true" size="26px">tune</Icon>
-            </button>
-            <NuxtLink :to="filterRouteUrl()">
-                <Icon unsize="true" size="26px">search</Icon>
-            </NuxtLink>
-        </div>
-        <main>
-            <h2>Advanced Search Options: </h2>
+        </template>
+
+        <h2>Advanced Search Options: </h2>
+        <template v-if="!onlynhentai">
             <label>Tags</label>
             <ButtonGroupTags 
                 v-model:on="filter.include" 
                 v-model:off="filter.exclude" 
                 :options="allTags" 
             />
-            <label>Sources</label>
-            <ButtonGroup 
-                v-model="filter.sources" 
-                :options="sources" 
-                capitalize 
+        </template>
+        <template v-if="hasnhentai">
+            <label>NSFW Tags</label>
+            <ButtonGroupTags 
+                v-model:on="filter.include" 
+                v-model:off="filter.exclude" 
+                :options="nsfwTags" 
             />
+        </template>
 
-            <label>Content Rating</label>
-            <ButtonGroup 
-                v-model="filter.attributes[0].values" 
-                :options="ratings" 
-                capitalize 
-            />
-            <ButtonGroupBool 
-                v-if="filter.attributes[0].values.length > 0" 
-                v-model="filter.attributes[0].include" 
-                on="Include" 
-                off="Exclude" 
-                on-icon="done" 
-                off-icon="close" 
-            />
+        <label>Sources</label>
+        <ButtonGroup 
+            v-model="filter.sources" 
+            :options="sources" 
+            capitalize 
+        />
 
-            <label>Publication Status</label>
-            <ButtonGroup 
-                v-model="filter.attributes[2].values" 
-                :options="statuses" 
-                capitalize 
-            />
-            <ButtonGroupBool 
-                v-if="filter.attributes[2].values.length > 0" 
-                v-model="filter.attributes[2].include" 
-                on="Include" 
-                off="Exclude" 
-                on-icon="done" 
-                off-icon="close" 
-            />
+        <label>Content Rating</label>
+        <ButtonGroup 
+            v-model="filter.attributes[0].values" 
+            :options="ratings" 
+            capitalize 
+        />
+        <ButtonGroupBool 
+            v-if="filter.attributes[0].values.length > 0" 
+            v-model="filter.attributes[0].include" 
+            on="Include" 
+            off="Exclude" 
+            on-icon="done" 
+            off-icon="close" 
+        />
 
-            <label>Sort Options</label>
-            <ButtonGroupIndex 
-                v-model="filter.sort" 
-                :options="allSorts" 
-            />
-            <label>Sort By Options</label>
-            <ButtonGroupBool v-model="filter.asc" />
-        </main>
-    </div>
+        <label>Publication Status</label>
+        <ButtonGroup 
+            v-model="filter.attributes[2].values" 
+            :options="statuses" 
+            capitalize 
+        />
+        <ButtonGroupBool 
+            v-if="filter.attributes[2].values.length > 0" 
+            v-model="filter.attributes[2].include" 
+            on="Include" 
+            off="Exclude" 
+            on-icon="done" 
+            off-icon="close" 
+        />
+
+        <label>Sort Options</label>
+        <ButtonGroupIndex 
+            v-model="filter.sort" 
+            :options="allSorts" 
+        />
+        <label>Sort By Options</label>
+        <ButtonGroupBool v-model="filter.asc" />
+
+        <button class="icon-btn align-left" @click="clearTags()">
+            <Icon>delete</Icon>
+            <p>Clear</p>
+        </button>
+    </InputGroup>
 </CardList>
 </template>
 
@@ -154,6 +155,7 @@ const pending = ref(false);
 const { data: filters } = await getFilters();
    
 const allTags = computed(() => filters.value?.find(t => t.key === 'tag')?.values || []);
+const nsfwTags = computed(() => filters.value?.find(t => t.key === 'nsfw-tag')?.values || []);
 const allSorts = computed(() => filters.value?.find(t => t.key === 'sorts')?.values || []);
 const sources = computed(() => filters.value?.find(t => t.key === 'source')?.values || []);
 const ratings = computed(() => filters.value?.find(t => t.key === 'content rating')?.values || []);
@@ -171,6 +173,9 @@ const state = computed(() => {
 
     return 0;
 });
+
+const hasnhentai = computed(() => filter.value.sources.includes('nhentai'));
+const onlynhentai = computed(() => hasnhentai.value && filter.value.sources.length === 1);
 
 useHead({ title: 'Find your next binge!' });
 useServerSeoMeta({
@@ -222,6 +227,16 @@ const onScroll = async () => {
     await fetch(false);
 }
 
+const clearTags = () => {
+    filter.value.exclude = [];
+    filter.value.include = [];
+    filter.value.sources = [];
+    filter.value.attributes.forEach(t => t.values = []);
+    filter.value.sort = defaultFilters.sort;
+    filter.value.nsfw = defaultFilters.nsfw;
+    
+}
+
 onMounted(() => nextTick(() => {
     filter.value = routeFilter();
     fetch(true);
@@ -258,8 +273,10 @@ $br-color: transparent;
         padding: 0 10px;
 
         h2 { margin-top: 10px; }
-
         
+        button:last-child {
+            margin-bottom: var(--margin);
+        }
     }
 
     &.open main {

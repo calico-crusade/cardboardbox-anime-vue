@@ -4,10 +4,12 @@
     :search="combined"
     :pending="pending"
     :noresults="!!results"
+    @headerstuck="(v) => stuck = v"
 >
     <ReverseSearch 
         v-model="search"
         @file="searchFile"
+        :stuck="stuck"
     />
 </CardList>
 </template>
@@ -17,6 +19,7 @@ const route = useRoute();
 const { reverseFile, reverseUrl } = useMangaApi();
 const { toPromise, proxy } = useApiHelper();
 
+const stuck = ref(false);
 const url = computed(() => decodeURIComponent(route.params.url?.toString() ?? ''));
 const search = ref(url.value);
 const { pending, data: results } = await reverseUrl(url.value, process.client);

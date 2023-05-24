@@ -1,21 +1,24 @@
 <template>
 <div class="card-list" ref="scroller" @scroll="onScroll" :class="style">
     <div class="title flex center-items">
-        <button class="back" @click="back">
-            <Icon>arrow_back</Icon>
-        </button>
+        <IconBtn
+            icon="arrow_back"
+            @click="back"
+        />
         <h2 class="fill" :class="{ 'caps': capitalize }">{{ title }} ({{ items.length }})</h2>
-        <button v-if="allowReload" class="btn-reload" @click="() => $emit('reload')">
-            <Icon>sync</Icon>
-        </button>
+
+        <IconBtn 
+            v-if="allowReload"
+            @click="() => $emit('reload')"
+            icon="sync"
+        />
         <div class="btn-group">
-            <button 
+            <IconBtn
                 v-for="sty in styles"
                 @click="() => style = sty.style"
-                :class="{ 'active': sty.style === listStyle }"
-            >
-                <Icon>{{ sty.icon }}</Icon>
-            </button>
+                :icon="sty.icon"
+                :color="sty.style === listStyle ? 'primary' : 'shade'"
+            />
         </div>
     </div>
 
@@ -136,6 +139,29 @@ onMounted(() => {
         .btn-reload {
             height: 24px;
             margin: auto 10px;
+        }
+
+        .btn-group {
+            margin-top: 0;
+            border: 0;
+            background-color: transparent;
+            
+            button {
+
+                &:not(:first-child):not(:last-child) {
+                    border-radius: 0;
+                }
+
+                &:first-child {
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+                }
+
+                &:last-child {
+                    border-top-left-radius: 0;
+                    border-bottom-left-radius: 0;
+                }
+            }
         }
     }
 

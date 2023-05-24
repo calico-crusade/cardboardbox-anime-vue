@@ -3,7 +3,11 @@
     <span 
         class="material-symbols-outlined"
         :class="{ 'unsize': unsize, 'fill-icon': fill, 'spin': spin }" 
-        :style="{ 'font-size': size, transform: `rotate(${rotate || 0}deg)` }"
+        :style="{ 
+            'font-size': size, 
+            transform: `rotate(${rotate || 0}deg)`,
+            'animation-duration': speed
+        }"
     >
         <slot />      
     </span>
@@ -16,7 +20,8 @@ defineProps<{
     fill?: boolean | string,
     spin?: boolean | string,
     size?: string,
-    rotate?: number
+    rotate?: number | string,
+    speed?: string
 }>();
 </script>
 

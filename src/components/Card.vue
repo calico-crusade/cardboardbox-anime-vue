@@ -200,7 +200,10 @@ function determineCardData(): MangaData | undefined {
     if (!manga) return undefined;
     const data = ('id' in manga) ? manga : manga.manga;
 
-    if (!manga || 'id' in manga) return { manga: data };
+    if (!manga || 'id' in manga) return { 
+        manga: data,
+        rating: data.attributes.find(t => t.name === 'Content Rating')?.value
+    };
 
     const { stats, progress, chapter } = manga;
 
@@ -218,7 +221,7 @@ function determineCardData(): MangaData | undefined {
         stats: stats,
         chapter: chapter,
         icon: getIcon(),
-        rating: manga.manga.attributes.find(t => t.name === 'Content Rating')?.value
+        rating: data.attributes.find(t => t.name === 'Content Rating')?.value
     }
 }
 </script>

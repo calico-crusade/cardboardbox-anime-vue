@@ -1,13 +1,14 @@
 <template>
 <CardList 
     :title="title"
-    :manga="randomManga"
-    :pending="randomPending"
-></CardList>
+    :manga="data"
+    :pending="pending"
+    allowReload
+    @reload="() => reload()"
+/>
 </template>
 
 <script setup lang="ts">
-
 const { randomNum } = useMangaApi();
 
 const messages = [
@@ -35,7 +36,7 @@ useServerSeoMeta({
     ogImage: 'https://manga.index-0.com/logo.png'
 });
 
-const { data: randomManga, pending: randomPending } = await randomNum(6);
+let { data, pending, refresh } = await randomNum(6);
 const rndNum = (max: number, min: number = 0) => min + Math.floor(Math.random() * max);
 const rnd = <T>(array: T[]) => array[rndNum(array.length)];
 const timeout = () => rndNum(10, 75);
@@ -61,6 +62,13 @@ const printMessage = async () => {
 };
 
 let mounted = false;
+
+const reload = () => {
+    pending.value = true;
+    data.value = [];
+
+    refresh();
+}
 
 onMounted(() => nextTick(async () => {
     mounted = true;

@@ -1,5 +1,12 @@
 <template>
-<div class="control no-top group center-items">
+<InputGroup
+    v-model="value"
+    :link="wrapedUrl"
+    placeholder="Image URL or Manga Title" 
+    :disabled="!wrapedUrl"
+    :stuck="stuck"
+>
+<template #input>
     <input 
         type="file" 
         class="file-input" 
@@ -7,26 +14,18 @@
         @change="selected" 
         ref="fileinput" 
     />
-    <input 
-        type="text" 
-        class="fill" 
-        v-model="value" 
-        placeholder="Image URL or Manga Title" 
+    <IconBtn
+        icon="image"
+        inline
+        @click="() => fileinput?.click()"
     />
-    <button @click="() => value = ''">
-        <Icon unsize="true" size="12px">close</Icon>
-    </button>
-    <div class="sep" />
-    <button @click="() => fileinput?.click()">
-        <Icon unsize="true" size="26px">image</Icon>
-    </button>
-    <NuxtLink :to="wrapedUrl" :class="{ 'disabled': !wrapedUrl }">
-        <Icon unsize="true" size="26px">search</Icon>
-    </NuxtLink>
-</div>
+</template>
+</InputGroup>
 </template>
 
 <script setup lang="ts">
+import { booleanishext } from '~/models';
+
 interface Emits {
     (e: 'update:modelValue', value: string): void;
     (e: 'file', value: File): void;
@@ -34,6 +33,7 @@ interface Emits {
 
 interface Props {
     modelValue: string;
+    stuck?: booleanishext
 }
 
 const props = defineProps<Props>();

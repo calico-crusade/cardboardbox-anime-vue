@@ -39,7 +39,7 @@ export const useMangaApi = () => {
 
     const random = () => get<MangaWithChapters>(`manga/random`);
 
-    const randomNum = (count: number) => get<Manga[]>(`manga/random/${count}`);
+    const randomNum = (count: number, lazy?: boolean) => get<Manga[]>(`manga/random/${count}`, undefined, lazy);
 
     const extended = (id: number | string) => get<ProgressExt>(`manga/${id}/extended`);
 

@@ -6,45 +6,58 @@
         <Cover :manga="manga" type="background" width="100%" height="400px" />
         <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
         <div class="buttons flex center-horz">
-            <NuxtLink class="icon-btn" v-if="resumeUrl" :to="resumeUrl">
-                <Icon>play_arrow</Icon>
-                <p>Resume</p>
-            </NuxtLink>
-            <button v-if="isRandom" class="icon-btn" @click="nextRandom">
-                <Icon>shuffle</Icon>
-                <p>Next Random Manga</p>
-            </button>
-            <button 
+            <IconBtn 
+                v-if="resumeUrl" 
+                breakpoint 
+                :link="resumeUrl"
+                icon="play_arrow" 
+                text="Resume" 
+                color="shade"
+            />
+            <IconBtn 
+                v-if="isRandom" 
+                breakpoint 
+                @click="nextRandom"
+                icon="shuffle" 
+                text="Next Random Manga" 
+                color="shade"
+            />
+            <IconBtn 
                 v-if="stats && currentUser" 
-                class="icon-btn" 
-                @click="toggleFavourite" 
-                :disabled="reloading"
-            >
-                <Icon :fill="isFavourite" :spin="reloading">star</Icon>
-                <p>{{ isFavourite ? 'Unfavourite' : 'Favourite' }}</p>
-            </button>
-            <button 
-                v-if="stats?.progress && currentUser" 
-                :disabled="reloading" 
-                class="icon-btn" 
+                breakpoint 
+                :fill="isFavourite"
+                @click="toggleFavourite"
+                :loading="reloading"
+                icon="star" 
+                :text="isFavourite ? 'Unfavourite' : 'Favourite'"
+                color="shade"
+            />
+            <IconBtn 
+                v-if="stats?.progress && currentUser"
+                :loading="reloading"
                 @click="resetProgress"
-            >
-                <Icon :spin="reloading">delete</Icon>
-                <p>Reset Progress</p>
-            </button>
-            <button 
-                class="icon-btn" 
-                v-if="currentUser" 
-                :disabled="reloading" 
+                breakpoint 
+                icon="delete"
+                text="Reset Progress"
+                color="shade"
+            />
+            <IconBtn
+                v-if="currentUser"
+                :loading="reloading"
                 @click="reloadSource"
-            >
-                <Icon :spin="reloading">sync</Icon>
-                <p>Reload Source</p>
-            </button>
-            <button class="icon-btn" @click="() => copyUrl()">
-                <Icon>content_copy</Icon>
-                <p>Copy Manga Url</p>
-            </button>
+                breakpoint
+                icon="sync"
+                text="Reload Source"
+                color="shade"
+            />
+
+            <IconBtn 
+                @click="copyUrl"
+                breakpoint
+                icon="content_copy"
+                text="Copy Manga Url"
+                color="shade"
+            />
         </div>
         <div class="drawers">
             <Drawer title="Progress" v-if="stats && stats.progress">
@@ -279,7 +292,9 @@ const nextRandom = async () => {
     await fetchExt();
 }
 
-onMounted(() => nextTick(() => fetchExt()));
+onMounted(() => nextTick(() => watch(() => id.value, () => {
+    if (id.value) fetchExt();
+}, { immediate: true })));
 </script>
 
 <style lang="scss" scoped>

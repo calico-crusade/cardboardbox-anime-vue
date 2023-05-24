@@ -14,6 +14,7 @@ $primary-color-trans: rgba( lighten( $primary-color, 20% ), 0.8 );
     --color-secondary: rgba(0, 174, 240, 1);
     --color-secondary-tran: rgba(0, 174, 240, 0.25);
     --color-secondary-dark: rgb(0, 95, 133);
+    --color-actual-warning: rgba(252, 83, 5, 0.705);
     --color-warning: rgb(255, 61, 61);
     --color-muted: #555;
 
@@ -163,6 +164,10 @@ p, h1, h2, h3, h4, h5, h6 {
 
     &.active, &:hover {
         background-color: var(--color-primary);
+    }
+
+    &.align-left {
+        margin-left: auto;
     }
 }
 
@@ -339,7 +344,7 @@ input:read-only:not([type='color']):not([type='range']) {
         }
 
         .sep {
-            border-left: 1px solid var(--color-muted);
+            border-left: 1px solid #{$ctrl-bg};
         }
     }
 

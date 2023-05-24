@@ -4,10 +4,12 @@
     :search="combined"
     :pending="pending"
     :noresults="!!results"
+    @headerstuck="(v) => stuck = v"
 >
     <ReverseSearch 
         v-model="search"
         @file="searchFile"
+        :stuck="stuck"
     />
 </CardList>
 </template>
@@ -23,6 +25,7 @@ const { reverseFile, reverseUrl } = useMangaApi();
 const { toPromise, proxy } = useApiHelper();
 const search = ref('');
 const pending = ref(false);
+const stuck = ref(false);
 const results = ref<ImageSearch | undefined>();
 const combined = computed(() => 
     results.value 

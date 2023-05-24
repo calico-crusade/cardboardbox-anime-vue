@@ -126,12 +126,16 @@
                     @move="(inc) => move(index, inc)"
                 />
                 <footer class="flex">
-                    <button class="pad-left icon-btn" @click="save">
-                        <Icon>save</Icon>
-                    </button>
-                    <button class="icon-btn" @click="reset">
-                        <Icon>sync</Icon>
-                    </button>
+                    <IconBtn
+                        pad-left
+                        @click="save"
+                        icon="save"
+                    />
+
+                    <IconBtn
+                        @click="reset"
+                        icon="sync"
+                    />
                 </footer>
             </div>
         </Tab>

@@ -15,9 +15,7 @@
         </li>
     </ul>
     <footer class="flex">
-        <button class="icon-btn pad-left" @click="addManga">
-            <Icon>add</Icon>
-        </button>
+        <IconBtn icon="add" pad-left @click="addManga"  />
     </footer>
 </div>
 </template>
