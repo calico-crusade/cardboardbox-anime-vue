@@ -142,12 +142,12 @@ export const useMangaApi = () => {
         ) && blurPornCovers.value
     };
 
-    const strip = (id: number, pages: { chapterId: number, page: number}[]) => {
+    const strip = (id: number, pages: { chapterId: number, page: number}[], name?: string) => {
         const body = JSON.stringify({
             mangaId: id,
             pages
         });
-        return download(`manga/strip`, 'strip.png', {
+        return download(`manga/strip`, name ?? 'strip.png', {
             method: 'POST',
             body,
             headers: { 'Content-Type': 'application/json' }

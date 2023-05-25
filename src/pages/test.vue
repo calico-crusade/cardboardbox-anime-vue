@@ -119,6 +119,17 @@
             </InputGroup>
         </CardList>
     </Tab>
+    <Tab title="dragging" icon="drag_indicator">
+        <div class="fill-parent">
+            <draggable v-model="todos" item-key="id">
+                <template #item="{element: item }">
+                    <div class="item">
+                        {{ item }}
+                    </div>
+                </template>
+            </draggable>
+        </div>
+    </Tab>
 </Tabs>
 </div>
 </template>
@@ -133,6 +144,7 @@ const open = ref(false);
 const selected = ref(options[0]);
 const search = ref('');
 const { data, pending, refresh } = await randomNum(20);
+const todos = ref(['laundry', 'cooking', 'testing code', 'fucking the loli']);
 
 const reload = () => {
     pending.value = true;

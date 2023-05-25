@@ -12,26 +12,6 @@
     </header>
     <main class="fill">
         <Tabs>
-            <Tab title="Selected Image" icon="my_location" scrollable>
-                <div class="tab-control pad">
-                    <div class="images grid responsive">
-                        <div class="image" v-for="(page, index) of selected">
-                            <img :src="page.proxied" />
-                            <div class="floating-btns">
-                                <button @click="() => toggle(page)">
-                                    <Icon>delete</Icon>
-                                </button>
-                                <button @click="() => move(index, -1)">
-                                    <Icon>skip_previous</Icon>
-                                </button>
-                                <button @click="() => move(index, 1)">
-                                    <Icon>skip_next</Icon>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </Tab>
             <Tab title="Available Images" icon="add_photo_alternate" scrollable>
                 <div class="tab-control pad">
                     <div class="control group no-top">
@@ -49,17 +29,36 @@
                     </div>
 
                     <div class="images grid responsive">
-                        <div class="image" v-for="page of pageUrls" :class="state(page)">
+                        <div class="image clickable" v-for="page of pageUrls" :class="state(page)" @click="() => toggle(page)">
                             <img :src="page.proxied" />
-                            <div class="floating-btns">
-                                <button @click="() => toggle(page)">
-                                    <Icon>{{ state(page) === 'none' ? 'my_location' : 'delete' }}</Icon>
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
                 
+            </Tab>
+            <Tab title="Selected Image" icon="my_location" scrollable>
+                <div class="tab-control pad">
+                    <ClientOnly>
+                        <draggable v-model="selected" item-key="id" tag="div" :component-data="{class: 'images grid responsive'}">
+                            <template #item="{element: page}">
+                                <div class="image">
+                                    <img :src="page.proxied" />
+                                    <div class="floating-btns">
+                                        <button @click="() => toggle(page)">
+                                            <Icon>delete</Icon>
+                                        </button>
+                                        <button @click="() => move(page, -1)">
+                                            <Icon>skip_previous</Icon>
+                                        </button>
+                                        <button @click="() => move(page, 1)">
+                                            <Icon>skip_next</Icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </draggable>
+                    </ClientOnly>
+                </div>
             </Tab>
         </Tabs>
     </main>
@@ -72,6 +71,7 @@ const { proxy, clone, toPromise } = useApiHelper();
 const { fetch, pages, strip } = useMangaApi();
 
 type Selected = {
+    id: string;
     page: number;
     chapter: number;
     url: string;
@@ -105,11 +105,13 @@ const pageUrls = computed(() =>
                 proxied: proxy(t, 'manga-page', manga.value?.referer),
                 page: i + 1,
                 chapter: chapterId.value,
-                url: t
+                url: t,
+                id: `${chapterId.value}-${i + 1}`
             }
         }));
 const firstPage = computed(() => pageUrls.value[page.value - 1] || DEFAULT_IMAGE);
 const selected = ref<Selected[]>([]);
+const name = computed(() => (manga.value?.title ?? 'strip').replace(/[/\\?%*:|"<>]/g, '-') + ".png");
 
 const prevChapId = computed(() => chapters.value[chapterIndex.value - 1]?.id);
 const nextChapId = computed(() => chapters.value[chapterIndex.value + 1]?.id);
@@ -117,7 +119,10 @@ const nextChapId = computed(() => chapters.value[chapterIndex.value + 1]?.id);
 const nextChap = () => { if (nextChapId.value) chapterId.value = nextChapId.value; };
 const prevChap = () => { if (prevChapId.value) chapterId.value = prevChapId.value; };
 
-const move = (index: number, increment: number) => {
+const move = (page: Selected, increment: number) => {
+    const index = selected.value.findIndex(t => t.chapter == page.chapter && t.page == page.page);
+    if (index === -1) return;
+
     let next = index + increment;
     if (next < 0) next = selected.value.length - 1;
     if (next >= selected.value.length) next = 0;
@@ -135,7 +140,7 @@ const downloadStrip = async () => {
             chapterId: t.chapter,
             page: t.page
         }
-    }));
+    }), name.value);
     pending.value = false;
 };
 
@@ -205,6 +210,16 @@ watch(() => data.value, () => {
 
             &.selected {
                 border-color: var(--color-success);
+            }
+
+            &.clickable:hover {
+                cursor: pointer;
+                filter: brightness(0.8) grayscale(0.8);
+            }
+
+            &:not(.clickable):hover {
+                cursor: grab;
+                filter: brightness(0.8) grayscale(0.8);
             }
         }
     }
