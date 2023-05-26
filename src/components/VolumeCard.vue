@@ -1,8 +1,8 @@
 <template>
 <NuxtLink 
-    v-if="chapter.versions.length === 0" 
+    v-if="chapter.versions.length === 1 && first" 
     class="chapter" 
-    :to="'/manga/' + id + '/' + chapter.id" 
+    :to="'/manga/' + id + '/' + first.id" 
     :class="{'active': chapter.read}"
 >
     <div 
@@ -15,20 +15,20 @@
     <div class="chapter-content grid by-2">
         <span class="cell icon-text">
             <Icon v-if="chapter.read">done_all</Icon>
-            <Icon v-if="chapter.id === stats?.progress?.mangaChapterId">auto_stories</Icon>
-            <span v-if="chapter.volume">Vol. {{ chapter.volume }}&nbsp;</span>
-            Ch. {{ chapter.ordinal }}
+            <Icon v-if="first.id === progress?.mangaChapterId">auto_stories</Icon>
+            <span v-if="first.volume">Vol. {{ first.volume }}&nbsp;</span>
+            Ch. {{ first.ordinal }}
         </span>
-        <span class="cell icon-text">{{ chapter.title }}</span>
+        <span class="cell icon-text">{{ first.title }}</span>
         <span class="cell icon-text">
             <Icon>language</Icon>
             &nbsp;
-            {{ chapter.language }}
+            {{ first.language }}
         </span>
         <span class="cell icon-text">
             <Icon>schedule</Icon>
             &nbsp;
-            <Date :date="chapter.createdAt.toString()" />
+            <Date :date="first.createdAt.toString()" />
         </span>
     </div>
 </NuxtLink>
@@ -42,27 +42,27 @@
     </div>
     <NuxtLink 
         class="chapter-root" 
-        :to="'/manga/' + id + '/' + chapter.id" 
+        :to="'/manga/' + id + '/' + first.id" 
         :class="{'active': chapter.read}"
     >
         <div class="chapter-content grid by-2">
             <span class="cell icon-text">
                 <Icon v-if="chapter.read">done_all</Icon>
                 <Icon 
-                    v-if="chapter.id === stats?.progress?.mangaChapterId"
+                    v-if="first.id === progress?.mangaChapterId"
                 >
                     auto_stories
                 </Icon>
-                <span v-if="chapter.volume">Vol. {{ chapter.volume }}&nbsp;</span>
-                Ch. {{ chapter.ordinal }}
+                <span v-if="first.volume">Vol. {{ first.volume }}&nbsp;</span>
+                Ch. {{ first.ordinal }}
             </span>
-            <span class="cell icon-text">{{ chapter.title }}</span>
+            <span class="cell icon-text">{{ first.title }}</span>
             <span class="cell icon-text">
-                <Icon>language</Icon> {{ chapter.language }}
+                <Icon>language</Icon> {{ first.language }}
             </span>
             <span class="cell icon-text">
                 <Icon>schedule</Icon>&nbsp;
-                <Date :date="chapter.createdAt.toString()" />
+                <Date :date="first.createdAt.toString()" />
             </span>
         </div>
     </NuxtLink>
@@ -81,15 +81,18 @@
             </span>
         </div>
         <div class="version-content">
+            <template>
+
+            </template>
             <NuxtLink 
-                v-for="ver in chapter.versions" 
+                v-for="ver in rest"
                 :to="'/manga/' + id + '/' + ver.id"
             >
                 <div class="chapter-content grid by-2">
                     <span class="cell icon-text">
                         <Icon v-if="chapter.read">done_all</Icon>
                         <Icon 
-                            v-if="ver.id === stats?.progress?.mangaChapterId"
+                            v-if="ver.id === progress?.mangaChapterId"
                         >
                             auto_stories
                         </Icon>
@@ -104,13 +107,16 @@
 </template>
 
 <script setup lang="ts">
-import { ProgressExt, VolumeChapter } from '~/models';
+import { MangaVolueChapter, Progress } from '~/models';
 
 const props = defineProps<{
-    chapter: VolumeChapter,
+    chapter: MangaVolueChapter,
     id: string | number,
-    stats?: ProgressExt
+    progress?: Progress
 }>();
+
+const first = computed(() => props.chapter.versions[0]);
+const rest = computed(() => props.chapter.versions.slice(1));
 
 const toggle = () => {
     props.chapter.open = !props.chapter.open;

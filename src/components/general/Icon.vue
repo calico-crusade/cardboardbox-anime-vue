@@ -2,10 +2,10 @@
 <ClientOnly>
     <span 
         class="material-symbols-outlined"
-        :class="{ 'unsize': unsize, 'fill-icon': fill, 'spin': spin }" 
+        :class="{ 'unsize': unsize, 'fill-icon': fill, 'spin': spin, 'flip': flip }" 
         :style="{ 
             'font-size': size, 
-            transform: `rotate(${rotate || 0}deg)`,
+            transform: `rotate(${rotate || 0}deg) scaleX(${flip ? -1 : 1})`,
             'animation-duration': speed
         }"
     >
@@ -21,7 +21,8 @@ defineProps<{
     spin?: boolean | string,
     size?: string,
     rotate?: number | string,
-    speed?: string
+    speed?: string,
+    flip?: boolean | string
 }>();
 </script>
 
@@ -37,5 +38,7 @@ defineProps<{
         &.fill-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48; }
         &.unsize { height: unset; width: unset; }
         &.spin { animation: spin 10s linear infinite; }
+        &.flip { transform: scaleX(-1); }
+        &.span.flip { animation-name: spinflip; }
     }
 </style>

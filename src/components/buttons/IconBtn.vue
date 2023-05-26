@@ -15,6 +15,7 @@
         :rotate="rotate"
         :unsize="acUnsize"
         :speed="speed"
+        :flip="flip"
     >
         <slot />{{ icon }}
     </Icon>
@@ -36,6 +37,7 @@
         :rotate="rotate"
         :unsize="acUnsize"
         :speed="speed"
+        :flip="flip"
     >
         <slot />{{ icon }}
     </Icon>
@@ -56,6 +58,7 @@
         :rotate="rotate"
         :unsize="acUnsize"
         :speed="speed"
+        :flip="flip"
     >
         <slot />{{ icon }}
     </Icon>
@@ -85,6 +88,8 @@ const props = withDefaults(defineProps<{
     breakpoint?: booleanish;
     loading?: booleanish;
     inline?: booleanish;
+    otherClasses?: string | string[];
+    flip?: booleanish;
 }>(), {
     size: '16px',
     icon: 'home',
@@ -108,7 +113,8 @@ const classes = computed(() => [
     props.text ? 'has-text' : 'no-text',
     isDisabled.value ? 'disabled' : '',
     props.padLeft ? 'pad-left' : '',
-    props.breakpoint ? 'breakpoint' : ''
+    props.breakpoint ? 'breakpoint' : '',
+    ...(typeof props.otherClasses === 'string' ? [ props.otherClasses ?? '' ] : props.otherClasses ?? [])
 ].join(' '));
 
 const styles = computed(() => {

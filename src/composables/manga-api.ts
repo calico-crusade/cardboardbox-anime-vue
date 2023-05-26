@@ -3,7 +3,8 @@ import {
     Manga, MangaWithChapters, Stats,
     Paginated, Progress, ProgressExt,
     VolumeChapter, Volume, ImageSearch,
-    States, MangaGraph, MangaData
+    States, MangaGraph, VolumeSort,
+    MangaVolumed,
 } from "~/models";
 import { useApiHelper } from "./api-helpers";
 import { FetchError } from 'ofetch';
@@ -43,7 +44,7 @@ export const useMangaApi = () => {
 
     const extended = (id: number | string) => get<ProgressExt>(`manga/${id}/extended`);
 
-    const volumed = (id: number | string) => get<MangaData>(`manga/${id}/volumed`);
+    const volumed = (id: number | string, params: Ref<{ sort: VolumeSort, asc: boolean }>) => get<MangaVolumed>(`manga/volumed/${id}`, params, false);
 
     const favourite = (id: number) => get<boolean>(`manga/${id}/favourite`, undefined, true);
 

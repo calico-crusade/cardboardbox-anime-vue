@@ -399,6 +399,9 @@ input:read-only:not([type='color']):not([type='range']) {
         padding-top: 5px;
         text-align: center;
         align-items: center;
+        background-color: transparent;
+        border: 1px solid transparent;
+        border-radius: 0 !important;
 
         &:not(:last-child) {
             border-right: 1px solid #{$ctrl-bg};
@@ -407,6 +410,10 @@ input:read-only:not([type='color']):not([type='range']) {
         &.active {
             background-color: var(--color-primary);
         }
+    }
+
+    &.no-top {
+        margin-top: 0;
     }
 }
 
@@ -494,6 +501,16 @@ input:read-only:not([type='color']):not([type='range']) {
 @keyframes spin {
     100% {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes spinflip {
+    0% {
+        transform: rotate(0) scaleX(-1);
+    }
+
+    100% {
+        transform: rotate(360deg) scaleX(-1);
     }
 }
 

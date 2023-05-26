@@ -6,84 +6,44 @@
         <Cover :manga="manga" type="background" width="100%" height="400px" />
         <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
         <div class="buttons flex center-horz">
-            <IconBtn 
-                v-if="resumeUrl" 
-                breakpoint 
-                :link="resumeUrl"
-                icon="play_arrow" 
-                text="Resume" 
-                color="shade"
-            />
-            <IconBtn 
-                v-if="isRandom" 
-                breakpoint 
-                @click="nextRandom"
-                icon="shuffle" 
-                text="Next Random Manga" 
-                color="shade"
-            />
-            <IconBtn 
-                v-if="stats && currentUser" 
-                breakpoint 
-                :fill="isFavourite"
-                @click="toggleFavourite"
-                :loading="reloading"
-                icon="star" 
-                :text="isFavourite ? 'Unfavourite' : 'Favourite'"
-                color="shade"
-            />
-            <IconBtn 
-                v-if="stats?.progress && currentUser"
-                :loading="reloading"
-                @click="resetProgress"
-                breakpoint 
-                icon="delete"
-                text="Reset Progress"
-                color="shade"
-            />
-            <IconBtn
-                v-if="currentUser"
-                :loading="reloading"
-                @click="reloadSource"
-                breakpoint
-                icon="sync"
-                text="Reload Source"
-                color="shade"
-            />
+            <IconBtn v-if="resumeUrl" breakpoint :link="resumeUrl" icon="play_arrow" text="Resume" color="shade" />
+            <IconBtn v-if="isRandom" breakpoint @click="nextRandom" icon="shuffle" text="Next Random Manga"
+                color="shade" />
+            <IconBtn v-if="stats && currentUser" breakpoint :fill="isFavourite" @click="toggleFavourite"
+                :loading="reloading" icon="star" :text="isFavourite ? 'Unfavourite' : 'Favourite'" color="shade" />
+            <IconBtn v-if="progress && currentUser" :loading="reloading" @click="resetProgress" breakpoint icon="delete"
+                text="Reset Progress" color="shade" />
+            <IconBtn v-if="currentUser" :loading="reloading" @click="reloadSource" breakpoint icon="sync"
+                text="Reload Source" color="shade" />
 
-            <IconBtn 
-                @click="copyUrl"
-                breakpoint
-                icon="content_copy"
-                text="Copy Manga Url"
-                color="shade"
-            />
+            <IconBtn @click="copyUrl" breakpoint icon="content_copy" text="Copy Manga Url" color="shade" />
         </div>
         <div class="drawers">
-            <Drawer title="Progress" v-if="stats && stats.progress">
+            <Drawer title="Progress" v-if="stats && progress && currentVersion">
                 <p>
                     <b>Chapter: </b>
-                    <span v-if="stats.chapter.volume">Vol. {{ stats.chapter.volume }}&nbsp;</span> Ch. {{ stats.chapter.ordinal }} - {{ stats.chapter.title }}
+                    <span v-if="currentVersion.volume">Vol. {{ currentVersion.volume }}&nbsp;</span> Ch. {{
+                        currentVersion.ordinal }} - {{ currentVersion.title }}
                 </p>
                 <p>
                     <b>Progress: </b>
-                    {{ stats.stats.chapterProgress }}%
+                    {{ stats.chapterProgress }}%
                 </p>
                 <p>
                     <b>Page Progress: </b>
-                    {{ stats.stats.pageProgress }}%
+                    {{ stats.pageProgress }}%
                 </p>
                 <p>
                     <b>Last Read On: </b>
-                    <Date :date="stats.progress.updatedAt.toString()" />
+                    <Date :date="progress.updatedAt.toString()" />
                 </p>
                 <p>
                     <b>Favourite: </b>
-                    {{ stats.stats.favourite ? 'Yes' : 'No' }}
+                    {{ isFavourite ? 'Yes' : 'No' }}
                 </p>
                 <p>
                     <b>Completed: </b>
-                    {{ stats.stats.completed ? 'Yes' : 'No' }}
+                    {{ stats.completed ? 'Yes' : 'No' }}
                 </p>
             </Drawer>
             <Drawer title="Description" v-if="manga.description">
@@ -97,9 +57,7 @@
                 <div class="tags in-line">
                     <span>Tags </span>
                     <span v-if="manga.nsfw" class="warning">Nsfw</span>
-                    <NuxtLink 
-                        v-for="tag in manga.tags" 
-                        :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
+                    <NuxtLink v-for="tag in manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
                 </div>
                 <div class="tags in-line">
                     <span>Details </span>
@@ -113,107 +71,117 @@
     <main class="volumes fill flex row">
         <div class="chapter-header flex">
             <p class="fill">Chapters</p>
-            <button @click="() => collapseToggle()">
-                <Icon>
-                    {{ allCollapsed 
-                        ? 'arrow_drop_up' 
-                        : 'arrow_drop_down' }}
-                </Icon>
-            </button>
-        </div>
-        <Loading v-if="volumes.length === 0" />
-        <article class="volume" v-for="(vol, index) in volumes">
-            <div 
-                class="name" 
-                @click="() => toggleVolume(index)"
-            >
-                {{ vol.name 
-                    ? 'Volume ' + vol.name 
-                    : 'No Volume' }}
-            </div>
-            <button 
-                class="collapse-btn" 
-                @click="() => toggleVolume(index)"
-            >
-                <Icon>{{ volumeCollapsed(index) 
-                    ? 'expand_more' 
-                    : 'expand_less' }}</Icon>
-            </button>
-            <div 
-                class="chapters" 
-                :class="{'collapse': volumeCollapsed(index)}"
-            >
-                <a 
-                    class="chapter grid by-2" 
-                    @click="() => toggleVolume(index)"
-                >
-                    <span class="cell">
-                        {{ vol.name 
-                            ? 'Volume ' + vol.name 
-                            : 'No Volume' }}
-                    </span>
-                    <span class="cell icon-text">
-                        <Icon>expand_more</Icon> Open
-                    </span>
-                    <span class="cell icon-text">
-                        <Icon>layers</Icon> {{ vol.chapters.length }} Chapters
-                    </span>
-                </a>
-                <VolumeCard 
-                    v-for="chapter of vol.chapters" 
-                    :id="id" 
-                    :chapter="chapter" 
-                    :stats="stats" 
+            <p>Sort:</p>
+            <div class="btn-group no-top">
+                <IconBtn 
+                    :icon="s.icon"
+                    v-for="s in sorts"
+                    :link="url(s.key)"
+                    :other-classes="s.key === sort ? 'active' : ''"
                 />
             </div>
-        </article>
+            <IconBtn 
+                icon="sort"
+                :rotate="asc ? 0 : 180"
+                :flip="!asc"
+                :link="url(undefined, !asc)"
+            />
+            <IconBtn 
+                @click="collapseToggle" 
+                :icon="allCollapsed ? 'remove' : 'add'"
+            />
+        </div>
+        <Loading v-if="volumes.length === 0 || reloading" />
+        <template v-else>
+            <article class="volume" v-for="(vol, index) in volumes">
+                <div class="name" @click="() => toggleVolume(index)">
+                    {{ vol.name
+                        ? 'Volume ' + vol.name
+                        : 'No Volume' }}
+                </div>
+                <button class="collapse-btn" @click="() => toggleVolume(index)">
+                    <Icon>{{ volumeCollapsed(index)
+                        ? 'expand_more'
+                        : 'expand_less' }}</Icon>
+                </button>
+                <div class="chapters" :class="{ 'collapse': volumeCollapsed(index) }">
+                    <a class="chapter grid by-2" @click="() => toggleVolume(index)">
+                        <span class="cell">
+                            {{ vol.name
+                                ? 'Volume ' + vol.name
+                                : 'No Volume' }}
+                        </span>
+                        <span class="cell icon-text">
+                            <Icon>expand_more</Icon> Open
+                        </span>
+                        <span class="cell icon-text">
+                            <Icon>layers</Icon> {{ vol.chapters.length }} Chapters
+                        </span>
+                    </a>
+                    <VolumeCard v-for="chapter of vol.chapters" :id="id" :chapter="chapter" :progress="progress" />
+                </div>
+            </article>
+        </template>
     </main>
 </div>
 </template>
 
 <script setup lang="ts">
-import { ProgressExt, Volume } from '~/models';
+import { VolumeSort } from '~/models';
 
-const { 
-    random,
-    fetch, 
-    groupVolumes, 
-    favourite, 
+const {
+    volumed,
+    favourite,
     reload,
-    extended,
     resetProgress: reset
 } = useMangaApi();
 
-const { proxy: proxyUrl, toPromise } = useApiHelper();
+const { proxy: proxyUrl, toPromise, clone } = useApiHelper();
 const { currentUser } = useAuthApi();
+const route = useRoute();
 
-let stats: Ref<ProgressExt | undefined> = ref(undefined);
-let reloading = ref(false);
-let volumes: Ref<Volume[]> = ref([]);
+const sorts : { key: VolumeSort, icon: string }[] = [
+    { key: 'ordinal', icon: 'list' },
+    { key: 'date', icon: 'calendar_month' },
+    { key: 'language', icon: 'translate' },
+    { key: 'title', icon: 'sort_by_alpha' },
+];
 
-const _id = useRoute().params.id.toString();
-const isRandom = _id === 'random';
-const { data, pending, error, refresh } = await (isRandom ? random() : fetch(_id));
+const rawId = computed(() => route.params.id.toString());
+const sort = computed(() => <VolumeSort | undefined>route.query?.sort?.toString() ?? 'ordinal');
+const asc = computed(() => (route.query?.asc?.toString()?.toLowerCase() ?? 'true') === 'true');
+const isRandom = computed(() => rawId.value === 'random');
+
+const params = ref({
+    sort: sort.value,
+    asc: asc.value
+});
+const { data: rawData, pending: reloading, error, refresh } = await volumed(rawId.value, params);
+const data = ref(clone(rawData.value));
+const pending = computed(() => {
+    if (data.value) return false;
+    return reloading.value;
+});
 const manga = computed(() => data.value?.manga);
-const isFavourite = computed(() => stats.value?.stats.favourite || false);
+const isFavourite = computed(() => stats.value?.favourite || false);
 const id = computed(() => manga.value?.id || 0);
-volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
+const volumes = computed(() => data.value?.volumes ?? []);
+const stats = computed(() => data.value?.stats);
+const progress = computed(() => data.value?.progress);
 
 const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer);
 
-const allCollapsed = computed(() => 
-    !!volumes.value.find(t => !t.collapse));
-const currentChapter = computed(() => data.value
-    ?.chapters.find(t => 
-        t.id === stats.value?.progress?.mangaChapterId));
-const resumeUrl = computed(() => 
-    currentChapter.value 
-        ? `/manga/${manga.value?.id}/${currentChapter.value.id}?page=${(stats.value?.progress?.pageIndex ?? 0) + 1}` 
-        : (data.value?.chapters[0]?.id 
-            ? `/manga/${manga.value?.id}/${data.value.chapters[0]?.id}?page=0` 
-            : undefined 
-        )
-    );
+const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
+const currentVolume = computed(() => volumes.value[data.value?.volumeIndex ?? 0]);
+const currentChapter = computed(() =>
+    currentVolume.value?.chapters.find(t => t.progress !== null && t.progress !== undefined)
+    ?? currentVolume.value?.chapters[0]);
+const currentVersion = computed(() => currentChapter.value?.versions[currentChapter.value?.readIndex ?? 0]);
+const resumeUrl = computed(() =>
+    currentVersion.value
+        ? `/manga/${manga.value?.id}/${currentVersion.value.id}?page=${(progress.value?.pageIndex ?? 0) + 1}`
+        : undefined
+);
 const title = computed(() => manga.value?.title ?? 'Manga Not Found');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const cover = computed(() => proxy(manga.value?.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
@@ -230,53 +198,50 @@ useServerSeoMeta({
 });
 
 const toggleVolume = (index: number) => {
-    const vol = volumes.value[index];
-    vol.collapse = !vol.collapse;
-    volumes.value = volumes.value;
+    volumes.value[index].collapse = !volumes.value[index].collapse;
 }
 
 const volumeCollapsed = (index: number) => volumes.value[index].collapse;
 
 const collapseToggle = () => {
     const collapse = allCollapsed.value;
-    for(let vol of volumes.value)
+    for (let vol of volumes.value)
         vol.collapse = collapse;
 };
 
 const toggleFavourite = async () => {
     if (!id.value) return;
     await toPromise(favourite(id.value));
-    fetchExt();
+    await refetch();
 }
 
 const reloadSource = async () => {
     if (!manga.value) return;
     reloading.value = true;
 
-    const output = await toPromise(reload(manga.value));
-    data.value = output ?? null;
-    volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
+    console.log('Reloading');
+    await toPromise(reload(manga.value));
+    console.log('Reload finished');
+    await refetch();
+    console.log('Refetch finished');
     reloading.value = false;
 }
 
-const fetchExt = async () => {
-    if (!id.value) {
-        console.error(
-            'Skipping fetch, ID isnt present', 
-            { data: JSON.stringify(data.value) });
-        return;
+const refetch = () => {
+    if (rawData.value && data.value) {
+        rawData.value.stats = undefined;
+        rawData.value.progress = undefined;
+        rawData.value.chapter = undefined;
+        data.value.volumes = [];
     }
-    reloading.value = true;
 
-    stats.value = await toPromise(extended(id.value));
-    volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
-    reloading.value = false;
+    return refresh();
 }
 
 const resetProgress = async () => {
     reloading.value = true;
     await toPromise(reset(id.value));
-    fetchExt();
+    await refetch();
 }
 
 const copyUrl = () => {
@@ -287,20 +252,40 @@ const copyUrl = () => {
 const nextRandom = async () => {
     if (!isRandom) return;
 
-    await refresh();
-    volumes.value = groupVolumes(data.value?.chapters || [], stats.value);
-    await fetchExt();
+    await refetch();
 }
 
-onMounted(() => nextTick(() => watch(() => id.value, () => {
-    if (id.value) fetchExt();
-}, { immediate: true })));
+const url = (s?: VolumeSort, a?: boolean) => {
+    return `/manga/${id.value}?sort=${s ?? sort.value}&asc=${a ?? asc.value}`;
+}
+
+onMounted(() => nextTick(() => {
+
+    watch(() => id.value, () => {
+        if (id.value) refetch();
+    }, { immediate: true });
+
+    watch(() => rawData.value, () => {
+        if (rawData.value) data.value = clone(rawData.value);
+    });
+
+    watch(() => route.query, () => {
+        if (sort.value === params.value.sort && asc.value == params.value.asc) return;
+
+        params.value = {
+            sort: sort.value,
+            asc: asc.value
+        };
+    }, { deep: true });
+}));
 </script>
 
 <style lang="scss" scoped>
 $bg-color: var(--bg-color-accent);
+
 .manga-details {
     position: unset;
+
     .manga-header {
         position: relative;
         margin: 5px;
@@ -311,14 +296,21 @@ $bg-color: var(--bg-color-accent);
             font-size: 2em;
             text-align: center;
             margin-top: 5px;
+            max-width: 100%;
+            word-break: break-word;
         }
 
         .buttons {
             flex-flow: row wrap;
             align-items: center;
-            button, a { 
-                margin: 5px; 
-                p { display: none; }
+
+            button,
+            a {
+                margin: 5px;
+
+                p {
+                    display: none;
+                }
             }
         }
     }
@@ -330,6 +322,7 @@ $bg-color: var(--bg-color-accent);
         .chapter-header {
             border-radius: 5px;
             background-color: $bg-color;
+
             p {
                 margin: auto 5px;
                 padding: 7.5px 0;
@@ -341,12 +334,14 @@ $bg-color: var(--bg-color-accent);
             flex-flow: column;
             position: relative;
             margin: 10px 0;
+
             .collapse-btn {
                 position: absolute;
                 top: 0;
                 right: 0;
                 transform: translateY(-50%);
             }
+
             .name {
                 position: absolute;
                 top: 50%;
@@ -355,6 +350,7 @@ $bg-color: var(--bg-color-accent);
                 transform-origin: left;
                 cursor: pointer;
             }
+
             .chapters {
                 margin-left: 5px;
                 display: flex;
@@ -363,21 +359,33 @@ $bg-color: var(--bg-color-accent);
                 border-top-left-radius: 10px;
                 border-bottom-left-radius: 10px;
                 padding: 10px;
-                .chapter, .version-chapter {
+
+                .chapter,
+                .version-chapter {
                     padding: 15px;
                     background-color: $bg-color;
                     text-decoration: none;
                     margin: 5px;
                     position: relative;
-                    &:first-child { display: none; }
 
-                    &.resume { background-color: var(--accent-1); }
+                    &:first-child {
+                        display: none;
+                    }
+
+                    &.resume {
+                        background-color: var(--accent-1);
+                    }
                 }
 
                 &.collapse {
-                    .chapter:first-child { display: grid; }
-                    .chapter:not(:first-child), 
-                    .version-chapter:not(:first-child) { display: none; }
+                    .chapter:first-child {
+                        display: grid;
+                    }
+
+                    .chapter:not(:first-child),
+                    .version-chapter:not(:first-child) {
+                        display: none;
+                    }
                 }
             }
         }
@@ -400,9 +408,11 @@ $bg-color: var(--bg-color-accent);
         margin: 5px;
         flex-flow: column;
 
-        button, a {
+        button,
+        a {
             flex: 1;
-            p { 
+
+            p {
                 display: block;
                 margin-left: 10px;
             }

@@ -6,7 +6,8 @@
     "dev": "npx nuxi clean && nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "build-run": "npx nuxi clean && nuxt build && node .output/server/index.mjs"
   },
   "devDependencies": {
     "@pinia/nuxt": "^0.4.9",
