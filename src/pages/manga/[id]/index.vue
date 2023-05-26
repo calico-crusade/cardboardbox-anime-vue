@@ -156,6 +156,7 @@ const params = ref({
     sort: sort.value,
     asc: asc.value
 });
+const unauthed = !currentUser.value;
 const { data: rawData, pending: reloading, error, refresh } = await volumed(rawId.value, params);
 const data = ref(clone(rawData.value));
 const pending = computed(() => {
@@ -262,7 +263,7 @@ const url = (s?: VolumeSort, a?: boolean) => {
 onMounted(() => nextTick(() => {
 
     watch(() => id.value, () => {
-        if (id.value) refetch();
+        if (id.value && unauthed) refetch();
     }, { immediate: true });
 
     watch(() => rawData.value, () => {
