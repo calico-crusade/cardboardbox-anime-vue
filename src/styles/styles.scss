@@ -4,6 +4,7 @@ $primary-color-trans: rgba( lighten( $primary-color, 20% ), 0.8 );
 :root {
     --bg-color: rgba(12, 9, 12, 1);
     --bg-color-accent: rgba(0, 0, 0, 0.25);
+    --bg-color-accent-darkish: rgba(0, 0, 0, 0.45);
     --bg-color-accent-dark: rgba(0, 0, 0, 0.75);
     --bg-color-offset: #302e42;
 

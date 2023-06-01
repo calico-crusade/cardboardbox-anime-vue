@@ -3,7 +3,7 @@
     v-if="chapter.versions.length === 1 && first" 
     class="chapter" 
     :to="'/manga/' + id + '/' + first.id" 
-    :class="{'active': chapter.read}"
+    :class="{'active': chapter.read && first.id !== progress?.mangaChapterId, 'collapsed': collapsed}"
 >
     <div 
         class="progress" 
@@ -32,7 +32,7 @@
         </span>
     </div>
 </NuxtLink>
-<div v-else class="version-chapter">
+<div v-else class="version-chapter" :class="{'collapsed': collapsed}">
     <div 
         class="progress" 
         v-if="chapter.progress" 
@@ -112,7 +112,8 @@ import { MangaVolueChapter, Progress } from '~/models';
 const props = defineProps<{
     chapter: MangaVolueChapter,
     id: string | number,
-    progress?: Progress
+    progress?: Progress,
+    collapsed?: boolean
 }>();
 
 const first = computed(() => props.chapter.versions[0]);
@@ -138,7 +139,7 @@ $bg-color: var(--bg-color-accent);
         top: 0;
         left: 0;
         height: 100%;
-        background-color: var(--color-secondary-dark);
+        background-color: var(--bg-color-accent-darkish);
 
         span {
             position: absolute;
@@ -182,6 +183,14 @@ $bg-color: var(--bg-color-accent);
         }
     }
 
+    &.active {
+        background-color: var(--bg-color-accent-darkish);
+    }
+
     &.resume { background-color: var(--accent-1); }
+
+    &.collapsed {
+        display: none;
+    }
 }
 </style>
