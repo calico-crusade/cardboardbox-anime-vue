@@ -41,8 +41,7 @@ export default defineNuxtConfig({
     ],
     modules: [
         '@pinia/nuxt',
-        '@vite-pwa/nuxt',
-        'nuxt-purgecss'
+        '@vite-pwa/nuxt'
     ],
     imports: {
         dirs: [
