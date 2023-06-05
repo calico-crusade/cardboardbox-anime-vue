@@ -32,7 +32,7 @@
         </span>
     </div>
 </NuxtLink>
-<div v-else class="version-chapter" :class="{'collapsed': collapsed}">
+<div v-else class="version-chapter" :class="{'collapsed': collapsed,'active': chapter.read}">
     <div 
         class="progress" 
         v-if="chapter.progress" 
@@ -184,7 +184,7 @@ $bg-color: var(--bg-color-accent);
     }
 
     &.active {
-        background-color: var(--bg-color-accent-darkish);
+        background-color: var(--bg-color-accent-darkish) !important;
     }
 
     &.resume { background-color: var(--accent-1); }

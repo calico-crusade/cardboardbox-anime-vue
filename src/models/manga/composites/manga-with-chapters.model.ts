@@ -4,7 +4,7 @@ import { Manga } from "../manga.model";
 import { Progress } from "../progress.model";
 import { Stats } from "./stats.model";
 
-export type VolumeSort = 'ordinal' | 'date' | 'language' | 'title';
+export type VolumeSort = 'ordinal' | 'date' | 'language' | 'title' | 'read';
 
 export interface MangaWithChaptersBase {
     manga: Manga;

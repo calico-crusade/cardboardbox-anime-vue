@@ -192,6 +192,7 @@ const sorts : { key: VolumeSort, icon: string }[] = [
     { key: 'date', icon: 'calendar_month' },
     { key: 'language', icon: 'translate' },
     { key: 'title', icon: 'sort_by_alpha' },
+    { key: 'read', icon: 'done_all' }
 ];
 
 const rawId = computed(() => route.params.id.toString());
@@ -203,6 +204,7 @@ const params = ref({ sort: sort.value, asc: asc.value });
 const unauthed = !currentUser.value;
 const { data: rawData, pending: reloading, error, refresh } = await volumed(rawId.value, params);
 const data = ref(clone(rawData.value));
+const hideRead = ref(false);
 const pending = computed(() => data.value ? false : reloading.value);
 const manga = computed(() => data.value?.manga);
 const isFavourite = computed(() => stats.value?.favourite || false);
