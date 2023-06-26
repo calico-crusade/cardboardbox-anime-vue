@@ -101,7 +101,7 @@ const doSearch = (trigger?: boolean) => {
 .input-group {
     background-color: var(--bg-color-accent);
     border: 1px solid var(--bg-color-accent);
-    border-radius: 10px;
+    border-radius: calc(var(--brd-radius) * 2);
     overflow: hidden;
 
     .input-header {
@@ -109,9 +109,7 @@ const doSearch = (trigger?: boolean) => {
         border-color: transparent !important;
         margin-top: 0;
 
-        button, a {
-            margin: auto 5px !important;
-        }
+        button, a { margin: auto 5px !important; }
 
         .select-styled {
             background-color: transparent;
@@ -136,13 +134,8 @@ const doSearch = (trigger?: boolean) => {
         }
     }
 
-    &:focus-within {
-        border-color: var(--color-primary);
-    }
-
-    &.stuck {
-        background-color: var(--bg-color-accent-dark);
-    }
+    &:focus-within { border-color: var(--color-primary); }
+    &.stuck { background-color: var(--bg-color-accent-dark); }
 
     &.open .input-drawer {
         max-height: 80vh;

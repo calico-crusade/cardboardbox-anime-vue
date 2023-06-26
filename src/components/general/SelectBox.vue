@@ -32,7 +32,7 @@ $ctrl-bg: var(--bg-color-accent);
     background-color: $ctrl-bg;
     color: var(--color);
     padding: 10px;
-    border-radius: 5px;
+    border-radius: var(--brd-radius);
     outline: none;
     border: 1px solid #{$ctrl-bg};
     font-family: var(--font-family);

@@ -75,12 +75,17 @@
                     <input type="range" min="1" max="100" v-model="brightness" />
                 </div>
                 <div class="control">
-                    <label class="no-bot">Reader Style</label>
+                    <label class="no-bot">Card Style</label>
                     <SelectBox v-model="listStyle">
                         <option v-for="style in LIST_STYLES" :value="style">
                             {{ style }}
                         </option>
                     </SelectBox>
+                </div>
+                <div class="control checkbox">
+                    <CheckBox v-model="fillPage">
+                        Fill Card-List Page
+                    </CheckBox>
                 </div>
             </div>
         </Tab>
@@ -171,6 +176,7 @@ const {
     progressBarStyle: progressBar,
     listStyle,
     showTutorial,
+    fillPage,
     filterStyle: filter,
     customFilter
 } = useAppSettings();
@@ -246,14 +252,9 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .settings {
-    h2:not(:first-child), .header, footer {
-        margin-top: var(--margin);
-    }
-
+    h2:not(:first-child), .header, footer { margin-top: var(--margin); }
     footer {
-        button:not(:first-child) {
-            margin-left: 5px;
-        }
+        button:not(:first-child) { margin-left: 5px; }
     }
 }
 </style>

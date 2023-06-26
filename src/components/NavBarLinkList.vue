@@ -106,32 +106,32 @@ const logout = () => { doLogout(); clicked(); }
 </script>
 
 <style lang="scss" scoped>
-    a, button {
-        display: flex;
-        flex-flow: row;
-        border-left: 3px solid transparent;
-        border-right: 3px solid transparent;
-        padding: 5px;
-        text-align: left;
-        font-size: 16px;
+a, button {
+    display: flex;
+    flex-flow: row;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    padding: 5px;
+    text-align: left;
+    font-size: 16px;
 
-        p { 
-            margin: auto 5px; 
-            flex: 1; 
-            white-space: pre;
-            display: block;
-        }
-        
-        span:last-child { display: inline-block; }
-
-        svg { path { color: #fff; fill: currentColor; } }
-
-        img { 
-            width: 24px;
-            &.avatar { border-radius: 50%; }
-        }
-        &.sub { margin-left: 20px; }
-        &.active { border-left-color: var(--color-primary); }
-        &:hover { background-color: var(--bg-color-accent); }
+    p { 
+        margin: auto 5px; 
+        flex: 1; 
+        white-space: pre;
+        display: block;
     }
+    
+    span:last-child { display: inline-block; }
+
+    svg { path { color: #fff; fill: currentColor; } }
+
+    img { 
+        width: 24px;
+        &.avatar { border-radius: 50%; }
+    }
+    &.sub { margin-left: 20px; }
+    &.active { border-left-color: var(--color-primary); }
+    &:hover { background-color: var(--bg-color-accent); }
+}
 </style>

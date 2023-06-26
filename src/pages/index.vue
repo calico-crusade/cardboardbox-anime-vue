@@ -83,7 +83,3 @@ onUnmounted(() => {
     mounted = false;
 });
 </script>
-
-<style lang="scss" scoped>
-
-</style>

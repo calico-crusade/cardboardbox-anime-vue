@@ -21,7 +21,7 @@ const open = ref(true);
 $bg-color: var(--bg-color-accent);
 $max-height: 80vh;
 .drawer {
-    border-radius: 5px;
+    border-radius: var(--brd-radius);
     margin-bottom: 5px;
     overflow: hidden;
     background-color: $bg-color;
@@ -30,8 +30,8 @@ $max-height: 80vh;
         padding: 5px;
         cursor: pointer;
         border-bottom: 1px solid transparent;
-        border-top-right-radius: 5px;
-        border-top-left-radius: 5px;
+        border-top-right-radius: var(--brd-radius);
+        border-top-left-radius: var(--brd-radius);
         p { margin: auto 3px; }
     }
     .opener {
@@ -39,8 +39,8 @@ $max-height: 80vh;
         max-height: 0;
         padding: 0 5px;
         transition: max-height 250ms;
-        border-bottom-right-radius: 5px;
-        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: var(--brd-radius);
+        border-bottom-left-radius: var(--brd-radius);
 
         .open-content {
             margin-bottom: 5px;

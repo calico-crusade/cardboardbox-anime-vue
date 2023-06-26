@@ -352,9 +352,7 @@ $bg-color: var(--bg-color-accent);
             a {
                 margin: 5px;
 
-                p {
-                    display: none;
-                }
+                p { display: none; }
             }
         }
     }
@@ -364,7 +362,7 @@ $bg-color: var(--bg-color-accent);
         margin: 5px 5px 5px 5px;
 
         .chapter-header {
-            border-radius: 5px;
+            border-radius: var(--brd-radius);
             background-color: $bg-color;
 
             p {

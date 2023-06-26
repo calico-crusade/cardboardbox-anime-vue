@@ -208,9 +208,7 @@ watch(() => data.value, () => {
                 }
             }
 
-            &.selected {
-                border-color: var(--color-success);
-            }
+            &.selected { border-color: var(--color-success); }
 
             &.clickable:hover {
                 cursor: pointer;

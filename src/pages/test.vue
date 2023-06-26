@@ -163,9 +163,3 @@ const swipe = (name: string, event?: any) => {
     // });
 }
 </script>
-
-<style lang="scss" scoped>
-.some-buttons {
-    
-}
-</style>

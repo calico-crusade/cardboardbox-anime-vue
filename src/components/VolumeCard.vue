@@ -119,9 +119,7 @@ const props = defineProps<{
 const first = computed(() => props.chapter.versions[0]);
 const rest = computed(() => props.chapter.versions.slice(1));
 
-const toggle = () => {
-    props.chapter.open = !props.chapter.open;
-}
+const toggle = () => { props.chapter.open = !props.chapter.open; }
 </script>
 
 <style lang="scss" scoped>
@@ -183,14 +181,8 @@ $bg-color: var(--bg-color-accent);
         }
     }
 
-    &.active {
-        background-color: var(--bg-color-accent-darkish) !important;
-    }
-
+    &.active { background-color: var(--bg-color-accent-darkish) !important; }
     &.resume { background-color: var(--accent-1); }
-
-    &.collapsed {
-        display: none;
-    }
+    &.collapsed { display: none; }
 }
 </style>

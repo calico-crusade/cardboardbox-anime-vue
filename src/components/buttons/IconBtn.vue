@@ -137,7 +137,7 @@ $icon-height: calc(var(--icon-size) + #{$icon-padding * 2} + 2px);
     display: inline-flex;
     flex-flow: row;
     align-items: center;
-    border-radius: 5px;
+    border-radius: var(--brd-radius);
     padding: 5px;
     height: auto;
 

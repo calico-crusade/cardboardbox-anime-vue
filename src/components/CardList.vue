@@ -1,5 +1,5 @@
 <template>
-<div class="card-list" ref="scroller" @scroll="onScroll" :class="style">
+<div class="card-list" ref="scroller" @scroll="onScroll" :class="cssStyle">
     <div class="title flex center-items">
         <IconBtn
             icon="arrow_back"
@@ -11,6 +11,10 @@
             v-if="allowReload"
             @click="() => $emit('reload')"
             icon="sync"
+        />
+        <IconBtn
+            @click="() => fill = !fill"
+            :icon="!fill ? 'fullscreen' : 'fullscreen_exit'"
         />
         <div class="btn-group">
             <IconBtn
@@ -26,7 +30,7 @@
         <slot />
     </header>
 
-    <div class="cards" :class="{ 'grid responsive': listStyle === ListStyle.Album }">
+    <div class="cards" :class="{ 'grid by-auto': listStyle === ListStyle.Album }">
         <div class="card" v-for="item in items" >
             <Card :manga="item.manga" :search="item.search" />
         </div>
@@ -57,7 +61,7 @@ import {
 type MangaType = Manga | ProgressExt;
 type SearchType = MatchResult | VisionResult | BaseResult | ImageSearchManga;
 
-const { listStyle } = useAppSettings();
+const { listStyle, fillPage } = useAppSettings();
 const stickyheader = ref<HTMLElement>();
 const emits = defineEmits<{ 
     (e: 'onscrolled'): void;
@@ -88,6 +92,13 @@ const style = computed<ListStyle>({
     get: () => listStyle.value,
     set: (value: ListStyle) => listStyle.value = value
 });
+
+const fill = computed<boolean>({
+    get: () => fillPage.value,
+    set: (value: boolean) => fillPage.value = value
+});
+
+const cssStyle = computed(() => `${style.value} ${fill.value ? 'fill-page' : ''}`);
 
 const styles = [
     { icon: 'list', style: ListStyle.Compact },
@@ -180,14 +191,10 @@ onMounted(() => {
         top: -2px;
         z-index: 1;
 
-        &[stuck] {
-            padding-top: 5px;
-        }
+        &[stuck] { padding-top: 5px; }
     }
 
-    .cards {
-        padding-bottom: var(--margin);
-    }
+    .cards { padding-bottom: var(--margin); }
 
     .error-card {
         display: flex;
@@ -204,25 +211,22 @@ onMounted(() => {
             margin: 0 auto;
 
             .card {
-                margin: 0;
+                margin: 0 auto;
 
-                &:nth-child(3n+2) { margin: 0 auto; }
-                &:nth-child(3n+3) { margin-left: auto; }
+                // &:nth-child(3n+2) { margin: 0 auto; }
+                // &:nth-child(3n+3) { margin-left: auto; }
             }
         }
+    }
+
+    &.fill-page {
+        .title, header, .cards, .error-card { max-width: 100%; }
     }
 }
 
 @media only screen and (max-width: 900px) {
     .card-list.album .cards {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-
-        .card {
-            margin: 0 !important;
-
-            &:nth-child(2n+1) { margin-right: auto !important; }
-            &:nth-child(2n+2) { margin-left: auto !important; }
-        }
     }
 }
 

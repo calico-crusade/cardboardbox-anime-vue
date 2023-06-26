@@ -58,12 +58,7 @@ onMounted(() => nextTick(() => {
 
 <style lang="scss" scoped>
 .import {
-    p {
-        margin-top: 10px;
-    }
-
-    a {
-        text-decoration: underline;
-    }
+    p { margin-top: 10px; }
+    a { text-decoration: underline; }
 }
 </style>

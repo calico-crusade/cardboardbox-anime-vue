@@ -251,7 +251,7 @@ $br-color: transparent;
 
 .search-drawer {
     margin: 5px auto;
-    border-radius: 5px;
+    border-radius: var(--brd-radius);
     overflow: hidden;
     transition: background-color 250ms;
 
@@ -267,16 +267,13 @@ $br-color: transparent;
         overflow: hidden;
         max-height: 0;
         transition: all 250ms;
-        border-bottom-left-radius: 5px;
-        border-bottom-right-radius: 5px;
+        border-bottom-left-radius: var(--brd-radius);
+        border-bottom-right-radius: var(--brd-radius);
         border-top: 1px solid transparent;
         padding: 0 10px;
 
         h2 { margin-top: 10px; }
-        
-        button:last-child {
-            margin-bottom: var(--margin);
-        }
+        button:last-child { margin-bottom: var(--margin); }
     }
 
     &.open main {
@@ -290,9 +287,7 @@ $br-color: transparent;
 
 @media only screen and (max-width: 550px) {
     .control {
-        label, select {
-            display: none;
-        }
+        label, select { display: none; }
     }
 }
 </style>

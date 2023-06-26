@@ -23,7 +23,11 @@ export default defineNuxtConfig({
     },
     css: [
         '@/node_modules/highlight.js/styles/vs2015.css',
+        '@/styles/variables.scss',
+        '@/styles/reset.scss',
         '@/styles/styles.scss',
+        '@/styles/layout.scss',
+        '@/styles/controls.scss',
     ],
     runtimeConfig: {
         public: {

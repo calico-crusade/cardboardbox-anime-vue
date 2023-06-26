@@ -137,9 +137,7 @@ const onClicked = () => {
                 h2 { display: none; }
                 button {
                     margin-top: 10px;
-                    span {
-                        display: inline-block !important;
-                    }
+                    span { display: inline-block !important; }
                 }
             }
 
@@ -153,9 +151,7 @@ const onClicked = () => {
 }
 
 @media only screen and (max-width: 1050px) {
-    .app-header {
-        display: flex;
-    }
+    .app-header { display: flex; }
 
     .fade.open {
         opacity: 1;
@@ -184,9 +180,7 @@ const onClicked = () => {
             }
         }
 
-        &.closed {
-            margin-left: calc(var(--nav-width) * -1 - 50px);
-        }
+        &.closed { margin-left: calc(var(--nav-width) * -1 - 50px); }
     }
 }
 </style>
