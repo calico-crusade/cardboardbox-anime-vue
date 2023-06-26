@@ -22,6 +22,7 @@
     "sass-loader": "^13.2.2"
   },
   "dependencies": {
+    "colortranslator": "^2.0.0",
     "dayjs": "^1.11.7",
     "file-saver": "^2.0.5",
     "hammerjs": "^2.0.8",

@@ -24,6 +24,28 @@ export const useSettingsHelper = () => {
             }
         });
     }
+
+    function getSetJson<T>(key: string, def?: T, fn?: (val: T | undefined) => void) {
+        const fromJson = () => {
+            const val = getStore<string>(key);
+            if (!val) return def;
+            return <T>JSON.parse(val);
+        };
+        const toJson = (val: T | undefined) => {
+            if (!val) return undefined;
+            return JSON.stringify(val);
+        }
+        const state = useState<T | undefined>(key, () => fromJson());
+
+        return computed({
+            get: () => state.value,
+            set: (val: T | undefined) => {
+                state.value = val;
+                setStore(key, toJson(val));
+                if (fn) fn(val);
+            }
+        });
+    }
     
     const getSetBool = (key: string, def: boolean, fn?: (val: boolean) => void) => {
         const state = useState<boolean>(key, () => !!(getStore(key) ?? def));
@@ -80,5 +102,6 @@ export const useSettingsHelper = () => {
         getSet,
         getSetNumb,
         getSetArray,
+        getSetJson
     };
 }

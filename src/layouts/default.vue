@@ -1,5 +1,6 @@
 <template>
     <div class="app-fix flex">
+        <div class="app-background"></div>
         <NavBar />
         <main class="fill flex">
             <slot />
@@ -12,9 +13,7 @@
     .app-fix {
         flex-flow: column;
 
-        main {
-            overflow: hidden;
-        }
+        main { overflow: hidden; }
     }
 }
 </style>

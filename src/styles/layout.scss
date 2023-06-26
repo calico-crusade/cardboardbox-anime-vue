@@ -61,7 +61,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: .5rem;
 
+    .span { grid-column: span 2; }
+
     &.by-2 {
+
         .cell:nth-child(even) { 
             text-align: right;
             justify-content: end; 
@@ -69,6 +72,8 @@
     }
     &.by-3, &.responsive { 
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        
+        .span { grid-column: span 3; }
         .cell {
             &:nth-child(3n+3) {
                 text-align: right;
@@ -82,6 +87,7 @@
     }
     &.by-4 { 
         grid-template-columns: repeat(4, minmax(0, 1fr)); 
+        .span {  grid-column: span 4; }
     }
 
     &.by-auto {
@@ -96,7 +102,8 @@
 }
 
 @media only screen and (max-width: 600px) {
-    .grid.responsive {
+    .grid.responsive,
+    .grid.by-2 {
         grid-template-columns: repeat(1, minmax(0, 1fr));
     }
 }

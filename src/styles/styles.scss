@@ -8,7 +8,21 @@
     max-width: var(--full-width);
     max-height: var(--full-height);
     overflow: hidden;
-    background-image: var(--bg-image);
+
+    .app-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--full-width);
+        height: var(--full-height);
+        z-index: -1;
+        background-image: var(--bg-image);
+        background-position: var(--bg-image-position);
+        background-size: var(--bg-image-size);
+        background-repeat: var(--bg-image-repeat);
+        filter: var(--bg-image-filter);
+        transform: scale(1.1);
+    }
 }
 
 .text-center { text-align: center; }

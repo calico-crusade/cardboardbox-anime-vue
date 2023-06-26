@@ -64,6 +64,11 @@ input:read-only:not([type='color']):not([type='range']) {
             border: none;
         }
 
+        input:not(.fill), 
+        select:not(.fill) {
+            min-width: 100px;
+        }
+
         button, a {
             display: flex;
             align-items: center;

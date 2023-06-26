@@ -1,5 +1,5 @@
 <template>
-<div class="tab-controls fill fill-parent" :class="{ 'flip': flip }">
+<div class="tab-controls fill fill-parent" :class="classes">
     <div class="tab-header">
         <button
             class="tab-button"
@@ -21,9 +21,18 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{ flip?: boolean }>();
+import { booleanish, isTrue } from '~/models';
+
+type Style = 'top' | 'bottom' | 'left' | 'right';
+
+const props = withDefaults(defineProps<{ 
+    position?: Style,
+    noMargins?: booleanish
+}>(), { position: 'top' });
 
 const { tabs, setActiveTab } = useTabs();
+
+const classes = computed(() => `${props.position} ${isTrue(props.noMargins) ? 'no-margins' : ''}`);
 
 const data = computed(() => {
     const output = [];
@@ -122,7 +131,7 @@ $darkbackground: var(--bg-color);
         }
     }
 
-    &.flip {
+    &.bottom {
         flex-flow: column-reverse;
 
         .tab-header {
@@ -145,6 +154,55 @@ $darkbackground: var(--bg-color);
                 &:last-child { border-bottom-right-radius: 0; }
             }
         }
+    }
+
+    &.left {
+        flex-flow: row;
+        .tab-content .tab { border-top-right-radius: $margin; }
+        .tab-header .tab-button {
+            border-top-left-radius: $margin;
+            border-bottom-left-radius: $margin;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    &.right {
+        flex-flow: row-reverse;
+        .tab-content .tab { 
+            border-top-left-radius: $margin;
+
+            &:first-child { border-top-right-radius: 0; }
+            &:last-child { border-top-right-radius: $margin; }
+        }
+        .tab-header .tab-button {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: $margin;
+            border-bottom-right-radius: $margin;
+
+            .title {
+                flex-flow:  row-reverse;
+                p { margin-right: 5px; }
+            }
+        }
+    }
+
+    &.left, &.right {
+        .tab-header {
+            flex-flow: column;
+            margin: #{$margin} 0;
+            .tab-button {
+                flex: 0;
+                .title { margin: 5px 0; }
+            }
+        }
+        .tab-content { margin: #{$margin} 0; }
+    }
+
+    &.no-margins {
+        .tab-header { margin: 0; }
+        .tab-content { margin: 0; }
     }
 }
 </style>

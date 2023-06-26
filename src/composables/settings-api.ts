@@ -1,6 +1,10 @@
 import { WritableComputedRef } from "nuxt/dist/app/compat/capi";
-import { FilterStyle, ListStyle, PageStyle, ProgressBarStyle, Theme } from "~/models";
+import { 
+    FilterStyle, ListStyle, PageStyle, ProgressBarStyle, 
+    ThemeColor, SiteBackground, THEME_DEFAULTS
+ } from "~/models";
 
+type Dic = { [key: string]: string };
 interface MangaSettings {
     invertControls: boolean;
     forwardOnly: boolean;
@@ -14,11 +18,10 @@ interface MangaSettings {
     blurPornCovers: boolean;
     showTutorial: boolean;
     showPorn: boolean;
-    bgImageDir: string;
-    bgImageColors: string[];
     pageMenuOver: boolean;
     regionMargin: number;
     fillPage: boolean;
+    background: SiteBackground;
 }
 
 interface Settings {
@@ -38,11 +41,10 @@ type MangaSettingsKey = {
     blurPornCovers: WritableComputedRef<boolean>;
     showTutorial: WritableComputedRef<boolean>;
     showPorn: WritableComputedRef<boolean>;
-    bgImageDir: WritableComputedRef<string>;
-    bgImageColors: WritableComputedRef<string[]>;
     pageMenuOver: WritableComputedRef<boolean>;
     regionMargin: WritableComputedRef<number>;
     fillPage: WritableComputedRef<boolean>;
+    background: WritableComputedRef<SiteBackground>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -58,31 +60,17 @@ const DEFAULTS: MangaSettings = {
     blurPornCovers: true,
     showTutorial: true,
     showPorn: true,
-    bgImageDir: 'to right bottom',
-    bgImageColors: ['#1953aa', '#693594', '#57195c', '#1a10a0', '#171130'],
     pageMenuOver: false,
     regionMargin: 30,
-    fillPage: false
+    fillPage: false,
+    background: { ...THEME_DEFAULTS.themes[0] }
 }
 
 export const useAppSettings = () => {
     const { currentUser } = useAuthApi();
     const { post, debounce, clone } = useApiHelper();
-    const { getSetBool, getSetNumb, getSet, getSetArray } = useSettingsHelper();
+    const { getSetBool, getSetNumb, getSet, getSetArray, getSetJson } = useSettingsHelper();
     const pauseUpdates = useState<boolean>(() => false);
-
-    const themes: Theme[] = [
-        {
-            name: 'Dark',
-            direction: 'to right bottom',
-            colors: ['#1953aa', '#693594', '#57195c', '#1a10a0', '#171130']
-        },
-        {
-            name: 'Light Pink',
-            direction: 'to right bottom',
-            colors: ['#0260ed', '#9645d9', '#ce14db', '#9f0f9a', '#ff0040']
-        },
-    ]
 
     const settings = (() => {
         return <MangaSettingsKey>{
@@ -98,21 +86,68 @@ export const useAppSettings = () => {
             blurPornCovers: getSetBool('blur-porn-covers', DEFAULTS.blurPornCovers, () => commit()),
             showTutorial: getSetBool('show-read-tutorial', DEFAULTS.showTutorial, () => commit()),
             showPorn: getSetBool('show-porn', DEFAULTS.showPorn, () => commit()),
-            bgImageDir: getSet<string>('bg-image-dir', DEFAULTS.bgImageDir, () => { commit(); fixBgImage(); }),
-            bgImageColors: getSetArray('bg-image-colors', DEFAULTS.bgImageColors, () => { commit(); fixBgImage(); }),
             pageMenuOver: getSetBool('page-menu-over', DEFAULTS.pageMenuOver, () => commit()),
             regionMargin: getSetNumb('region-margin', DEFAULTS.regionMargin, () => commit()),
             fillPage: getSetBool('fill-page', DEFAULTS.fillPage, () => commit()),
+            background: getSetJson<SiteBackground>('background', DEFAULTS.background, () => commitFix()),
         }
     })();
+
+    const setVar = (name: string, value?: string) => document.documentElement.style.setProperty('--' + name, value ?? '');
+
+    const determineStyle = (theme: SiteBackground): { [key: string]: string } => {
+        let map: Dic = {};
+        const fallbackCustom = (value: string, custom?: string) => (value === 'custom' ? custom : value) ?? '';
+        switch(theme.type) {
+            case 'gradient': 
+                const dir = theme.gradient.dir === 'deg' ? `${theme.gradient.degrees}deg` : theme.gradient.dir;
+                map = { 
+                    'bg-image': `linear-gradient(${dir}, ${theme.gradient.colors.map(t => t.color).join(', ')})`,
+                    'bg-image-position': 'center',
+                    'bg-image-repeat': 'no-repeat',
+                    'bg-image-size': 'cover',
+                    'bg-image-filter': ''
+                };
+                break;
+            case 'image': 
+                map = { 
+                    'bg-image': `url(${theme.image.url})`,
+                    'bg-image-position': fallbackCustom(theme.image.position, theme.image.custonPosition),
+                    'bg-image-repeat': theme.image.repeat,
+                    'bg-image-size': fallbackCustom(theme.image.size, theme.image.customSize),
+                    'bg-image-filter': theme.image.filters.map(t => `${t.key}(${t.value})`).join(' ')
+                };
+                break;
+            case 'solid-color': 
+                map = { 
+                    'bg-image': `linear-gradient(0deg, ${theme.solidColor}, ${theme.solidColor})`,
+                    'bg-image-position': 'center',
+                    'bg-image-repeat': 'no-repeat',
+                    'bg-image-size': 'cover',
+                    'bg-image-filter': ''
+                };
+                break;
+        }
+
+        for(const key in theme.colorMods) {
+            if (theme.colorMods[<ThemeColor>key])
+                map[key] = theme.colorMods[<ThemeColor>key] ?? '';
+        }
+
+        return map;
+    };
+
+    const setBgImage = (theme: SiteBackground) => {
+        const styles = <Dic>determineStyle(theme);
+        for(const key in styles) {
+            setVar(key, styles[key]);
+        }
+    };
 
     const fixBgImage = () => {
         if (!process.client) return;
 
-        document.documentElement.style.setProperty(
-            '--bg-image', 
-            `linear-gradient(${settings.bgImageDir.value}, ${settings.bgImageColors.value.join(', ')})`
-        );
+        setBgImage(settings.background.value);
     };
 
     const settingsFromUser = () => {
@@ -136,6 +171,7 @@ export const useAppSettings = () => {
     }, 1000);
 
     const commit = () => commitDebounce();
+    const commitFix = () => { commit(); fixBgImage();}
 
     const injectSettings = () => {
         const raw = <any>settingsFromUser()?.manga;
@@ -155,20 +191,19 @@ export const useAppSettings = () => {
     }
 
     const resetBgImage = () => {
-        settings.bgImageDir.value = 'to right bottom';
-        settings.bgImageColors.value = ['#1953aa', '#693594', '#57195c', '#1a10a0', '#171130' ];
+        settings.background.value = clone(THEME_DEFAULTS.themes[0]);
         fixBgImage();
     }
 
     return {
         ...settings,
-
-        themes,
         pauseUpdates,
 
         injectSettings,
         resetBgImage,
         fixBgImage,
-        commit
+        commit,
+        determineStyle,
+        setBgImage
     }
 };
