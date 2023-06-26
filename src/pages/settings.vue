@@ -123,13 +123,18 @@
                         <Icon>add</Icon>
                     </button>
                 </div>
-                <ColorPicker 
-                    v-for="(color, index) in colors"
-                    v-model="color.color"
-                    :label="'Gradient Color #' + (index + 1)"
-                    @delete="() => deleteColor(index)"
-                    @move="(inc) => move(index, inc)"
-                />
+                <ClientOnly>
+                    <draggable v-model="colors" item-key="color" tag="div">
+                        <template #item="{element: color, index}">
+                            <ColorPicker 
+                                v-model="color.color"
+                                :label="'Gradient Color #' + (index + 1)"
+                                @delete="() => deleteColor(index)"
+                                @move="(inc) => move(index, inc)"
+                            />
+                        </template>
+                    </draggable>
+                </ClientOnly>
                 <footer class="flex">
                     <IconBtn
                         pad-left
