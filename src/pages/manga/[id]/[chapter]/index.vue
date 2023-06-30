@@ -126,6 +126,7 @@
     </main>
     <div class="fade" @click="() => menuOpen = !menuOpen" />
     <aside class="flex row">
+        <div class="floating-image"  />
         <header class="flex center-items">
             <button @click="() => menuOpen = !menuOpen">
                 <Icon>close</Icon>
@@ -844,7 +845,22 @@ $progress-height: 10px;
         right: 0;
         height: 100%;
         z-index: 2;
-        background-image: var(--bg-image);
+        overflow: hidden;
+
+        .floating-image {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: var(--bg-image);
+            background-position: var(--bg-image-position);
+            background-size: var(--bg-image-size);
+            background-repeat: var(--bg-image-repeat);
+            filter: var(--bg-image-filter);
+            transform: scale(1.1);
+        }
     }
 
     main { max-width: 100% !important; }
