@@ -35,65 +35,56 @@ export const useApiHelper = () => {
     const clone = <T>(item: T) => <T>JSON.parse(JSON.stringify(item));
 
     function get<T>(url: string, params?: Params, lazy: boolean = false) {
-        if (lazy) 
-            return useLazyFetch<T>(wrapUrl(url), {
-                params,
-                headers: headers()
-            });
-
-        return useFetch<T>(wrapUrl(url), {
+        const opts = {
             params,
             headers: headers()
-        });
+        };
+
+        if (lazy) 
+            return useLazyFetch<T>(wrapUrl(url), opts);
+
+        return useFetch<T>(wrapUrl(url), opts);
     }
 
     function post<T>(url: string, body?: any, params?: Params, lazy: boolean = false) {
-        if (lazy)
-            return useLazyFetch<T>(wrapUrl(url), {
-                params,
-                headers: headers(),
-                body,
-                method: 'POST'
-            });
-
-        return useFetch<T>(wrapUrl(url), <any>{
+        const opts = <any>{
             params,
             headers: headers(),
             body,
-            method: 'POST'
-        });
+            method: 'post'
+        };
+
+        if (lazy)
+            return useLazyFetch<T>(wrapUrl(url), opts);
+
+        return useFetch<T>(wrapUrl(url), opts);
     }
 
     function put<T>(url: string, body?: any, params?: Params, lazy: boolean = false) {
-        if (lazy)
-            return useLazyFetch<T>(wrapUrl(url), {
-                params,
-                headers: headers(),
-                body,
-                method: 'PUT'
-            });
-
-        return useFetch<T>(wrapUrl(url), <any>{
+        const opts = <any>{
             params,
             headers: headers(),
             body,
             method: 'PUT'
-        });
+        };
+
+        if (lazy)
+            return useLazyFetch<T>(wrapUrl(url), opts);
+
+        return useFetch<T>(wrapUrl(url), opts);
     }
 
     function deletefn<T>(url: string, params?: Params, lazy: boolean = false) {
-        if (lazy) 
-            return useLazyFetch<T>(wrapUrl(url), {
-                params,
-                headers: headers(),
-                method: 'DELETE'
-            });
-
-        return useFetch<T>(wrapUrl(url), <any>{
+        const opts = <any>{
             params,
             headers: headers(),
             method: 'DELETE'
-        });
+        };
+
+        if (lazy) 
+            return useLazyFetch<T>(wrapUrl(url), opts);
+
+        return useFetch<T>(wrapUrl(url), opts);
     }
 
     function download(url: string, name?: string, req?: RequestInit) {
@@ -153,6 +144,57 @@ export const useApiHelper = () => {
         }
     }
 
+    const dateFormatLocal = (inDate: string, full = false): string => {
+        const date = Date.parse(inDate);
+        const units = {
+            year: 24 * 60 * 60 * 1000 * 365,
+            month: (24 * 60 * 60 * 1000 * 365) / 12,
+            day: 24 * 60 * 60 * 1000,
+            hour: 60 * 60 * 1000,
+            minute: 60 * 1000,
+            second: 1000,
+        };
+        const elapsed = date - Date.now();
+        for (const key in units) {
+            const u = key as keyof typeof units;
+            if (Math.abs(elapsed) > units[u] || u == "second") {
+                try {
+                    // @ts-ignore
+                    const rtf = new Intl.RelativeTimeFormat("en", {
+                        numeric: "auto",
+                        style: !full ? "narrow" : undefined,
+                    });
+                    return rtf.format(Math.round(elapsed / units[u]), u);
+                } catch (error) {
+                    console.warn(error);
+                    return `${-Math.round(elapsed / units[u])} ${u + (-Math.round(elapsed / units[u]) > 1 ? "s" : "")
+                        } ago`;
+                }
+            }
+        }
+        return "A long time ago";
+    }
+    
+    const dateFormatMicro = (inDate: string): string => {
+        const date = Date.parse(inDate);
+        const units = {
+            y: 24 * 60 * 60 * 1000 * 365,
+            mo: (24 * 60 * 60 * 1000 * 365) / 12,
+            d: 24 * 60 * 60 * 1000,
+            h: 60 * 60 * 1000,
+            m: 60 * 1000,
+            s: 1000,
+        };
+        const elapsed = date - Date.now();
+        for (const key in units) {
+            const u = key as keyof typeof units;
+            if (Math.abs(elapsed) > units[u] || u == "s") {
+                return `${-Math.round(elapsed / units[u])}${u}`;
+            }
+        }
+        return "∞";
+    }
+
     return {
         get,
         post,
@@ -164,6 +206,8 @@ export const useApiHelper = () => {
         toPromise,
         clone,
         debounce,
-        throttle
+        throttle,
+        dateFormatLocal,
+        dateFormatMicro
     }
 }

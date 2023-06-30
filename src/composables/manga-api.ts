@@ -8,6 +8,9 @@ import {
 } from "~/models";
 import { useApiHelper } from "./api-helpers";
 import { FetchError } from 'ofetch';
+import { AsyncData } from "nuxt/app";
+
+type Worked = { worked: boolean };
 
 export const useMangaApi = () => {
     const { get, del, post, download } = useApiHelper();
@@ -155,6 +158,12 @@ export const useMangaApi = () => {
         });
     }
 
+    const markAsRead = (id: number | string, chapter?: number | number[]): AsyncData<Worked | null, FetchError<any> | null> => {
+        if (chapter === undefined) return get<Worked>(`manga/${id}/mark-as-read`);
+        if (typeof chapter === 'number') return get<Worked>(`manga/${id}/mark-as-read/${chapter}`);
+        return <any>post<Worked>(`manga/${id}/mark-as-read`, chapter);
+    }
+
     return {
         fetch,
         random,
@@ -176,6 +185,7 @@ export const useMangaApi = () => {
         shouldBlur,
         providers,
         volumed,
-        strip
+        strip,
+        markAsRead
     };
 };

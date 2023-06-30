@@ -7,6 +7,7 @@
     :class="classes" 
     @click="() => $emit('click')"
     :style="styles"
+    :title="text"
 >
     <Icon 
         :size="acIconSize"
@@ -29,6 +30,7 @@
     :class="classes" 
     @click="() => $emit('click')"
     :style="styles"
+    :title="text"
 >
     <Icon 
         :size="acIconSize"
@@ -50,6 +52,7 @@
     @click="() => $emit('click')"
     :style="styles"
     :disabled="isDisabled"
+    :title="text"
 >
     <Icon 
         :size="acIconSize"

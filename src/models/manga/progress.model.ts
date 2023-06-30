@@ -8,6 +8,7 @@ export interface Progress extends DbObject {
     mangaId: number;
     mangaChapterId: number;
     pageIndex: number;
+    read: { chapterId: number, pageIndex: number }[];
 }
 
 export interface ProgressExt {

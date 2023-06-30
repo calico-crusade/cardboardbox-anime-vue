@@ -50,12 +50,20 @@
                 text="Reload Source" 
                 color="shade" 
             />
-
             <IconBtn 
                 @click="copyUrl" 
                 breakpoint 
                 icon="content_copy" 
                 text="Copy Manga Url" 
+                color="shade" 
+            />
+            <IconBtn
+                v-if="currentUser"
+                @click="toggleReadAll"
+                breakpoint
+                :loading="reloading"
+                :icon="progress && progress.read.length > 0 ? 'visibility_off' : 'visibility'"
+                :text="progress && progress.read.length > 0 ? 'Mark all as Unread' : 'Mark all as Read'"
                 color="shade" 
             />
         </div>
@@ -180,7 +188,8 @@ const {
     volumed,
     favourite,
     reload,
-    resetProgress: reset
+    resetProgress: reset,
+    markAsRead
 } = useMangaApi();
 
 const { proxy: proxyUrl, toPromise, clone } = useApiHelper();
@@ -263,11 +272,8 @@ const reloadSource = async () => {
     if (!manga.value) return;
     reloading.value = true;
 
-    console.log('Reloading');
     await toPromise(reload(manga.value));
-    console.log('Reload finished');
     await refetch();
-    console.log('Refetch finished');
     reloading.value = false;
 }
 
@@ -301,6 +307,14 @@ const nextRandom = async () => {
 
 const url = (s?: VolumeSort, a?: boolean) => {
     return `/manga/${id.value}?sort=${s ?? sort.value}&asc=${a ?? asc.value}`;
+}
+
+const toggleReadAll = async () => {
+    if (!manga.value || !currentUser.value) return;
+
+    reloading.value = true;
+    await toPromise(markAsRead(id.value));
+    await refetch();
 }
 
 onMounted(() => nextTick(() => {
