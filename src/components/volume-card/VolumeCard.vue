@@ -1,162 +1,104 @@
 <template>
-    <NuxtLink v-if="chapter.versions.length === 1 && first" class="chapter" :to="'/manga/' + id + '/' + first.id"
-        :class="{ 'active': chapter.read && first.id !== progress?.mangaChapterId, 'collapsed': collapsed }">
-        <div class="progress" v-if="chapter.progress" :style="{ 'width': chapter.progress + '%' }">
-            <span>{{ chapter.progress.toFixed(2) + '%' }}</span>
-        </div>
-        <VolumeCardContent :chapter="first" :read="chapter.read" :progress="progress" />
+<div class="volume-card" :class="{ 'version': version }">
+    <NuxtLink :to="url" :class="{ 'active': isRead }" class="cell">
+        <Icon v-if="isRead">done_all</Icon>
+        <Icon v-if="chapter.id === progress?.mangaChapterId">
+            auto_stories
+        </Icon>
+        {{ chapter.volume ? 'Vol. ' + chapter.volume + ' ' : '' }}
+        Ch. {{ chapter.ordinal }}
+        {{ chapter.title ? ' - ' + chapter.title : '' }}
     </NuxtLink>
-    <div v-else class="version-chapter" :class="{ 'collapsed': collapsed, 'active': chapter.read }">
-        <div class="progress" v-if="chapter.progress" :style="{ 'width': chapter.progress + '%' }">
-            <span>{{ chapter.progress.toFixed(2) + '%' }}</span>
-        </div>
-        <NuxtLink class="chapter-root" :to="'/manga/' + id + '/' + first.id" :class="{ 'active': chapter.read }">
-            <VolumeCardContent :chapter="first" :read="chapter.read" :progress="progress" />
-        </NuxtLink>
-        <div class="version-drawer" :class="{ open: chapter.open }">
-            <div class="header grid by-2" @click="() => toggle()">
-                <span class="cell icon-text">
-                    <Icon>layers</Icon>&nbsp;
-                    Other Versions: {{ chapter.versions.length }}
-                </span>
-                <span class="cell icon-text">
-                    <Icon>
-                        {{ chapter.open
-                            ? 'expand_more'
-                            : 'expand_less' }}
-                    </Icon>
-                </span>
-            </div>
-            <div class="version-content">
-                <NuxtLink v-for="ver in rest" :to="'/manga/' + id + '/' + ver.id">
-                    <div class="chapter-content grid by-2">
-                        <span class="cell icon-text">
-                            <Icon v-if="chapter.read">done_all</Icon>
-                            <Icon v-if="ver.id === progress?.mangaChapterId">
-                                auto_stories
-                            </Icon>
-                            <span v-if="ver.volume">Vol. {{ ver.volume }}&nbsp;</span>
-                            Ch. {{ ver.ordinal }}
-                        </span>
-                    </div>
-                </NuxtLink>
-            </div>
-        </div>
+    <span class="cell">
+        <Icon>schedule</Icon>&nbsp;
+        <Date :date="chapter.createdAt.toString()" format="partial" />
+    </span>
+    <div class="cell btns" v-if="!version">
+        <IconBtn 
+            other-classes="cell"
+            :loading="loading"
+            :icon="isRead ? 'visibility_off' : 'visibility'"
+            @click="toggleRead"
+        />
+        <IconBtn 
+            v-if="hasVersions"
+            other-classes="cell"
+            :loading="loading"
+            :icon="isOpen ? 'expand_less' : 'expand_more'"
+            @click="() => $emit('toggle-open')"
+        />
     </div>
+</div>
 </template>
     
 <script setup lang="ts">
-import { MangaVolueChapter, Progress } from '~/models';
+import { Chapter, Progress } from '~/models';
 
 const { toPromise } = useApiHelper();
-const { currentUser } = useAuthApi();
 const { markAsRead } = useMangaApi();
 
-const props = defineProps<{
-    chapter: MangaVolueChapter,
-    id: string | number,
-    progress?: Progress,
-    collapsed?: boolean
+const emits = defineEmits<{
+    (e: 'toggle-read', chapter: Chapter): void;
+    (e: 'update:modelValue', value: boolean): void;
 }>();
 
-const first = computed(() => props.chapter.versions[0]);
-const rest = computed(() => props.chapter.versions.slice(1));
-const toggle = () => { props.chapter.open = !props.chapter.open; };
+const props = defineProps<{
+    chapter: Chapter,
+    progress?: Progress,
+    version?: boolean,
+    open?: boolean,
+    hasVersions?: boolean
+    modelValue: boolean;
+}>();
+
+const loading = ref(false);
+const isRead = computed(() => props.modelValue);
+const isOpen = computed(() => props.open ?? false);
+const url = computed(() => `/manga/${props.chapter.mangaId}/${props.chapter.id}`);
+
+const toggleRead = async () => {
+    loading.value = true;
+    const result = await toPromise(markAsRead(props.chapter.mangaId, props.chapter.id));
+    loading.value = false;
+    if (result?.worked)
+        emits('update:modelValue', !props.modelValue);
+}
 </script>
     
 <style lang="scss" scoped>
-$bg-color: var(--bg-color-accent);
+.volume-card {
+    display: grid;
+    gap: 5px;
+    grid-template-columns: auto 150px 100px;
+    grid-template-rows: auto;
+    align-items: center;
+    background-color: var(--bg-color-accent);
+    padding-left: 10px;
+    padding-bottom: 5px;
 
-.volume-card-wrapper {
-    display: flex;
-    flex-flow: row;
-    flex: 1;
-
-    .mark-as-read {
-        margin-left: 10px;
-    }
-}
-
-.chapter,
-.version-chapter {
-    flex: 1;
-    padding: 15px;
-    background-color: $bg-color;
-    text-decoration: none;
-    margin: 5px;
-    position: relative;
-
-    &:first-child {
-        display: none;
-    }
-
-    .progress {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        background-color: var(--bg-color-accent-darkish);
-
-        span {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--accent-1);
-            border-radius: 50%;
-        }
-    }
-
-    .chapter-content {
-        position: relative;
-    }
-
-    .chapter-root {
+    .cell {
+        margin: auto 0px;
         display: flex;
-        flex-flow: column;
-        position: relative;
-        text-decoration: none;
-        border-bottom: 1px solid #{$bg-color};
-        padding-bottom: 5px;
-    }
+        flex-flow: row;
+        align-items: center;
 
-    .version-drawer {
-        padding-top: 5px;
-        border-top: 1px solid #{$bg-color};
-
-        .header {
-            cursor: pointer;
-        }
-
-        .version-content {
-            transition: max-height 250ms;
-            max-height: 0;
-            overflow: hidden;
-            margin: 0;
-
-            .version-item {
-                text-decoration: none;
-            }
-        }
-
-        &.open {
-            .version-content {
-                max-height: 100px;
-                overflow-y: auto;
-            }
+        &.btns {
+            justify-content: flex-end;
         }
     }
 
-    &.active {
-        background-color: var(--bg-color-accent-darkish) !important;
+    a.cell {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
-    &.resume {
-        background-color: var(--accent-1);
+    &.version {
+        grid-template-columns: auto 150px;
     }
 
-    &.collapsed {
-        display: none;
+    &:not(.version):last-child {
+        padding-bottom: 0;
     }
 }
 </style>

@@ -117,7 +117,10 @@
             </Drawer>
         </div>
     </div>
-    <main class="volumes fill flex row">
+    
+    <VolumeList :sort="sort" :asc="asc" :manga="data" />
+
+    <!-- <main class="volumes fill flex row">
         <div class="chapter-header flex">
             <p class="fill">Chapters</p>
             <p>Sort:</p>
@@ -177,7 +180,7 @@
                 </div>
             </article>
         </template>
-    </main>
+    </main> -->
 </div>
 </template>
 
