@@ -54,7 +54,12 @@ const props = defineProps<{
 const loading = ref(false);
 const isRead = computed(() => props.modelValue);
 const isOpen = computed(() => props.open ?? false);
-const url = computed(() => `/manga/${props.chapter.mangaId}/${props.chapter.id}`);
+const url = computed(() => {
+    let base = `/manga/${props.chapter.mangaId}/${props.chapter.id}`;
+    if (props.chapter.id === props.progress?.mangaChapterId)
+        base += `?page=${(props.progress.pageIndex ?? 0) + 1}`;
+    return base;
+});
 
 const toggleRead = async () => {
     loading.value = true;

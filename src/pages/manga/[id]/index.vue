@@ -117,70 +117,8 @@
             </Drawer>
         </div>
     </div>
-    
-    <VolumeList :sort="sort" :asc="asc" :manga="data" />
 
-    <!-- <main class="volumes fill flex row">
-        <div class="chapter-header flex">
-            <p class="fill">Chapters</p>
-            <p>Sort:</p>
-            <div class="btn-group no-top">
-                <IconBtn 
-                    :icon="s.icon"
-                    v-for="s in sorts"
-                    :link="url(s.key)"
-                    :other-classes="s.key === sort ? 'active' : ''"
-                />
-            </div>
-            <IconBtn 
-                icon="sort"
-                :rotate="asc ? 0 : 180"
-                :flip="!asc"
-                :link="url(undefined, !asc)"
-            />
-            <IconBtn 
-                @click="collapseToggle" 
-                :icon="allCollapsed ? 'remove' : 'add'"
-            />
-        </div>
-        <Loading v-if="volumes.length === 0 || reloading" />
-        <template v-else>
-            <article class="volume" v-for="(vol, index) in volumes">
-                <div class="name" @click="() => toggleVolume(index)">
-                    {{ vol.name
-                        ? 'Volume ' + vol.name
-                        : 'No Volume' }}
-                </div>
-                <button class="collapse-btn" @click="() => toggleVolume(index)">
-                    <Icon>{{ volumeCollapsed(index)
-                        ? 'expand_more'
-                        : 'expand_less' }}</Icon>
-                </button>
-                <div class="chapters" :class="{ 'collapse': volumeCollapsed(index) }">
-                    <a class="chapter-collapse grid by-2" @click="() => toggleVolume(index)">
-                        <span class="cell">
-                            {{ vol.name
-                                ? 'Volume ' + vol.name
-                                : 'No Volume' }}
-                        </span>
-                        <span class="cell icon-text">
-                            <Icon>expand_more</Icon> Open
-                        </span>
-                        <span class="cell icon-text">
-                            <Icon>layers</Icon> {{ vol.chapters.length }} Chapters
-                        </span>
-                    </a>
-                    <VolumeCard 
-                        v-for="chapter of vol.chapters" 
-                        :id="id" 
-                        :chapter="chapter" 
-                        :progress="progress" 
-                        :collapsed="volumeCollapsed(index)"
-                    />
-                </div>
-            </article>
-        </template>
-    </main> -->
+    <VolumeList :sort="sort" :asc="asc" :manga="data" :progress="progress" />
 </div>
 </template>
 
@@ -199,14 +137,6 @@ const { proxy: proxyUrl, toPromise, clone } = useApiHelper();
 const { currentUser } = useAuthApi();
 const route = useRoute();
 
-const sorts : { key: VolumeSort, icon: string }[] = [
-    { key: 'ordinal', icon: 'list' },
-    { key: 'date', icon: 'calendar_month' },
-    { key: 'language', icon: 'translate' },
-    { key: 'title', icon: 'sort_by_alpha' },
-    { key: 'read', icon: 'done_all' }
-];
-
 const rawId = computed(() => route.params.id.toString());
 const sort = computed(() => <VolumeSort | undefined>route.query?.sort?.toString() ?? 'ordinal');
 const asc = computed(() => (route.query?.asc?.toString()?.toLowerCase() ?? 'true') === 'true');
@@ -216,7 +146,6 @@ const params = ref({ sort: sort.value, asc: asc.value });
 const unauthed = !currentUser.value;
 const { data: rawData, pending: reloading, error, refresh } = await volumed(rawId.value, params);
 const data = ref(clone(rawData.value));
-const hideRead = ref(false);
 const pending = computed(() => data.value ? false : reloading.value);
 const manga = computed(() => data.value?.manga);
 const isFavourite = computed(() => stats.value?.favourite || false);
@@ -234,8 +163,8 @@ const currentChapter = computed(() =>
     ?? currentVolume.value?.chapters[0]);
 const currentVersion = computed(() => currentChapter.value?.versions[currentChapter.value?.readIndex ?? 0]);
 const resumeUrl = computed(() =>
-    currentVersion.value
-        ? `/manga/${manga.value?.id}/${currentVersion.value.id}?page=${(progress.value?.pageIndex ?? 0) + 1}`
+    progress?.value
+        ? `/manga/${manga.value?.id}/${progress.value.mangaChapterId}?page=${(progress.value.pageIndex ?? 0) + 1}`
         : undefined
 );
 const title = computed(() => manga.value?.title ?? 'Manga Not Found');

@@ -1,21 +1,22 @@
 <template>
 <div class="volume-container" :class="{ 'collapse': volume.collapse }">
     <header class="flex" @click="toggle">
-        <p class="fill">{{ volume.name ? 'Volume ' + volume.name : 'No Volume' }} - {{ volume.chapters.length }} Chapters</p>
+        <p class="fill">{{ volume.name ? 'Volume ' + volume.name : 'No Volume' }} - {{ volume.chapters.length }} Chapter{{ volume.chapters.length > 1 ? 's' : '' }}</p>
         <Icon>{{ !volume.collapse ? 'expand_less' : 'expand_more' }}</Icon>
     </header>
     <div class="volume-chapters">
-        <VolumeChapter v-for="chapter in volume.chapters" :chapter="chapter" />
+        <VolumeChapter v-for="chapter in volume.chapters" :chapter="chapter" :progress="progress" />
     </div>
 </div>
 </template>
 
 <script setup lang="ts">
-import { MangaVolume } from 'models';
+import { MangaVolume, Progress } from 'models';
 
 const props = defineProps<{
     volume: MangaVolume;
     index: number;
+    progress?: Progress;
 }>();
 
 const toggle = () => props.volume.collapse = !props.volume.collapse;

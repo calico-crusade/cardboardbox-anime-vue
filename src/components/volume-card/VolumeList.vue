@@ -24,19 +24,20 @@
     </header>
     <Loading v-if="volumes.length === 0" />
     <template v-else>
-        <Volume v-for="(vol, index) in volumes" :volume="vol" :index="index" />
+        <Volume v-for="(vol, index) in volumes" :volume="vol" :index="index" :progress="progress" />
     </template>
 </main>
 </template>
 
 <script setup lang="ts">
-import { MangaVolumed, VolumeSort } from '~/models';
+import { MangaVolumed, Progress, VolumeSort } from '~/models';
 
 const props = defineProps<{
     sort?: VolumeSort;
     asc?: boolean;
     manga?: MangaVolumed;
     reloading?: boolean;
+    progress?: Progress;
 }>();
 
 const actSort = computed(() => props.sort ?? 'ordinal');
