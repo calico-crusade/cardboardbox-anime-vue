@@ -38,7 +38,7 @@ const { toPromise } = useApiHelper();
 const { markAsRead } = useMangaApi();
 
 const emits = defineEmits<{
-    (e: 'toggle-read', chapter: Chapter): void;
+    (e: 'toggle-open'): void;
     (e: 'update:modelValue', value: boolean): void;
 }>();
 
