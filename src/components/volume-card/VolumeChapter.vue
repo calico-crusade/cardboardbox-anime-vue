@@ -10,6 +10,8 @@
             v-model="chapter.read" 
             :open="chapter.open" 
             @toggle-open="() => chapter.open = !chapter.open"
+            :has-versions="false"
+            :version="false"
         />
     </div>
 </div>
@@ -25,6 +27,7 @@
             :open="chapter.open" 
             @toggle-open="() => chapter.open = !chapter.open"
             :has-versions="true"
+            :version="false"
         />
         <template v-if="chapter.open">
             <VolumeCard 
@@ -33,6 +36,7 @@
                 :progress="progress" 
                 :read="chapter.read" 
                 :version="true"
+                :has-versions="false"
                 v-model="chapter.read"
             />
         </template>

@@ -63,10 +63,10 @@ const url = computed(() => {
         base += `?page=${(props.progress.pageIndex ?? 0) + 1}`;
     return base;
 });
-const hasButtons = computed(() => !props.version && props.hasVersions && currentUser);
+const hasButtons = computed(() => !props.version && (!!currentUser.value || props.hasVersions));
 
 const toggleRead = async () => {
-    if (!currentUser) return;
+    if (!currentUser.value) return;
 
     loading.value = true;
     const result = await toPromise(markAsRead(props.chapter.mangaId, props.chapter.id));
