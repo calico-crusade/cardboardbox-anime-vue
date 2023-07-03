@@ -1,5 +1,5 @@
 <template>
-<div class="volume-card" :class="{ 'version': version }">
+<div class="volume-card" :class="{ 'version': version, 'no-buttons': !hasButtons }">
     <NuxtLink :to="url" :class="{ 'active': isRead }" class="cell">
         <Icon v-if="isRead">done_all</Icon>
         <Icon v-if="chapter.id === progress?.mangaChapterId">
@@ -13,9 +13,10 @@
         <Icon>schedule</Icon>&nbsp;
         <Date :date="chapter.createdAt.toString()" format="partial" />
     </span>
-    <div class="cell btns" v-if="!version">
+    <div class="cell btns" v-if="hasButtons">
         <IconBtn 
             other-classes="cell"
+            v-if="currentUser"
             :loading="loading"
             :icon="isRead ? 'visibility_off' : 'visibility'"
             @click="toggleRead"
@@ -36,6 +37,8 @@ import { Chapter, Progress } from '~/models';
 
 const { toPromise } = useApiHelper();
 const { markAsRead } = useMangaApi();
+
+const { currentUser } = useAuthApi();
 
 const emits = defineEmits<{
     (e: 'toggle-open'): void;
@@ -60,8 +63,11 @@ const url = computed(() => {
         base += `?page=${(props.progress.pageIndex ?? 0) + 1}`;
     return base;
 });
+const hasButtons = computed(() => !props.version && props.hasVersions && currentUser);
 
 const toggleRead = async () => {
+    if (!currentUser) return;
+
     loading.value = true;
     const result = await toPromise(markAsRead(props.chapter.mangaId, props.chapter.id));
     loading.value = false;
@@ -104,6 +110,11 @@ const toggleRead = async () => {
 
     &:not(.version):last-child {
         padding-bottom: 0;
+    }
+
+    &.no-buttons {
+        grid-template-columns: auto 150px;
+        min-height: 46px;
     }
 }
 </style>
