@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import dayjs from 'dayjs';
+
 const { dateFormatLocal, dateFormatMicro } = useApiHelper();
 
 const { format, date } = defineProps<{
@@ -14,7 +15,7 @@ const { format, date } = defineProps<{
 }>();
 
 const dt = computed(() => {
-    const d = (date ?? new Date()).toString();
+    const d = (date ?? new Date()).toString() + 'Z';
     switch (format) {
         case 'full': return dateFormatMicro(d);
         case 'partial': return dateFormatLocal(d, true);

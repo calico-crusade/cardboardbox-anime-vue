@@ -60,16 +60,8 @@ export default defineNuxtConfig({
         includeManifestIcons: false,
         manifest: webManifest({ baseUrl: baseUrl }),
         workbox: {
-            globIgnores: ["**/*"], // forcefully un-precache SW
-            globPatterns: [],
-            navigateFallback: null, // do not try to precache index.html
-            runtimeCaching: [
-                {
-                    urlPattern: ({ request }: {request: any}) => request.destination === "document",
-                    handler: "NetworkOnly",
-                },
-            ],
-            sourcemap: true, // just so we can see what the SW is actually doing
+            navigateFallback: '/',
+            globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
         },
         client: {
             registerPlugin: true,
@@ -78,7 +70,8 @@ export default defineNuxtConfig({
         },
         devOptions: {
             enabled: true,
-            type: "module",
+            navigateFallbackAllowlist: [/^\/$/],
+            type: 'module',
         },
     }
 })

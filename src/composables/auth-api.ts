@@ -4,11 +4,15 @@ import { useSettingsHelper } from "./settings-helper";
 
 export const useAuthApi = () => {
     const { get } = useApiHelper();
-    const { authUrl, appId, token } = useSettingsHelper();
+    const { authUrl, appId, token, getSet } = useSettingsHelper();
     const { currentRoute } = useRouter();
 
     const currentUser = useState<AuthUser | undefined>('login-user', () => undefined);
     const failureReason = useState<string | undefined>('login-failure', () => undefined);
+    const loginReturnUrl = computed({
+        get: () => process.client ? localStorage.getItem('login-return-url') ?? '/account' : '/account',
+        set: (value: string) => process.client ? localStorage.setItem('login-return-url', value) : undefined
+    });
 
     const me = () => get<AuthUser>(`auth`);
     const resCode = (code: string) => get<AuthResponse>(`auth/${code}`);
@@ -66,7 +70,8 @@ export const useAuthApi = () => {
     const login = () => {
         currentUser.value = undefined;
         failureReason.value = undefined;
-        const returnUrl = window.location.protocol + '//' + window.location.host + '/auth?return=' + currentRoute.value.fullPath;
+        const returnUrl = window.location.protocol + '//' + window.location.host + '/auth';
+        loginReturnUrl.value = currentRoute.value.fullPath;
         window.location.href = `${authUrl}/Home/Auth/${appId}?redirect=${encodeURIComponent(returnUrl)}`;
     };
 
@@ -81,6 +86,7 @@ export const useAuthApi = () => {
         resolve,
         login,
         logout,
+        loginReturnUrl,
         currentUser,
         failureReason
     }

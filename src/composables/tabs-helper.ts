@@ -14,7 +14,7 @@ interface TabData {
 const tabsInjectionKey = Symbol('tabs') as InjectionKey<{
   registerTab: (identifier: symbol, tabData: TabData) => void,
   deregisterTab: (identifier: symbol) => void
-  activeTab: Readonly<Ref<symbol>>,
+  activeTab: Readonly<Ref<symbol | undefined>>,
 }>
 
 export const useTabs = () => {
@@ -32,7 +32,7 @@ export const useTabs = () => {
     tabs.delete(identifier)
   }
 
-  const activeTab = ref<symbol>()
+  const activeTab = ref<symbol | undefined>();
 
   provide(tabsInjectionKey, {
     registerTab,
