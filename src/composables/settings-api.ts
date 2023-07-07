@@ -1,6 +1,6 @@
 import { WritableComputedRef } from "nuxt/dist/app/compat/capi";
-import { 
-    FilterStyle, ListStyle, PageStyle, ProgressBarStyle, 
+import {
+    FilterStyle, ListStyle, PageStyle, ProgressBarStyle,
     ThemeColor, SiteBackground, THEME_DEFAULTS
  } from "~/models";
 
@@ -22,6 +22,7 @@ interface MangaSettings {
     regionMargin: number;
     fillPage: boolean;
     background: SiteBackground;
+    lastCheck?: Date | null;
 }
 
 interface Settings {
@@ -45,6 +46,7 @@ type MangaSettingsKey = {
     regionMargin: WritableComputedRef<number>;
     fillPage: WritableComputedRef<boolean>;
     background: WritableComputedRef<SiteBackground>;
+    lastCheck: WritableComputedRef<Date | undefined | null>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -63,13 +65,14 @@ const DEFAULTS: MangaSettings = {
     pageMenuOver: false,
     regionMargin: 30,
     fillPage: false,
-    background: { ...THEME_DEFAULTS.themes[0] }
+    background: { ...THEME_DEFAULTS.themes[0] },
+    lastCheck: new Date()
 }
 
 export const useAppSettings = () => {
     const { currentUser } = useAuthApi();
     const { post, debounce, clone } = useApiHelper();
-    const { getSetBool, getSetNumb, getSet, getSetArray, getSetJson } = useSettingsHelper();
+    const { getSetBool, getSetNumb, getSet, getSetDate, getSetJson } = useSettingsHelper();
     const pauseUpdates = useState<boolean>(() => false);
 
     const settings = (() => {
@@ -89,7 +92,8 @@ export const useAppSettings = () => {
             pageMenuOver: getSetBool('page-menu-over', DEFAULTS.pageMenuOver, () => commit()),
             regionMargin: getSetNumb('region-margin', DEFAULTS.regionMargin, () => commit()),
             fillPage: getSetBool('fill-page', DEFAULTS.fillPage, () => commit()),
-            background: getSetJson<SiteBackground>('background', DEFAULTS.background, () => commitFix()),
+            background: getSetJson<SiteBackground>('background', JSON.stringify(DEFAULTS.background), () => commitFix()),
+            lastCheck: getSetDate('last-check', null, () => commit())
         }
     })();
 
@@ -99,9 +103,9 @@ export const useAppSettings = () => {
         let map: Dic = {};
         const fallbackCustom = (value: string, custom?: string) => (value === 'custom' ? custom : value) ?? '';
         switch(theme.type) {
-            case 'gradient': 
+            case 'gradient':
                 const dir = theme.gradient.dir === 'deg' ? `${theme.gradient.degrees}deg` : theme.gradient.dir;
-                map = { 
+                map = {
                     'bg-image': `linear-gradient(${dir}, ${theme.gradient.colors.map(t => t.color).join(', ')})`,
                     'bg-image-position': 'center',
                     'bg-image-repeat': 'no-repeat',
@@ -109,8 +113,8 @@ export const useAppSettings = () => {
                     'bg-image-filter': ''
                 };
                 break;
-            case 'image': 
-                map = { 
+            case 'image':
+                map = {
                     'bg-image': `url(${theme.image.url})`,
                     'bg-image-position': fallbackCustom(theme.image.position, theme.image.custonPosition),
                     'bg-image-repeat': theme.image.repeat,
@@ -118,8 +122,8 @@ export const useAppSettings = () => {
                     'bg-image-filter': theme.image.filters.map(t => `${t.key}(${t.value})`).join(' ')
                 };
                 break;
-            case 'solid-color': 
-                map = { 
+            case 'solid-color':
+                map = {
                     'bg-image': `linear-gradient(0deg, ${theme.solidColor}, ${theme.solidColor})`,
                     'bg-image-position': 'center',
                     'bg-image-repeat': 'no-repeat',

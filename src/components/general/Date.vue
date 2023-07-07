@@ -9,17 +9,20 @@ import dayjs from 'dayjs';
 
 const { dateFormatLocal, dateFormatMicro } = useApiHelper();
 
-const { format, date } = defineProps<{
+const props = defineProps<{
     format?: string,
     date?: string | Date
 }>();
 
+const date = computed(() => props.date);
+const format = computed(() => props.format);
+
 const dt = computed(() => {
-    const d = (date ?? new Date()).toString() + 'Z';
-    switch (format) {
+    const d = (date.value ?? new Date()).toString() + 'Z';
+    switch (format.value) {
         case 'full': return dateFormatMicro(d);
         case 'partial': return dateFormatLocal(d, true);
-        default: return dayjs(date).format(format || 'YYYY-MM-DD HH:mm');
+        default: return dayjs(date.value).format(format.value || 'YYYY-MM-DD HH:mm');
     }
 });
 </script>

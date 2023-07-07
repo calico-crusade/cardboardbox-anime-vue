@@ -164,6 +164,10 @@ export const useMangaApi = () => {
         return <any>post<Worked>(`manga/${id}/mark-as-read`, chapter);
     }
 
+    const since = (date: Date, page: number = 1, size: number = 100) => {
+        return get<Paginated<ProgressExt>>(`manga/since/${date.toISOString()}`, { page, size });
+    }
+
     return {
         fetch,
         random,
@@ -186,6 +190,7 @@ export const useMangaApi = () => {
         providers,
         volumed,
         strip,
-        markAsRead
+        markAsRead,
+        since
     };
 };

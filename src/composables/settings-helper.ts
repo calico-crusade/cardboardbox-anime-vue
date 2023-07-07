@@ -13,10 +13,11 @@ export const useSettingsHelper = () => {
     }
 
     function getSet<T>(key: string, def?: T, fn?: (val: T | undefined) => void) {
-        const state = useState<T | undefined>(key, () => getStore<T>(key, def));
+        const fetch = () => getStore<T>(key, def);
+        const state = useState<T | undefined>(key, () => fetch());
 
         return computed({
-            get: () => state.value,
+            get: () => state.value ?? fetch(),
             set: (val: T | undefined) => {
                 state.value = val;
                 setStore(key, val);
@@ -25,32 +26,38 @@ export const useSettingsHelper = () => {
         });
     }
 
-    function getSetJson<T>(key: string, def?: T, fn?: (val: T | undefined) => void) {
-        const fromJson = () => {
-            const val = getStore<string>(key);
-            if (!val) return def;
-            return <T>JSON.parse(val);
-        };
+    function getSetJson<T>(key: string, def?: string, fn?: (val: T | undefined) => void) {
+        const fromJson = () => getStore<string>(key);
         const toJson = (val: T | undefined) => {
             if (!val) return undefined;
             return JSON.stringify(val);
         }
-        const state = useState<T | undefined>(key, () => fromJson());
+        const state = useState<string | undefined>(key, () => fromJson());
 
         return computed({
-            get: () => state.value,
+            get: () => {
+                const value = state.value ?? fromJson();
+                if (!value) return undefined;
+
+                return <T>JSON.parse(value);
+            },
             set: (val: T | undefined) => {
-                state.value = val;
-                setStore(key, toJson(val));
+                setStore(key, state.value = toJson(val));
                 if (fn) fn(val);
             }
         });
     }
-    
+
     const getSetBool = (key: string, def: boolean, fn?: (val: boolean) => void) => {
-        const state = useState<boolean>(key, () => !!(getStore(key) ?? def));
+        const fetch = () => {
+            const value = getStore(key);
+            if (value === undefined) return undefined;
+
+            return !!value;
+        };
+        const state = useState<boolean | undefined>(key, () => fetch());
         return computed({
-            get: () => state.value,
+            get: () => state.value ?? fetch() ?? def,
             set: (value: boolean) => {
                 state.value = value;
                 setStore(key, value ? '1' : undefined);
@@ -58,12 +65,17 @@ export const useSettingsHelper = () => {
             }
         });
     };
-    
+
     const getSetNumb = (key: string, def: number, fn?: (val: number) => void) => {
-        const state = useState<number>(key, 
-            () => +(getStore<string>(key)?.toString() ?? def.toString()));
+        const fetch = () => {
+            const value = getStore(key);
+            if (value === undefined || value === null) return undefined;
+            return +value;
+        }
+
+        const state = useState<number | undefined>(key,  () => fetch());
         return computed({
-            get: () => state.value,
+            get: () => state.value ?? fetch() ?? def,
             set: (value: number) => {
                 state.value = value;
                 setStore(key, value.toString());
@@ -73,14 +85,14 @@ export const useSettingsHelper = () => {
     };
 
     const getSetArray = (key: string, def: string[], fn?: (val: string[]) => void) => {
-        const state = useState<string[]>(key, 
-            () => getStore<string>(key)
-                ?.toString()
-                ?.split(',')
-                ?.map(t => t.trim()) ?? def);
+        const fetch = () => getStore<string>(key)
+            ?.toString()
+            ?.split(',')
+            ?.map(t => t.trim());
+        const state = useState<string[] | undefined>(key, () => fetch());
 
         return computed({
-            get: () => state.value,
+            get: () => state.value ?? fetch() ?? def,
             set: (value: string[]) => {
                 state.value = value;
                 setStore(key, value.join(', ').toString());
@@ -88,8 +100,26 @@ export const useSettingsHelper = () => {
             }
         })
     }
-    
-    return { 
+
+    const getSetDate = (key: string, def?: Date | null, fn?: (val: Date  | null | undefined) => void) => {
+        const fetch = () => {
+            const value = getStore<string>(key);
+            if (!value) return undefined;
+            return new Date(value);
+        }
+
+        const state = useState<Date | undefined | null>(key, () => fetch());
+        return computed({
+            get: () => state.value ?? fetch() ?? def,
+            set: (value: Date | undefined | null) => {
+                state.value = value;
+                setStore(key, value?.toISOString());
+                if (fn) fn(value);
+            }
+        });
+    }
+
+    return {
         token: getSet<string>('auth-token'),
         redirect: getSet<string>('redirect-url'),
         menuOpen: getSetBool('manga-menu-open', false),
@@ -102,6 +132,7 @@ export const useSettingsHelper = () => {
         getSet,
         getSetNumb,
         getSetArray,
-        getSetJson
+        getSetJson,
+        getSetDate,
     };
 }
