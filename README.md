@@ -1,4 +1,2 @@
 # cardboardbox-anime-vue
-The rewrite of the cardboardbox-anime UI with Nuxt3
-
-You can check it out [here](https://manga.index-0.com). 
+This repo has been moved to it's new home [here](https://github.com/cardboards-box/manga-ui)!
